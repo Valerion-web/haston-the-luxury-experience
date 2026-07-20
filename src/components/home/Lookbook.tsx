@@ -34,7 +34,12 @@ export function Lookbook() {
               transition={{ duration: 0.5 }}
               className="relative w-[75vw] shrink-0 overflow-hidden rounded-md luxe-shadow sm:w-[420px] md:w-[520px]"
             >
-              <img src={s.src} alt={s.title} loading="lazy" className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110" />
+              <img
+                src={s.src}
+                alt={s.title}
+                loading="lazy"
+                className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
+              />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/80 to-transparent p-6 text-primary-foreground">
                 <p className="text-[10px] uppercase tracking-[0.32em] opacity-70">{s.tag}</p>
                 <p className="mt-2 text-display text-2xl">{s.title}</p>

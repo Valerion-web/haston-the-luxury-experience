@@ -43,15 +43,36 @@ function Lookbook() {
   );
 }
 
-function Shot({ src, tag, title, reverse }: { src: string; tag: string; title: string; reverse?: boolean }) {
+function Shot({
+  src,
+  tag,
+  title,
+  reverse,
+}: {
+  src: string;
+  tag: string;
+  title: string;
+  reverse?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [-80, 80]);
   const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
   return (
-    <div ref={ref} className={`grid items-center gap-10 md:grid-cols-[1.4fr_1fr] md:gap-20 ${reverse ? "md:grid-flow-dense" : ""}`}>
-      <motion.div className={`overflow-hidden rounded-md luxe-shadow ${reverse ? "md:col-start-2" : ""}`} style={{ y }}>
-        <motion.img src={src} alt={title} style={{ scale }} className="aspect-[4/5] w-full object-cover" />
+    <div
+      ref={ref}
+      className={`grid items-center gap-10 md:grid-cols-[1.4fr_1fr] md:gap-20 ${reverse ? "md:grid-flow-dense" : ""}`}
+    >
+      <motion.div
+        className={`overflow-hidden rounded-md luxe-shadow ${reverse ? "md:col-start-2" : ""}`}
+        style={{ y }}
+      >
+        <motion.img
+          src={src}
+          alt={title}
+          style={{ scale }}
+          className="aspect-[4/5] w-full object-cover"
+        />
       </motion.div>
       <div>
         <p className="text-eyebrow text-muted-foreground">{tag}</p>

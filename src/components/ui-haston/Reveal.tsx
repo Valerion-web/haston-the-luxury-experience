@@ -1,5 +1,5 @@
 import { motion, type Variants } from "framer-motion";
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 
 const base: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -15,9 +15,9 @@ export function Reveal({
   children: ReactNode;
   delay?: number;
   className?: string;
-  as?: any;
+  as?: ElementType;
 }) {
-  const MotionAs = motion(As);
+  const MotionAs = motion(As as Parameters<typeof motion>[0]);
   return (
     <MotionAs
       initial="hidden"

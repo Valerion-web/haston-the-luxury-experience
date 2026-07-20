@@ -33,11 +33,7 @@ export function Navbar() {
     >
       <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr_auto] items-center gap-6 px-6 md:px-10">
         <div className="flex items-center gap-4">
-          <button
-            className="lg:hidden"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-          >
+          <button className="lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
           <nav className="hidden items-center gap-8 lg:flex">

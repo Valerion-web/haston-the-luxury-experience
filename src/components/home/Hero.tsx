@@ -42,18 +42,25 @@ export function Hero() {
       >
         <div
           className="absolute -left-40 top-1/4 h-[70vh] w-[70vh] rounded-full blur-[140px]"
-          style={{ background: "radial-gradient(circle, oklch(0.83 0.035 82 / 0.35), transparent 60%)" }}
+          style={{
+            background: "radial-gradient(circle, oklch(0.83 0.035 82 / 0.35), transparent 60%)",
+          }}
         />
         <div
           className="absolute -right-40 bottom-0 h-[60vh] w-[60vh] rounded-full blur-[140px]"
-          style={{ background: "radial-gradient(circle, oklch(0.47 0.045 130 / 0.35), transparent 60%)" }}
+          style={{
+            background: "radial-gradient(circle, oklch(0.47 0.045 130 / 0.35), transparent 60%)",
+          }}
         />
       </motion.div>
 
       {/* Grain */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay"
-        style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)", backgroundSize: "3px 3px" }}
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)",
+          backgroundSize: "3px 3px",
+        }}
       />
 
       <div className="relative z-10 mx-auto grid min-h-[92vh] max-w-[1600px] grid-cols-1 items-center gap-10 px-6 pb-16 pt-24 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-24 md:pt-32">
@@ -144,10 +151,7 @@ export function Hero() {
         </motion.div>
 
         {/* Image composition */}
-        <motion.div
-          style={{ y: parallaxY }}
-          className="relative aspect-[3/4] w-full"
-        >
+        <motion.div style={{ y: parallaxY }} className="relative aspect-[3/4] w-full">
           <motion.div
             style={{ x: imgX, y: imgY, scale }}
             className="absolute inset-0 overflow-hidden rounded-md luxe-shadow"

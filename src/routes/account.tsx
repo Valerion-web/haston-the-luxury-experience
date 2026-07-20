@@ -2,11 +2,26 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { motion, AnimatePresence } from "framer-motion";
-import { Package, Heart, MapPin, User, Bell, Wallet, Award, LogOut, ChevronRight } from "lucide-react";
+import {
+  Package,
+  Heart,
+  MapPin,
+  User,
+  Bell,
+  Wallet,
+  Award,
+  LogOut,
+  ChevronRight,
+} from "lucide-react";
 import { PRODUCTS } from "@/lib/haston-data";
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [{ title: "My Account — HASTON" }, { name: "description", content: "Your HASTON account dashboard." }] }),
+  head: () => ({
+    meta: [
+      { title: "My Account — HASTON" },
+      { name: "description", content: "Your HASTON account dashboard." },
+    ],
+  }),
   component: Account,
 });
 
@@ -25,7 +40,11 @@ function Account() {
 
   return (
     <>
-      <PageHero eyebrow="Account" title="Welcome back, Andrea." breadcrumb={[{ label: "Account" }]} />
+      <PageHero
+        eyebrow="Account"
+        title="Welcome back, Andrea."
+        breadcrumb={[{ label: "Account" }]}
+      />
       <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
         <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
           <aside>
@@ -36,11 +55,13 @@ function Account() {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">Andrea Valerion</p>
-                  <p className="truncate text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Member since 2022</p>
+                  <p className="truncate text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                    Member since 2022
+                  </p>
                 </div>
               </div>
               <nav className="mt-6 flex flex-col gap-1">
-                {TABS.map(t => (
+                {TABS.map((t) => (
                   <button
                     key={t.key}
                     onClick={() => setTab(t.key)}
@@ -48,7 +69,9 @@ function Account() {
                       tab === t.key ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                     }`}
                   >
-                    <span className="flex items-center gap-3"><t.icon className="h-4 w-4" strokeWidth={1.4} /> {t.label}</span>
+                    <span className="flex items-center gap-3">
+                      <t.icon className="h-4 w-4" strokeWidth={1.4} /> {t.label}
+                    </span>
                     <ChevronRight className="h-3 w-3 opacity-40" />
                   </button>
                 ))}
@@ -61,17 +84,30 @@ function Account() {
 
           <div>
             <AnimatePresence mode="wait">
-              <motion.div key={tab}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+              <motion.div
+                key={tab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 {tab === "overview" && <Overview />}
                 {tab === "orders" && <Orders />}
                 {tab === "wishlist" && <WishlistTab />}
                 {tab === "addresses" && <Addresses />}
-                {tab === "wallet" && <PanelCard title="Wallet" body="Store credit: $180.00 — from your recent return." />}
+                {tab === "wallet" && (
+                  <PanelCard
+                    title="Wallet"
+                    body="Store credit: $180.00 — from your recent return."
+                  />
+                )}
                 {tab === "loyalty" && <Loyalty />}
-                {tab === "notifications" && <PanelCard title="Notifications" body="Manage which updates arrive in your inbox." />}
+                {tab === "notifications" && (
+                  <PanelCard
+                    title="Notifications"
+                    body="Manage which updates arrive in your inbox."
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -91,9 +127,11 @@ function Overview() {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {stats.map(s => (
+        {stats.map((s) => (
           <div key={s.label} className="rounded-md border border-border bg-card p-6 soft-shadow">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{s.label}</p>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              {s.label}
+            </p>
             <p className="mt-3 text-display text-3xl">{s.value}</p>
           </div>
         ))}
@@ -105,29 +143,55 @@ function Overview() {
 
 function Orders() {
   const orders = [
-    { id: "HV-10238", date: "May 18, 2025", total: 465, status: "In transit", items: [PRODUCTS[0], PRODUCTS[3]] },
-    { id: "HV-09918", date: "March 02, 2025", total: 210, status: "Delivered", items: [PRODUCTS[2]] },
-    { id: "HV-09721", date: "January 14, 2025", total: 285, status: "Delivered", items: [PRODUCTS[1]] },
+    {
+      id: "HV-10238",
+      date: "May 18, 2025",
+      total: 465,
+      status: "In transit",
+      items: [PRODUCTS[0], PRODUCTS[3]],
+    },
+    {
+      id: "HV-09918",
+      date: "March 02, 2025",
+      total: 210,
+      status: "Delivered",
+      items: [PRODUCTS[2]],
+    },
+    {
+      id: "HV-09721",
+      date: "January 14, 2025",
+      total: 285,
+      status: "Delivered",
+      items: [PRODUCTS[1]],
+    },
   ];
   return (
     <div>
       <h2 className="text-display text-2xl">Recent orders</h2>
       <div className="mt-6 space-y-4">
-        {orders.map(o => (
+        {orders.map((o) => (
           <div key={o.id} className="rounded-md border border-border bg-card p-6 soft-shadow">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Order</p>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                  Order
+                </p>
                 <p className="mt-1 text-display text-lg">{o.id}</p>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{o.date}</p>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                  {o.date}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-sm">${o.total}</p>
-                <p className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.28em] ${o.status === "Delivered" ? "bg-accent/20 text-accent" : "bg-mustard/25 text-graphite"}`}>{o.status}</p>
+                <p
+                  className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.28em] ${o.status === "Delivered" ? "bg-accent/20 text-accent" : "bg-mustard/25 text-graphite"}`}
+                >
+                  {o.status}
+                </p>
               </div>
             </div>
             <div className="mt-4 flex gap-3">
-              {o.items.map(i => (
+              {o.items.map((i) => (
                 <img key={i.id} src={i.image} alt="" className="h-20 w-16 rounded object-cover" />
               ))}
             </div>
@@ -141,9 +205,15 @@ function Orders() {
 function WishlistTab() {
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3">
-      {PRODUCTS.slice(0, 6).map(p => (
+      {PRODUCTS.slice(0, 6).map((p) => (
         <Link key={p.id} to="/product/$slug" params={{ slug: p.slug }} className="group">
-          <div className="overflow-hidden rounded"><img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>
+          <div className="overflow-hidden rounded">
+            <img
+              src={p.image}
+              alt={p.name}
+              className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
           <p className="mt-3 text-display text-lg">{p.name}</p>
           <p className="text-xs">${p.price}</p>
         </Link>
@@ -158,7 +228,15 @@ function Addresses() {
       {["Home — Milano", "Studio — London"].map((t, i) => (
         <div key={i} className="rounded-md border border-border bg-card p-6 soft-shadow">
           <p className="text-eyebrow text-muted-foreground">{t}</p>
-          <p className="mt-4 text-sm leading-relaxed">Andrea Valerion<br />Via della Spiga 27<br />20121 Milano, Italy<br />+39 02 7600 1234</p>
+          <p className="mt-4 text-sm leading-relaxed">
+            Andrea Valerion
+            <br />
+            Via della Spiga 27
+            <br />
+            20121 Milano, Italy
+            <br />
+            +39 02 7600 1234
+          </p>
           <div className="mt-4 flex gap-3 text-[10px] uppercase tracking-[0.28em]">
             <button className="underline">Edit</button>
             <button className="text-muted-foreground">Set default</button>
@@ -175,9 +253,16 @@ function Loyalty() {
       <p className="text-eyebrow opacity-70">Loyalty · Atelier tier</p>
       <p className="mt-4 text-display text-4xl">2,480 points</p>
       <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-foreground/15">
-        <motion.div initial={{ width: 0 }} animate={{ width: "62%" }} transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-full bg-accent" />
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "62%" }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+          className="h-full rounded-full bg-accent"
+        />
       </div>
-      <p className="mt-3 text-[11px] uppercase tracking-[0.28em] opacity-70">1,520 to Maison tier</p>
+      <p className="mt-3 text-[11px] uppercase tracking-[0.28em] opacity-70">
+        1,520 to Maison tier
+      </p>
     </div>
   );
 }

@@ -42,7 +42,10 @@ export function Newsletter() {
 
         <Reveal delay={0.3}>
           <form
-            onSubmit={(e) => { e.preventDefault(); setDone(true); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              setDone(true);
+            }}
             className="relative mx-auto mt-10 flex max-w-lg items-center gap-2 rounded-full glass-dark p-2 focus-within:ring-2 focus-within:ring-ivory/40"
           >
             <input
@@ -59,12 +62,20 @@ export function Newsletter() {
               className="group grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ivory text-navy transition-all hover:scale-105 active:scale-95"
               aria-label="Subscribe"
             >
-              {done ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
+              {done ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              )}
             </button>
           </form>
         </Reveal>
         {done && (
-          <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 text-[11px] uppercase tracking-[0.28em] opacity-70">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 text-[11px] uppercase tracking-[0.28em] opacity-70"
+          >
             Welcome to the house.
           </motion.p>
         )}

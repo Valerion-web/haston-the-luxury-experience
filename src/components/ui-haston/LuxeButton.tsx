@@ -4,13 +4,11 @@ import type { ReactNode } from "react";
 
 type Variant = "solid" | "outline" | "ghost" | "ivory";
 const styles: Record<Variant, string> = {
-  solid:
-    "bg-primary text-primary-foreground border border-primary hover:bg-primary/90",
+  solid: "bg-primary text-primary-foreground border border-primary hover:bg-primary/90",
   outline:
     "border border-current bg-transparent hover:bg-primary hover:text-primary-foreground hover:border-primary",
   ghost: "bg-transparent hover:bg-foreground/5",
-  ivory:
-    "bg-ivory text-navy border border-ivory hover:bg-transparent hover:text-ivory",
+  ivory: "bg-ivory text-navy border border-ivory hover:bg-transparent hover:text-ivory",
 };
 
 type Props = {
@@ -24,7 +22,13 @@ type Props = {
 };
 
 export function LuxeButton({
-  children, to, onClick, variant = "solid", className = "", arrow, type = "button",
+  children,
+  to,
+  onClick,
+  variant = "solid",
+  className = "",
+  arrow,
+  type = "button",
 }: Props) {
   const cls = `group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-[11px] uppercase tracking-[0.28em] transition-all duration-500 ${styles[variant]} ${className}`;
   const inner = (
@@ -38,7 +42,12 @@ export function LuxeButton({
       <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
     </>
   );
-  if (to) return <Link to={to} className={cls}>{inner}</Link>;
+  if (to)
+    return (
+      <Link to={to} className={cls}>
+        {inner}
+      </Link>
+    );
   return (
     <button type={type} onClick={onClick} className={cls}>
       {inner}

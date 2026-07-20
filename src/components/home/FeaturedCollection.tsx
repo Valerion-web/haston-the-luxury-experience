@@ -56,7 +56,11 @@ export function FeaturedCollection() {
               transition={{ duration: 1, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
               className={`overflow-hidden rounded-md luxe-shadow ${i === 0 ? "mt-16" : ""}`}
             >
-              <img src={src} alt="" className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110" />
+              <img
+                src={src}
+                alt=""
+                className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
+              />
             </motion.div>
           ))}
         </div>

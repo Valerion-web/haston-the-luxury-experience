@@ -6,7 +6,12 @@ import { PRODUCTS } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — HASTON" }, { name: "description", content: "Secure checkout at HASTON." }] }),
+  head: () => ({
+    meta: [
+      { title: "Checkout — HASTON" },
+      { name: "description", content: "Secure checkout at HASTON." },
+    ],
+  }),
   component: Checkout,
 });
 
@@ -23,7 +28,9 @@ function Checkout() {
 
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-16 md:px-10">
-      <Link to="/" className="text-display text-xl tracking-[0.3em]">HASTON</Link>
+      <Link to="/" className="text-display text-xl tracking-[0.3em]">
+        HASTON
+      </Link>
 
       <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_440px]">
         <div>
@@ -31,11 +38,21 @@ function Checkout() {
           <div className="mb-12 flex items-center gap-4">
             {STEPS.map((s, i) => (
               <div key={s.key} className="flex flex-1 items-center gap-3">
-                <div className={`grid h-10 w-10 place-items-center rounded-full border transition-all ${i <= step ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}>
+                <div
+                  className={`grid h-10 w-10 place-items-center rounded-full border transition-all ${i <= step ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}
+                >
                   {i < step ? <Check className="h-4 w-4" /> : <s.icon className="h-4 w-4" />}
                 </div>
-                <span className={`hidden text-[11px] uppercase tracking-[0.28em] md:inline ${i <= step ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
-                {i < STEPS.length - 1 && <div className={`ml-2 h-px flex-1 transition-colors ${i < step ? "bg-primary" : "bg-border"}`} />}
+                <span
+                  className={`hidden text-[11px] uppercase tracking-[0.28em] md:inline ${i <= step ? "text-foreground" : "text-muted-foreground"}`}
+                >
+                  {s.label}
+                </span>
+                {i < STEPS.length - 1 && (
+                  <div
+                    className={`ml-2 h-px flex-1 transition-colors ${i < step ? "bg-primary" : "bg-border"}`}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -73,9 +90,17 @@ function Checkout() {
                     { title: "Express", body: "2–3 business days", price: "$18" },
                     { title: "White-glove", body: "Next-day, hand-delivered", price: "$45" },
                   ].map((s, i) => (
-                    <label key={i} className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-border p-5 transition-colors hover:border-primary">
+                    <label
+                      key={i}
+                      className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-border p-5 transition-colors hover:border-primary"
+                    >
                       <div className="flex items-center gap-4">
-                        <input type="radio" name="ship" defaultChecked={i === 0} className="accent-primary" />
+                        <input
+                          type="radio"
+                          name="ship"
+                          defaultChecked={i === 0}
+                          className="accent-primary"
+                        />
                         <div>
                           <p className="text-sm font-medium">{s.title}</p>
                           <p className="text-xs text-muted-foreground">{s.body}</p>
@@ -104,14 +129,21 @@ function Checkout() {
           </AnimatePresence>
 
           <div className="mt-12 flex items-center justify-between">
-            <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
-              className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground disabled:opacity-30">
+            <button
+              onClick={() => setStep(Math.max(0, step - 1))}
+              disabled={step === 0}
+              className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground disabled:opacity-30"
+            >
               ← Back
             </button>
             {step < 2 ? (
-              <LuxeButton onClick={() => setStep(step + 1)} arrow>Continue</LuxeButton>
+              <LuxeButton onClick={() => setStep(step + 1)} arrow>
+                Continue
+              </LuxeButton>
             ) : (
-              <LuxeButton onClick={() => alert("Order placed")} arrow>Place order — ${total}</LuxeButton>
+              <LuxeButton onClick={() => alert("Order placed")} arrow>
+                Place order — ${total}
+              </LuxeButton>
             )}
           </div>
         </div>
@@ -120,21 +152,36 @@ function Checkout() {
           <div className="rounded-md border border-border bg-card p-8 soft-shadow">
             <p className="text-eyebrow">Order summary</p>
             <div className="mt-6 space-y-4">
-              {items.map(p => (
+              {items.map((p) => (
                 <div key={p.id} className="flex gap-4">
-                  <img src={p.image} alt={p.name} className="h-20 w-16 shrink-0 rounded object-cover" />
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="h-20 w-16 shrink-0 rounded object-cover"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm">{p.name}</p>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Qty 1</p>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                      Qty 1
+                    </p>
                   </div>
                   <p className="text-sm">${p.price}</p>
                 </div>
               ))}
             </div>
             <div className="mt-6 hairline pt-6 space-y-2 text-sm">
-              <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span className="text-foreground">${total}</span></div>
-              <div className="flex justify-between text-muted-foreground"><span>Shipping</span><span className="text-foreground">Complimentary</span></div>
-              <div className="mt-3 flex justify-between hairline pt-3 text-lg"><span className="text-display">Total</span><span className="font-medium">${total}</span></div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Subtotal</span>
+                <span className="text-foreground">${total}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Shipping</span>
+                <span className="text-foreground">Complimentary</span>
+              </div>
+              <div className="mt-3 flex justify-between hairline pt-3 text-lg">
+                <span className="text-display">Total</span>
+                <span className="font-medium">${total}</span>
+              </div>
             </div>
           </div>
         </aside>
@@ -147,8 +194,10 @@ function Field({ label, placeholder }: { label: string; placeholder?: string }) 
   return (
     <label className="block">
       <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{label}</span>
-      <input placeholder={placeholder}
-        className="mt-2 block w-full rounded-md border border-border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none" />
+      <input
+        placeholder={placeholder}
+        className="mt-2 block w-full rounded-md border border-border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none"
+      />
     </label>
   );
 }

@@ -15,7 +15,12 @@ export function AboutBlock() {
       <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
         <div className="relative">
           <motion.div style={{ y }} className="relative overflow-hidden rounded-md luxe-shadow">
-            <img src={IMG.aboutStory} alt="HASTON atelier" loading="lazy" className="aspect-[4/5] w-full object-cover" />
+            <img
+              src={IMG.aboutStory}
+              alt="HASTON atelier"
+              loading="lazy"
+              className="aspect-[4/5] w-full object-cover"
+            />
           </motion.div>
           <div className="absolute -bottom-8 -right-6 hidden glass-panel rounded-md px-6 py-5 md:block">
             <p className="text-eyebrow text-muted-foreground">Established</p>
@@ -53,7 +58,9 @@ export function AboutBlock() {
                     <CountUp end={s.n} />
                     <span className="text-accent">{s.s}</span>
                   </p>
-                  <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">{s.l}</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+                    {s.l}
+                  </p>
                 </div>
               </Reveal>
             ))}
@@ -61,7 +68,9 @@ export function AboutBlock() {
 
           <Reveal delay={0.3}>
             <div className="mt-10">
-              <LuxeButton to="/about" variant="outline" arrow>Our story</LuxeButton>
+              <LuxeButton to="/about" variant="outline" arrow>
+                Our story
+              </LuxeButton>
             </div>
           </Reveal>
         </div>

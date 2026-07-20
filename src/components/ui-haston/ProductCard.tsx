@@ -16,11 +16,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       transition={{ duration: 0.8, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
       className="group relative"
     >
-      <Link
-        to="/product/$slug"
-        params={{ slug: product.slug }}
-        className="block"
-      >
+      <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
         <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-muted">
           {/* Badges */}
           <div className="absolute left-4 top-4 z-10 flex flex-col gap-1.5">
@@ -43,7 +39,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
           {/* Wishlist */}
           <button
-            onClick={(e) => { e.preventDefault(); setWished(v => !v); }}
+            onClick={(e) => {
+              e.preventDefault();
+              setWished((v) => !v);
+            }}
             aria-label="Wishlist"
             className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full glass-panel transition-transform hover:scale-110 active:scale-90"
           >
@@ -117,7 +116,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           {product.colors.map((c, i) => (
             <button
               key={c.name}
-              onClick={(e) => { e.preventDefault(); setColor(i); }}
+              onClick={(e) => {
+                e.preventDefault();
+                setColor(i);
+              }}
               aria-label={c.name}
               className={`h-4 w-4 rounded-full ring-1 ring-inset ring-black/10 transition-all ${
                 color === i ? "ring-2 ring-offset-2 ring-offset-background ring-primary" : ""

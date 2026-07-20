@@ -3,7 +3,9 @@ import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 
 export function BestSellers() {
-  const items = PRODUCTS.filter(p => p.isBestseller).concat(PRODUCTS.filter(p => !p.isBestseller)).slice(0, 4);
+  const items = PRODUCTS.filter((p) => p.isBestseller)
+    .concat(PRODUCTS.filter((p) => !p.isBestseller))
+    .slice(0, 4);
   return (
     <section className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
       <SectionHeader
@@ -13,14 +15,18 @@ export function BestSellers() {
         link={{ to: "/collections/bestsellers", label: "Shop all" }}
       />
       <div className="mt-16 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+        {items.map((p, i) => (
+          <ProductCard key={p.id} product={p} index={i} />
+        ))}
       </div>
     </section>
   );
 }
 
 export function NewArrivals() {
-  const items = PRODUCTS.filter(p => p.isNew).concat(PRODUCTS).slice(0, 4);
+  const items = PRODUCTS.filter((p) => p.isNew)
+    .concat(PRODUCTS)
+    .slice(0, 4);
   return (
     <section className="bg-secondary/40">
       <div className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
@@ -31,7 +37,9 @@ export function NewArrivals() {
           link={{ to: "/collections/new-arrivals", label: "Discover new" }}
         />
         <div className="mt-16 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          {items.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} />
+          ))}
         </div>
       </div>
     </section>

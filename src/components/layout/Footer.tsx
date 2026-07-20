@@ -41,7 +41,13 @@ const columns = [
 export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-primary text-primary-foreground">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, rgba(246,243,224,0.5), transparent 40%), radial-gradient(circle at 80% 70%, rgba(216,200,178,0.4), transparent 40%)" }} />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20% 30%, rgba(246,243,224,0.5), transparent 40%), radial-gradient(circle at 80% 70%, rgba(216,200,178,0.4), transparent 40%)",
+        }}
+      />
 
       <div className="relative mx-auto max-w-[1600px] px-6 py-24 md:px-10">
         <motion.div

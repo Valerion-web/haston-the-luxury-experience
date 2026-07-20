@@ -5,7 +5,11 @@ import { ChevronRight } from "lucide-react";
 import { SplitHeading } from "@/components/ui-haston/Reveal";
 
 export function PageHero({
-  eyebrow, title, description, breadcrumb, children,
+  eyebrow,
+  title,
+  description,
+  breadcrumb,
+  children,
 }: {
   eyebrow?: string;
   title: string;
@@ -15,7 +19,13 @@ export function PageHero({
 }) {
   return (
     <section className="relative overflow-hidden border-b border-border bg-secondary/30 pb-16 pt-16 md:pb-24 md:pt-24">
-      <div className="pointer-events-none absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 80% 20%, oklch(0.83 0.035 82 / 0.5), transparent 50%)" }} />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          background:
+            "radial-gradient(circle at 80% 20%, oklch(0.83 0.035 82 / 0.5), transparent 50%)",
+        }}
+      />
       <div className="relative mx-auto max-w-[1600px] px-6 md:px-10">
         {breadcrumb && (
           <motion.nav
@@ -24,11 +34,19 @@ export function PageHero({
             transition={{ duration: 0.6 }}
             className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground"
           >
-            <Link to="/" className="hover:text-foreground">Home</Link>
+            <Link to="/" className="hover:text-foreground">
+              Home
+            </Link>
             {breadcrumb.map((b, i) => (
               <span key={i} className="flex items-center gap-2">
                 <ChevronRight className="h-3 w-3" />
-                {b.to ? <Link to={b.to} className="hover:text-foreground">{b.label}</Link> : <span className="text-foreground">{b.label}</span>}
+                {b.to ? (
+                  <Link to={b.to} className="hover:text-foreground">
+                    {b.label}
+                  </Link>
+                ) : (
+                  <span className="text-foreground">{b.label}</span>
+                )}
               </span>
             ))}
           </motion.nav>

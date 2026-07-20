@@ -6,7 +6,12 @@ import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/search")({
-  head: () => ({ meta: [{ title: "Search — HASTON" }, { name: "description", content: "Search the HASTON collection." }] }),
+  head: () => ({
+    meta: [
+      { title: "Search — HASTON" },
+      { name: "description", content: "Search the HASTON collection." },
+    ],
+  }),
   component: SearchPage,
 });
 
@@ -15,7 +20,9 @@ function SearchPage() {
   const results = useMemo(() => {
     const s = q.toLowerCase().trim();
     if (!s) return PRODUCTS;
-    return PRODUCTS.filter(p => (p.name + " " + p.category + " " + p.description).toLowerCase().includes(s));
+    return PRODUCTS.filter((p) =>
+      (p.name + " " + p.category + " " + p.description).toLowerCase().includes(s),
+    );
   }, [q]);
 
   return (
@@ -23,15 +30,24 @@ function SearchPage() {
       <PageHero eyebrow="Search" title="Find your piece." breadcrumb={[{ label: "Search" }]}>
         <div className="flex items-center gap-3 rounded-full border border-border bg-card px-6 py-3 soft-shadow">
           <Search className="h-4 w-4 text-muted-foreground" />
-          <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search products, fabrics, categories…"
-            className="flex-1 bg-transparent text-base focus:outline-none" />
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search products, fabrics, categories…"
+            className="flex-1 bg-transparent text-base focus:outline-none"
+          />
         </div>
       </PageHero>
       <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
-        <p className="mb-10 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">{results.length} results for "{q}"</p>
+        <p className="mb-10 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          {results.length} results for "{q}"
+        </p>
         {results.length ? (
           <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-            {results.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            {results.map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i} />
+            ))}
           </div>
         ) : (
           <p className="py-24 text-center text-display text-2xl">No pieces match your search.</p>

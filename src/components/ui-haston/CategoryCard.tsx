@@ -4,8 +4,18 @@ import { ArrowUpRight } from "lucide-react";
 import type { MouseEvent } from "react";
 
 export function CategoryCard({
-  slug, name, tagline, image, index = 0,
-}: { slug: string; name: string; tagline: string; image: string; index?: number }) {
+  slug,
+  name,
+  tagline,
+  image,
+  index = 0,
+}: {
+  slug: string;
+  name: string;
+  tagline: string;
+  image: string;
+  index?: number;
+}) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const rx = useSpring(useTransform(my, [-40, 40], [8, -8]), { stiffness: 120, damping: 15 });
@@ -16,7 +26,10 @@ export function CategoryCard({
     mx.set(e.clientX - rect.left - rect.width / 2);
     my.set(e.clientY - rect.top - rect.height / 2);
   };
-  const onLeave = () => { mx.set(0); my.set(0); };
+  const onLeave = () => {
+    mx.set(0);
+    my.set(0);
+  };
 
   return (
     <motion.div
@@ -46,8 +59,10 @@ export function CategoryCard({
           <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent" />
 
           {/* Glow border */}
-          <div className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-               style={{ boxShadow: "inset 0 0 60px oklch(0.965 0.018 92 / 0.25)" }} />
+          <div
+            className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+            style={{ boxShadow: "inset 0 0 60px oklch(0.965 0.018 92 / 0.25)" }}
+          />
 
           <div
             style={{ transform: "translateZ(60px)" }}
