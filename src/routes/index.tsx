@@ -1,24 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/home/Hero";
+import { TrustStrip } from "@/components/home/TrustStrip";
+import { ShopByCategory } from "@/components/home/ShopByCategory";
+import { FeaturedCollection } from "@/components/home/FeaturedCollection";
+import { BestSellers, NewArrivals } from "@/components/home/BestSellers";
+import { AboutBlock } from "@/components/home/AboutBlock";
+import { WhyHaston } from "@/components/home/WhyHaston";
+import { Lookbook } from "@/components/home/Lookbook";
+import { InstagramFeed } from "@/components/home/InstagramFeed";
+import { Newsletter } from "@/components/home/Newsletter";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <Hero />
+      <TrustStrip />
+      <ShopByCategory />
+      <FeaturedCollection />
+      <BestSellers />
+      <NewArrivals />
+      <AboutBlock />
+      <WhyHaston />
+      <Lookbook />
+      <InstagramFeed />
+      <Newsletter />
+    </>
   );
 }
