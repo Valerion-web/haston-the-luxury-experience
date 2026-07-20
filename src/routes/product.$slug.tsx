@@ -95,7 +95,7 @@ function PDP() {
             <div className="mt-10">
               <p className="text-eyebrow">Color · <span className="normal-case tracking-normal text-foreground">{product.colors[color].name}</span></p>
               <div className="mt-4 flex gap-3">
-                {product.colors.map((c, i) => (
+                {product.colors.map((c: { name: string; hex: string }, i: number) => (
                   <button key={c.name} onClick={() => setColor(i)} aria-label={c.name}
                     className={`h-10 w-10 rounded-full ring-1 ring-black/10 transition-all ${color === i ? "ring-2 ring-offset-2 ring-primary" : ""}`}
                     style={{ backgroundColor: c.hex }} />
@@ -109,7 +109,7 @@ function PDP() {
                 <button className="text-[10px] uppercase tracking-[0.28em] underline">Size guide</button>
               </div>
               <div className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-5">
-                {product.sizes.map(s => (
+                {product.sizes.map((s: string) => (
                   <button key={s} onClick={() => setSize(s)}
                     className={`rounded border py-3 text-xs uppercase tracking-[0.24em] transition-all ${size === s ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}>
                     {s}
