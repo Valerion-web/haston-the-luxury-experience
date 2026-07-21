@@ -17,7 +17,7 @@ export function Reveal({
   className?: string;
   as?: ElementType;
 }) {
-  const MotionAs = motion(As as Parameters<typeof motion>[0]);
+  const MotionAs = motion(As as Parameters<typeof motion>[0]) as React.ComponentType<Record<string, unknown>>;
   return (
     <MotionAs
       initial="hidden"

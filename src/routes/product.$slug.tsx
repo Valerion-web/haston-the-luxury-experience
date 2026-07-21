@@ -37,7 +37,7 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function PDP() {
-  const { product } = Route.useLoaderData();
+  const { product } = Route.useLoaderData() as { product: NonNullable<ReturnType<typeof getProduct>> };
   const [imgIdx, setImgIdx] = useState(0);
   const [color, setColor] = useState(0);
   const [size, setSize] = useState<string | null>(null);
