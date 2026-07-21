@@ -1,5 +1,5 @@
 import { motion, type Variants } from "framer-motion";
-import type { ElementType, ReactNode } from "react";
+import type { ComponentType, ElementType, ReactNode } from "react";
 
 const base: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -17,7 +17,7 @@ export function Reveal({
   className?: string;
   as?: ElementType;
 }) {
-  const MotionAs = motion(As as Parameters<typeof motion>[0]);
+  const MotionAs = motion(As as Parameters<typeof motion>[0]) as ComponentType<Record<string, unknown>>;
   return (
     <MotionAs
       initial="hidden"
