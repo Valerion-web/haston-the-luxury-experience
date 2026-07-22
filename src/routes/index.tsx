@@ -20,10 +20,10 @@ function Home() {
       <Hero />
       <TrustStrip />
       <ShopByCategory />
+      <NewArrivals />
       <FeaturedCasualCollections />
       <FeaturedCollection />
       <BestSellers />
-      <NewArrivals />
       <WhyHaston />
       <Lookbook />
       <InstagramFeed />
