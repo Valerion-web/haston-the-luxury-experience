@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
+import { SearchOverlay } from "./SearchOverlay";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -13,10 +14,18 @@ const navLinks = [
   { label: "Stores", to: "/store-locator" },
 ];
 
+const MEGA_COLUMNS: { title: string; items: string[] }[] = [
+  { title: "Tops", items: ["Shirts", "T-Shirts", "Polos", "Overshirts", "Knitwear"] },
+  { title: "Bottoms", items: ["Trousers", "Chinos", "Jeans", "Cargo", "Shorts"] },
+  { title: "Outerwear", items: ["Jackets", "Overshirts", "Coats", "Vests"] },
+  { title: "Accessories", items: ["Belts", "Bags", "Caps", "Socks", "Scarves"] },
+];
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoverMega, setHoverMega] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -63,7 +72,11 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center justify-end gap-3 md:gap-5">
-          <button aria-label="Search" className="hover:opacity-70">
+          <button
+            aria-label="Search"
+            onClick={() => setSearchOpen(true)}
+            className="hover:opacity-70"
+          >
             <Search className="h-[18px] w-[18px]" />
           </button>
           <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-70">
@@ -93,29 +106,52 @@ export function Navbar() {
             onMouseLeave={() => setHoverMega(false)}
             className="absolute left-0 right-0 top-full hidden border-t border-border/50 glass-panel lg:block"
           >
-            <div className="mx-auto grid max-w-[1600px] grid-cols-4 gap-8 px-10 py-12">
-              {CATEGORIES.map((c) => (
-                <Link
-                  key={c.slug}
-                  to="/collections/$slug"
-                  params={{ slug: c.slug }}
-                  className="group relative overflow-hidden rounded-md"
-                >
-                  <div className="aspect-[3/4] overflow-hidden">
-                    <img
-                      src={c.image}
-                      alt={c.name}
-                      className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-display text-lg">{c.name}</p>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                      {c.tagline}
+            <div className="mx-auto grid max-w-[1600px] grid-cols-[1.4fr_2fr] gap-10 px-10 py-12">
+              <div className="grid grid-cols-4 gap-8">
+                {MEGA_COLUMNS.map((col) => (
+                  <div key={col.title}>
+                    <p className="mb-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+                      {col.title}
                     </p>
+                    <ul className="space-y-2.5">
+                      {col.items.map((it) => (
+                        <li key={it}>
+                          <Link
+                            to="/collections"
+                            className="text-sm text-foreground/80 hover:text-foreground hover:underline underline-offset-4"
+                          >
+                            {it}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </Link>
-              ))}
+                ))}
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                {CATEGORIES.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to="/collections/$slug"
+                    params={{ slug: c.slug }}
+                    className="group relative overflow-hidden rounded-md"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden">
+                      <img
+                        src={c.image}
+                        alt={c.name}
+                        className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="mt-3">
+                      <p className="text-display text-base">{c.name}</p>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                        {c.tagline}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -155,6 +191,9 @@ export function Navbar() {
                 <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="block py-2">
                   Wishlist
                 </Link>
+                <Link to="/order-tracking" onClick={() => setMenuOpen(false)} className="block py-2">
+                  Track Order
+                </Link>
                 <Link to="/support" onClick={() => setMenuOpen(false)} className="block py-2">
                   Support
                 </Link>
@@ -163,6 +202,8 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }
