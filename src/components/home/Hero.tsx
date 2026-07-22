@@ -1,10 +1,72 @@
-import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useScroll, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { IMG } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 
+type Slide = {
+  eyebrow: string;
+  title: [string, string, string];
+  copy: string;
+  image: string;
+  video?: string;
+  primary: { label: string; to: string };
+  secondary: { label: string; to: string };
+  spec: { label: string; value: string };
+};
+
+const SLIDES: Slide[] = [
+  {
+    eyebrow: "Summer Collection — Vol. 08",
+    title: ["Comfort", "that defines", "everyday."],
+    copy: "Premium fabrics, thoughtful design, and unhurried silhouettes for men who dress with intention.",
+    image: IMG.hero,
+    primary: { label: "Shop Now", to: "/collections/new-arrivals" },
+    secondary: { label: "Explore Collection", to: "/collections" },
+    spec: { label: "Fabric", value: "Belgian Linen" },
+  },
+  {
+    eyebrow: "Linen Collection",
+    title: ["Light.", "Breathable.", "Refined."],
+    copy: "Belgian linen, garment-washed and softened over 60 hours. Made for the slow afternoons.",
+    image: IMG.lb1,
+    primary: { label: "Shop Now", to: "/collections/shirts" },
+    secondary: { label: "Explore Collection", to: "/collections" },
+    spec: { label: "Edition", value: "Limited 240 pcs" },
+  },
+  {
+    eyebrow: "Premium Cotton Series",
+    title: ["Built to", "wear-in,", "not out."],
+    copy: "Long-staple cotton, milled in Italy. The essential wardrobe that only gets better.",
+    image: IMG.catShirts,
+    primary: { label: "Shop Now", to: "/collections/shirts" },
+    secondary: { label: "Explore Collection", to: "/collections" },
+    spec: { label: "Craft", value: "Milled in Italy" },
+  },
+  {
+    eyebrow: "Office Wear",
+    title: ["The Monday", "to Friday", "wardrobe."],
+    copy: "Structured tailoring with a modern ease. Trousers and shirts that carry the whole week.",
+    image: IMG.catTrousers,
+    primary: { label: "Shop Now", to: "/collections/trousers" },
+    secondary: { label: "Explore Collection", to: "/collections" },
+    spec: { label: "Tailoring", value: "Half-lined Wool" },
+  },
+  {
+    eyebrow: "Weekend Wear",
+    title: ["Slow", "Saturdays,", "sharper style."],
+    copy: "Overshirts, knits and easy layers built for a considered kind of downtime.",
+    image: IMG.lb2,
+    primary: { label: "Shop Now", to: "/collections/knitwear" },
+    secondary: { label: "Explore Collection", to: "/collections" },
+    spec: { label: "Season", value: "AW · Volume 07" },
+  },
+];
+
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const smx = useSpring(mx, { stiffness: 60, damping: 20 });
@@ -30,9 +92,19 @@ export function Hero() {
     return () => window.removeEventListener("mousemove", onMove);
   }, [mx, my]);
 
+  useEffect(() => {
+    if (paused) return;
+    const t = setInterval(() => setIdx((v) => (v + 1) % SLIDES.length), 6500);
+    return () => clearInterval(t);
+  }, [paused]);
+
+  const slide = SLIDES[idx];
+
   return (
     <section
       ref={ref}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
       className="relative isolate min-h-[92vh] overflow-hidden bg-primary text-primary-foreground"
     >
       {/* Ambient glow */}
@@ -66,88 +138,83 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid min-h-[92vh] max-w-[1600px] grid-cols-1 items-center gap-10 px-6 pb-16 pt-24 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-24 md:pt-32">
         {/* Copy */}
         <motion.div style={{ y: textY, opacity }} className="relative z-20">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="text-[10px] uppercase tracking-[0.4em] text-primary-foreground/70"
-          >
-            Autumn / Winter — Vol. 07
-          </motion.p>
-
-          <h1 className="mt-6 text-display text-[clamp(3rem,7vw,6.75rem)] leading-[0.95]">
-            <span className="block overflow-hidden">
-              <motion.span
-                initial={{ y: "110%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="block"
-              >
-                Comfort
-              </motion.span>
-            </span>
-            <span className="block overflow-hidden">
-              <motion.span
-                initial={{ y: "110%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1.1, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
-                className="block italic"
-              >
-                that defines
-              </motion.span>
-            </span>
-            <span className="block overflow-hidden">
-              <motion.span
-                initial={{ y: "110%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1.1, delay: 0.54, ease: [0.16, 1, 0.3, 1] }}
-                className="block"
-              >
-                everyday.
-              </motion.span>
-            </span>
-          </h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.9 }}
-            className="mt-8 max-w-md text-base leading-relaxed text-primary-foreground/75"
-          >
-            Premium fabrics, thoughtful design, and unhurried silhouettes for men who dress with
-            intention.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.05 }}
-            className="mt-10 flex flex-wrap items-center gap-4"
-          >
-            <LuxeButton to="/collections/new-arrivals" variant="ivory" arrow>
-              Shop New Collection
-            </LuxeButton>
-            <LuxeButton to="/collections" variant="outline" className="text-ivory">
-              Explore Collection
-            </LuxeButton>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.4 }}
-            className="mt-16 hidden items-center gap-6 md:flex"
-          >
-            <div className="h-px w-16 bg-primary-foreground/40" />
-            <p className="text-[10px] uppercase tracking-[0.32em] text-primary-foreground/50">
-              Scroll to explore
-            </p>
+          <AnimatePresence mode="wait">
             <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="h-8 w-px bg-primary-foreground/60"
-            />
-          </motion.div>
+              key={idx}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <p className="text-[10px] uppercase tracking-[0.4em] text-primary-foreground/70">
+                {slide.eyebrow}
+              </p>
+
+              <h1 className="mt-6 text-display text-[clamp(3rem,7vw,6.75rem)] leading-[0.95]">
+                <span className="block overflow-hidden">
+                  <motion.span
+                    initial={{ y: "110%" }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 1, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+                    className="block"
+                  >
+                    {slide.title[0]}
+                  </motion.span>
+                </span>
+                <span className="block overflow-hidden">
+                  <motion.span
+                    initial={{ y: "110%" }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 1, delay: 0.17, ease: [0.16, 1, 0.3, 1] }}
+                    className="block italic"
+                  >
+                    {slide.title[1]}
+                  </motion.span>
+                </span>
+                <span className="block overflow-hidden">
+                  <motion.span
+                    initial={{ y: "110%" }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 1, delay: 0.29, ease: [0.16, 1, 0.3, 1] }}
+                    className="block"
+                  >
+                    {slide.title[2]}
+                  </motion.span>
+                </span>
+              </h1>
+
+              <p className="mt-8 max-w-md text-base leading-relaxed text-primary-foreground/75">
+                {slide.copy}
+              </p>
+
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <LuxeButton to={slide.primary.to} variant="ivory" arrow>
+                  {slide.primary.label}
+                </LuxeButton>
+                <LuxeButton to={slide.secondary.to} variant="outline" className="text-ivory">
+                  {slide.secondary.label}
+                </LuxeButton>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Slide indicators */}
+          <div className="mt-14 flex items-center gap-3">
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="group relative h-1 w-10 overflow-hidden rounded-full bg-primary-foreground/20"
+              >
+                <span
+                  className={`absolute inset-y-0 left-0 bg-primary-foreground transition-[width] duration-[6500ms] ease-linear ${
+                    i === idx && !paused ? "w-full" : i < idx ? "w-full" : "w-0"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Image composition */}
@@ -156,14 +223,30 @@ export function Hero() {
             style={{ x: imgX, y: imgY, scale }}
             className="absolute inset-0 overflow-hidden rounded-md luxe-shadow"
           >
-            <motion.img
-              src={IMG.hero}
-              alt="HASTON autumn collection"
-              initial={{ scale: 1.25 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full w-full object-cover"
-            />
+            {slide.video ? (
+              <video
+                key={slide.video}
+                src={slide.video}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={slide.image}
+                  src={slide.image}
+                  alt={slide.eyebrow}
+                  initial={{ scale: 1.15, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 1.05, opacity: 0 }}
+                  transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </AnimatePresence>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent" />
           </motion.div>
 
@@ -171,21 +254,21 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 1.3 }}
+            transition={{ duration: 1, delay: 0.6 }}
             className="absolute -left-4 top-16 hidden animate-float glass-panel rounded-md px-5 py-4 text-navy md:block"
             style={{ animationDelay: "-2s" }}
           >
-            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">Fabric</p>
-            <p className="mt-1 text-display text-lg">Belgian Linen</p>
+            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">{slide.spec.label}</p>
+            <p className="mt-1 text-display text-lg">{slide.spec.value}</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 1.5 }}
+            transition={{ duration: 1, delay: 0.8 }}
             className="absolute -right-4 bottom-16 hidden animate-float glass-panel rounded-md px-5 py-4 text-navy md:block"
           >
-            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">Edition</p>
-            <p className="mt-1 text-display text-lg">Limited 240 pcs</p>
+            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">Season</p>
+            <p className="mt-1 text-display text-lg">AW · Vol. 07</p>
           </motion.div>
         </motion.div>
       </div>
