@@ -2,10 +2,14 @@ import { PRODUCTS } from "@/lib/haston-data";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 
+function dedupe<T extends { id: string }>(list: T[]) {
+  return list.filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+}
+
 export function BestSellers() {
-  const items = PRODUCTS.filter((p) => p.isBestseller)
-    .concat(PRODUCTS.filter((p) => !p.isBestseller))
-    .slice(0, 12);
+  const items = dedupe(
+    PRODUCTS.filter((p) => p.isBestseller).concat(PRODUCTS.filter((p) => !p.isBestseller))
+  ).slice(0, 12);
   return (
     <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
       <SectionHeader
@@ -24,9 +28,7 @@ export function BestSellers() {
 }
 
 export function NewArrivals() {
-  const items = PRODUCTS.filter((p) => p.isNew)
-    .concat(PRODUCTS)
-    .slice(0, 12);
+  const items = dedupe(PRODUCTS.filter((p) => p.isNew).concat(PRODUCTS)).slice(0, 12);
   return (
     <section className="bg-secondary/40">
       <div className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
