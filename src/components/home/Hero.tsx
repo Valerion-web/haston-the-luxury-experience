@@ -105,7 +105,7 @@ export function Hero() {
       ref={ref}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative isolate min-h-[76vh] overflow-hidden bg-primary text-primary-foreground"
+      className="relative isolate min-h-[540px] md:min-h-[620px] md:max-h-[720px] overflow-hidden bg-primary text-primary-foreground"
     >
       {/* Ambient glow */}
       <motion.div
@@ -135,7 +135,7 @@ export function Hero() {
         }}
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[76vh] max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pb-10 pt-14 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-14 md:pt-18">
+      <div className="relative z-10 mx-auto grid min-h-[540px] md:min-h-[620px] md:max-h-[720px] max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pb-10 pt-14 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-14 md:pt-18">
         {/* Copy */}
         <motion.div style={{ y: textY, opacity }} className="relative z-20">
           <AnimatePresence mode="wait">
@@ -218,7 +218,7 @@ export function Hero() {
         </motion.div>
 
         {/* Image composition */}
-        <motion.div style={{ y: parallaxY }} className="relative aspect-[3/4] w-full">
+        <motion.div style={{ y: parallaxY }} className="relative aspect-[4/5] w-full max-h-[560px]">
           <motion.div
             style={{ x: imgX, y: imgY, scale }}
             className="absolute inset-0 overflow-hidden rounded-md luxe-shadow"
