@@ -51,11 +51,11 @@ function Journal() {
         </div>
       </PageHero>
 
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         {items[0] && (
           <Link
             to="/journal"
-            className="group relative mb-16 block overflow-hidden rounded-md luxe-shadow"
+            className="group relative mb-8 block overflow-hidden rounded-md luxe-shadow"
           >
             <img
               src={items[0].image}
@@ -67,13 +67,13 @@ function Journal() {
               <p className="text-[10px] uppercase tracking-[0.32em] opacity-70">
                 {items[0].category} · {items[0].read}
               </p>
-              <h2 className="mt-4 max-w-2xl text-display text-4xl md:text-6xl">{items[0].title}</h2>
+              <h2 className="mt-4 max-w-2xl text-display text-4xl md:text-3xl">{items[0].title}</h2>
               <p className="mt-4 max-w-xl opacity-80">{items[0].excerpt}</p>
             </div>
           </Link>
         )}
 
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.slice(1).map((j, i) => (
             <motion.article
               key={j.slug}

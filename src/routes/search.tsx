@@ -39,8 +39,8 @@ function SearchPage() {
           />
         </div>
       </PageHero>
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
-        <p className="mb-10 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+        <p className="mb-6 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
           {results.length} results for "{q}"
         </p>
         {results.length ? (
@@ -50,7 +50,7 @@ function SearchPage() {
             ))}
           </div>
         ) : (
-          <p className="py-24 text-center text-display text-2xl">No pieces match your search.</p>
+          <p className="py-14 text-center text-display text-2xl">No pieces match your search.</p>
         )}
       </section>
     </>

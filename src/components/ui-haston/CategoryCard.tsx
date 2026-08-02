@@ -69,7 +69,7 @@ export function CategoryCard({
             className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-8 text-ivory"
           >
             <p className="text-[10px] uppercase tracking-[0.4em] opacity-80">{tagline}</p>
-            <h3 className="text-display text-4xl md:text-5xl">{name}</h3>
+            <h3 className="text-display text-4xl md:text-3xl">{name}</h3>
             <span className="mt-3 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.32em]">
               <span className="relative">
                 Explore

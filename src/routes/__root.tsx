@@ -9,7 +9,7 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <p className="text-eyebrow text-muted-foreground">Error 404</p>
-        <h1 className="mt-4 text-display text-6xl md:text-7xl">Lost in transit</h1>
+        <h1 className="mt-4 text-display text-3xl md:text-4xl">Lost in transit</h1>
         <p className="mt-4 text-sm text-muted-foreground">
           The page you're looking for has been moved or no longer exists.
         </p>

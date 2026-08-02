@@ -40,8 +40,8 @@ function Contact() {
         description="Client service, stylists and a private line for members."
         breadcrumb={[{ label: "Contact" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
-        <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+        <div className="grid gap-7 lg:grid-cols-[1fr_1fr]">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {channels.map((c, i) => (
               <motion.div

@@ -8,7 +8,7 @@ export function Newsletter() {
   const [done, setDone] = useState(false);
 
   return (
-    <section className="relative overflow-hidden bg-primary py-24 text-primary-foreground md:py-32">
+    <section className="relative overflow-hidden bg-primary py-14 text-primary-foreground md:py-10">
       <div
         className="absolute inset-0 opacity-40"
         style={{
@@ -27,7 +27,7 @@ export function Newsletter() {
         <Reveal>
           <p className="text-eyebrow opacity-70">The house dispatch</p>
         </Reveal>
-        <h2 className="mt-6 text-display text-4xl leading-[1.05] md:text-6xl">
+        <h2 className="mt-6 text-display text-4xl leading-[1.05] md:text-3xl">
           <SplitHeading text="Letters from" />
           <span className="mt-2 block italic">
             <SplitHeading text="the atelier." />
@@ -46,7 +46,7 @@ export function Newsletter() {
               e.preventDefault();
               setDone(true);
             }}
-            className="relative mx-auto mt-10 flex max-w-lg items-center gap-2 rounded-full glass-dark p-2 focus-within:ring-2 focus-within:ring-ivory/40"
+            className="relative mx-auto mt-6 flex max-w-lg items-center gap-2 rounded-full glass-dark p-2 focus-within:ring-2 focus-within:ring-ivory/40"
           >
             <input
               type="email"

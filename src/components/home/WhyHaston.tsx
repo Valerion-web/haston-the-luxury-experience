@@ -45,13 +45,13 @@ export function WhyHaston() {
             "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4), transparent 50%)",
         }}
       />
-      <div className="relative mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
         <SectionHeader
           eyebrow="Why HASTON"
           title="Six commitments. One standard."
           description="The quiet principles behind every seam."
         />
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((it, i) => (
             <motion.div
               key={it.title}

@@ -135,7 +135,7 @@ export function Hero() {
         }}
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[92vh] max-w-[1600px] grid-cols-1 items-center gap-10 px-6 pb-16 pt-24 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-24 md:pt-32">
+      <div className="relative z-10 mx-auto grid min-h-[92vh] max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pb-10 pt-14 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-14 md:pt-18">
         {/* Copy */}
         <motion.div style={{ y: textY, opacity }} className="relative z-20">
           <AnimatePresence mode="wait">
@@ -187,7 +187,7 @@ export function Hero() {
                 {slide.copy}
               </p>
 
-              <div className="mt-10 flex flex-wrap items-center gap-4">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 <LuxeButton to={slide.primary.to} variant="ivory" arrow>
                   {slide.primary.label}
                 </LuxeButton>
@@ -199,7 +199,7 @@ export function Hero() {
           </AnimatePresence>
 
           {/* Slide indicators */}
-          <div className="mt-14 flex items-center gap-3">
+          <div className="mt-7 flex items-center gap-3">
             {SLIDES.map((_, i) => (
               <button
                 key={i}

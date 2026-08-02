@@ -11,8 +11,8 @@ export function AboutBlock() {
   const y = useTransform(scrollYProgress, [0, 1], [-80, 80]);
 
   return (
-    <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
-      <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2 md:gap-24">
+    <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-24">
         <div className="relative">
           <motion.div style={{ y }} className="relative overflow-hidden rounded-md luxe-shadow">
             <img
@@ -32,7 +32,7 @@ export function AboutBlock() {
           <Reveal>
             <p className="text-eyebrow text-muted-foreground">The house</p>
           </Reveal>
-          <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-6xl">
+          <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">
             <SplitHeading text="Made for the men" />
             <span className="mt-1 block italic">
               <SplitHeading text="who dress with intention." />
@@ -46,7 +46,7 @@ export function AboutBlock() {
             </p>
           </Reveal>
 
-          <div className="mt-12 grid grid-cols-3 gap-6 hairline pt-10">
+          <div className="mt-6 grid grid-cols-3 gap-6 hairline pt-10">
             {[
               { n: 240, s: "+", l: "Artisans" },
               { n: 60, s: "%", l: "Natural fibers" },
@@ -54,7 +54,7 @@ export function AboutBlock() {
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.1}>
                 <div>
-                  <p className="text-display text-4xl md:text-5xl">
+                  <p className="text-display text-4xl md:text-3xl">
                     <CountUp end={s.n} />
                     <span className="text-accent">{s.s}</span>
                   </p>
@@ -67,7 +67,7 @@ export function AboutBlock() {
           </div>
 
           <Reveal delay={0.3}>
-            <div className="mt-10">
+            <div className="mt-6">
               <LuxeButton to="/about" variant="outline" arrow>
                 Our story
               </LuxeButton>

@@ -27,7 +27,7 @@ export function SectionHeader({
             <p className="text-eyebrow text-muted-foreground">{eyebrow}</p>
           </Reveal>
         )}
-        <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-6xl">
+        <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">
           <SplitHeading text={title} />
         </h2>
         {description && (

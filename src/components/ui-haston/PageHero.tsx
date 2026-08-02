@@ -18,7 +18,7 @@ export function PageHero({
   children?: ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-secondary/30 pb-16 pt-16 md:pb-24 md:pt-24">
+    <section className="relative overflow-hidden border-b border-border bg-secondary/30 pb-10 pt-10 md:pb-14 md:pt-14">
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
@@ -32,7 +32,7 @@ export function PageHero({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground"
+            className="mb-6 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground"
           >
             <Link to="/" className="hover:text-foreground">
               Home
@@ -61,7 +61,7 @@ export function PageHero({
             {eyebrow}
           </motion.p>
         )}
-        <h1 className="mt-6 max-w-4xl text-display text-5xl leading-[1.02] md:text-7xl">
+        <h1 className="mt-6 max-w-4xl text-display text-3xl leading-[1.02] md:text-4xl">
           <SplitHeading text={title} />
         </h1>
         {description && (

@@ -49,16 +49,16 @@ export function Footer() {
         }}
       />
 
-      <div className="relative mx-auto max-w-[1600px] px-6 py-24 md:px-10">
+      <div className="relative mx-auto max-w-[1600px] px-6 py-14 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 gap-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]"
+          className="grid grid-cols-1 gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]"
         >
           <div>
-            <p className="text-display text-4xl tracking-[0.14em] md:text-5xl">HASTON</p>
+            <p className="text-display text-4xl tracking-[0.14em] md:text-3xl">HASTON</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.4em] opacity-70">
               by House of Valerion
             </p>
@@ -101,7 +101,7 @@ export function Footer() {
           ))}
         </motion.div>
 
-        <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t border-primary-foreground/15 pt-8 text-[11px] uppercase tracking-[0.28em] opacity-60 md:flex-row md:items-center">
+        <div className="mt-6 flex flex-col items-start justify-between gap-6 border-t border-primary-foreground/15 pt-8 text-[11px] uppercase tracking-[0.28em] opacity-60 md:flex-row md:items-center">
           <p>© {new Date().getFullYear()} House of Valerion. All rights reserved.</p>
           <div className="flex flex-wrap gap-6">
             <Link to="/privacy-policy">Privacy</Link>

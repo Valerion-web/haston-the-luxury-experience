@@ -136,7 +136,7 @@ function CollectionPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[280px_1fr]">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
           <AnimatePresence initial={false}>
             {open && (
               <motion.aside
@@ -163,7 +163,7 @@ function CollectionPage() {
 
           <div className={open ? "lg:col-start-2" : "lg:col-span-2"}>
             {products.length === 0 ? (
-              <div className="grid place-items-center py-32 text-center">
+              <div className="grid place-items-center py-10 text-center">
                 <p className="text-display text-2xl">No pieces match these filters.</p>
                 <button
                   onClick={() => {
@@ -242,7 +242,7 @@ interface FilterPanelProps {
 
 function FilterPanel(p: FilterPanelProps) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
         <p className="text-eyebrow">Price</p>
         <input

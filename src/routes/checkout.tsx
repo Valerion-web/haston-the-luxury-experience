@@ -27,15 +27,15 @@ function Checkout() {
   const total = items.reduce((s, p) => s + p.price, 0);
 
   return (
-    <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-16 md:px-10">
+    <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
       <Link to="/" className="text-display text-xl tracking-[0.3em]">
         HASTON
       </Link>
 
-      <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_440px]">
+      <div className="mt-6 grid gap-7 lg:grid-cols-[1fr_440px]">
         <div>
           {/* Progress */}
-          <div className="mb-12 flex items-center gap-4">
+          <div className="mb-6 flex items-center gap-4">
             {STEPS.map((s, i) => (
               <div key={s.key} className="flex flex-1 items-center gap-3">
                 <div
@@ -128,7 +128,7 @@ function Checkout() {
             </motion.div>
           </AnimatePresence>
 
-          <div className="mt-12 flex items-center justify-between">
+          <div className="mt-6 flex items-center justify-between">
             <button
               onClick={() => setStep(Math.max(0, step - 1))}
               disabled={step === 0}

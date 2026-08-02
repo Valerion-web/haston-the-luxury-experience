@@ -7,14 +7,14 @@ const grid = [IMG.p1, IMG.lb2, IMG.p3, IMG.lb1, IMG.p5, IMG.lb3];
 
 export function InstagramFeed() {
   return (
-    <section className="bg-secondary/40 py-24 md:py-32">
+    <section className="bg-secondary/40 py-14 md:py-10">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
         <SectionHeader
           eyebrow="@haston.house"
           title="Follow the house."
           link={{ to: "/journal", label: "See more" }}
         />
-        <div className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-6">
           {grid.map((src, i) => (
             <motion.a
               key={i}

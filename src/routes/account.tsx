@@ -45,8 +45,8 @@ function Account() {
         title="Welcome back, Andrea."
         breadcrumb={[{ label: "Account" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
-        <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <aside>
             <div className="rounded-md border border-border bg-card p-6 soft-shadow">
               <div className="flex items-center gap-4">

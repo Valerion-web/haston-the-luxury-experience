@@ -106,7 +106,7 @@ export function Navbar() {
             onMouseLeave={() => setHoverMega(false)}
             className="absolute left-0 right-0 top-full hidden border-t border-border/50 glass-panel lg:block"
           >
-            <div className="mx-auto grid max-w-[1600px] grid-cols-[1.4fr_2fr] gap-10 px-10 py-12">
+            <div className="mx-auto grid max-w-[1600px] grid-cols-[1.4fr_2fr] gap-6 px-10 py-12">
               <div className="grid grid-cols-4 gap-8">
                 {MEGA_COLUMNS.map((col) => (
                   <div key={col.title}>
@@ -167,7 +167,7 @@ export function Navbar() {
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[60] bg-background p-8 lg:hidden"
           >
-            <div className="mb-10 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between">
               <span className="text-display text-xl tracking-[0.3em]">HASTON</span>
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
                 <X className="h-6 w-6" />

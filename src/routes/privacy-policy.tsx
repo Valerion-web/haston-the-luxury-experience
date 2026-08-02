@@ -20,7 +20,7 @@ function Privacy() {
         description="Last updated May 2025."
         breadcrumb={[{ label: "Privacy" }]}
       />
-      <article className="mx-auto max-w-3xl px-6 py-16 md:px-10 space-y-8 text-sm leading-relaxed text-muted-foreground">
+      <article className="mx-auto max-w-3xl px-6 py-10 md:px-10 space-y-8 text-sm leading-relaxed text-muted-foreground">
         {sections.map((s) => (
           <section key={s.title}>
             <h2 className="text-display text-2xl text-foreground">{s.title}</h2>

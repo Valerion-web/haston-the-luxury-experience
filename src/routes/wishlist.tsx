@@ -26,9 +26,9 @@ function Wishlist() {
         description="Save what you love — return to it when you're ready."
         breadcrumb={[{ label: "Wishlist" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         {items.length === 0 ? (
-          <div className="grid place-items-center py-24 text-center">
+          <div className="grid place-items-center py-14 text-center">
             <Heart className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
             <p className="mt-4 text-display text-2xl">Nothing saved yet.</p>
             <LuxeButton to="/collections" className="mt-8" arrow>

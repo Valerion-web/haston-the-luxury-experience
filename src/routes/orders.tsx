@@ -44,7 +44,7 @@ function Orders() {
         title="Your orders."
         breadcrumb={[{ label: "Account", to: "/account" }, { label: "Orders" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         <div className="space-y-4">
           {orders.map((o) => (
             <div key={o.id} className="rounded-md border border-border bg-card p-6 soft-shadow">

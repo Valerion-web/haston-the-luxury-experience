@@ -17,12 +17,12 @@ export function FeaturedCollection() {
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/60 to-primary/85" />
 
-      <div className="relative mx-auto grid max-w-[1600px] grid-cols-1 gap-16 px-6 py-32 md:grid-cols-[1fr_1fr] md:px-10 md:py-44">
+      <div className="relative mx-auto grid max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[1fr_1fr] md:px-10 md:py-44">
         <div>
           <Reveal>
             <p className="text-eyebrow opacity-70">The autumn edit</p>
           </Reveal>
-          <h2 className="mt-6 text-display text-5xl leading-[1.02] md:text-7xl">
+          <h2 className="mt-6 text-display text-3xl leading-[1.02] md:text-4xl">
             <SplitHeading text="Considered layers for" />
             <span className="mt-2 block italic">
               <SplitHeading text="slower days." />
@@ -35,7 +35,7 @@ export function FeaturedCollection() {
             </p>
           </Reveal>
           <Reveal delay={0.4}>
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-4">
               <LuxeButton to="/collections/new-arrivals" variant="ivory" arrow>
                 Shop the edit
               </LuxeButton>
@@ -54,7 +54,7 @@ export function FeaturedCollection() {
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 1, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className={`overflow-hidden rounded-md luxe-shadow ${i === 0 ? "mt-16" : ""}`}
+              className={`overflow-hidden rounded-md luxe-shadow ${i === 0 ? "mt-8" : ""}`}
             >
               <img
                 src={src}

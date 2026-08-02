@@ -16,7 +16,7 @@ export const Route = createFileRoute("/register")({
 function Register() {
   return (
     <div className="grid min-h-[85vh] grid-cols-1 md:grid-cols-2">
-      <div className="grid place-items-center px-6 py-16 md:px-16 md:order-2">
+      <div className="grid place-items-center px-6 py-10 md:px-16 md:order-2">
         <motion.form
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -24,11 +24,11 @@ function Register() {
           className="w-full max-w-md"
         >
           <p className="text-eyebrow text-muted-foreground">Join the house</p>
-          <h1 className="mt-4 text-display text-4xl md:text-5xl">Create account.</h1>
+          <h1 className="mt-4 text-display text-4xl md:text-3xl">Create account.</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Private previews, invitations and lifetime alterations.
           </p>
-          <div className="mt-10 space-y-5">
+          <div className="mt-6 space-y-5">
             <div className="grid gap-5 sm:grid-cols-2">
               <Input label="First name" />
               <Input label="Last name" />
@@ -42,7 +42,7 @@ function Register() {
           <LuxeButton className="mt-8 w-full" arrow>
             Create account
           </LuxeButton>
-          <p className="mt-10 text-center text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="mt-6 text-center text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
             Have an account?{" "}
             <Link to="/login" className="underline">
               Sign in
