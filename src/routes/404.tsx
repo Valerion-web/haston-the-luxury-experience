@@ -29,7 +29,7 @@ function NotFound() {
         <p className="mx-auto mt-6 max-w-md text-muted-foreground">
           The page you're looking for has been altered or archived.
         </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <div className="mt-6 flex flex-wrap justify-center gap-4">
           <LuxeButton to="/" arrow>
             Return home
           </LuxeButton>

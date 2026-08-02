@@ -34,7 +34,7 @@ function Lookbook() {
         breadcrumb={[{ label: "Lookbook" }]}
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-24 px-6 py-24 md:px-10 md:py-32">
+      <div className="mx-auto max-w-[1600px] space-y-24 px-6 py-14 md:px-10 md:py-10">
         {shots.map((s, i) => (
           <Shot key={i} {...s} reverse={i % 2 === 1} />
         ))}
@@ -61,7 +61,7 @@ function Shot({
   return (
     <div
       ref={ref}
-      className={`grid items-center gap-10 md:grid-cols-[1.4fr_1fr] md:gap-20 ${reverse ? "md:grid-flow-dense" : ""}`}
+      className={`grid items-center gap-6 md:grid-cols-[1.4fr_1fr] md:gap-20 ${reverse ? "md:grid-flow-dense" : ""}`}
     >
       <motion.div
         className={`overflow-hidden rounded-md luxe-shadow ${reverse ? "md:col-start-2" : ""}`}
@@ -76,7 +76,7 @@ function Shot({
       </motion.div>
       <div>
         <p className="text-eyebrow text-muted-foreground">{tag}</p>
-        <h3 className="mt-4 text-display text-4xl leading-[1.05] md:text-6xl">{title}</h3>
+        <h3 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">{title}</h3>
       </div>
     </div>
   );

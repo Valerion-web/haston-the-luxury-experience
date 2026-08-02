@@ -47,8 +47,8 @@
   --color-denim: var(--denim);
   --color-forest: var(--forest);
 
-  --font-display: "Playfair Display", "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Michroma", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Michroma", ui-sans-serif, system-ui, sans-serif;
 
   --shadow-luxe:
     0 30px 60px -20px oklch(0.15 0.03 260 / 0.35), 0 8px 20px -8px oklch(0.15 0.03 260 / 0.2);
@@ -117,6 +117,7 @@
     border-color: var(--color-border);
   }
   html {
+    font-size: 14.5px;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -124,7 +125,9 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv01";
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.75;
   }
   h1,
   h2,
@@ -132,8 +135,16 @@
   h4,
   h5 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    font-weight: 400;
+    text-transform: none;
+  }
+  i,
+  em,
+  .italic {
+    font-style: normal !important;
+    color: color-mix(in oklab, currentColor 88%, var(--color-sand));
   }
   ::selection {
     background: var(--color-navy);
@@ -145,14 +156,29 @@
 
 @utility text-display {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.18;
+  font-weight: 400;
+}
+
+/* Premium section title rule + gold accent */
+@utility gold-rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-sand) 90%, transparent),
+    transparent
+  );
+}
+@utility text-gold {
+  color: color-mix(in oklab, var(--color-sand) 78%, var(--color-navy));
 }
 
 @utility text-eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.32em;
+  font-size: 0.6rem;
+  letter-spacing: 0.36em;
   text-transform: uppercase;
   font-weight: 500;
 }
@@ -305,4 +331,35 @@ html.lenis body {
 }
 .lenis.lenis-stopped {
   overflow: hidden;
+}
+
+/* Michroma is a wide face — tighten global tracking on utility classes */
+.tracking-\[0\.4em\] {
+  letter-spacing: 0.22em !important;
+}
+.tracking-\[0\.32em\] {
+  letter-spacing: 0.18em !important;
+}
+.tracking-\[0\.28em\] {
+  letter-spacing: 0.16em !important;
+}
+.tracking-\[0\.3em\] {
+  letter-spacing: 0.18em !important;
+}
+.tracking-\[0\.24em\] {
+  letter-spacing: 0.14em !important;
+}
+
+@utility texture-linen {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in oklab, var(--color-navy) 3%, transparent) 0 1px,
+      transparent 1px 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklab, var(--color-navy) 2%, transparent) 0 1px,
+      transparent 1px 7px
+    );
 }

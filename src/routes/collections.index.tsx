@@ -40,7 +40,7 @@ function CollectionsIndex() {
         description="Browse the full HASTON archive — from wardrobe essentials to seasonal edits."
         breadcrumb={[{ label: "Collections" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-20 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-12 md:px-10">
         <h2 className="text-eyebrow text-muted-foreground">Seasonal edits</h2>
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           {editorial.map((c, i) => (
@@ -77,8 +77,8 @@ function CollectionsIndex() {
           ))}
         </div>
 
-        <h2 className="mt-20 text-eyebrow text-muted-foreground">Shop by category</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="mt-6 text-eyebrow text-muted-foreground">Shop by category</h2>
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {CATEGORIES.map((c, i) => (
             <CategoryCard key={c.slug} {...c} index={i} />
           ))}

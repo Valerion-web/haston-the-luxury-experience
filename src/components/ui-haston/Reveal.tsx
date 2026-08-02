@@ -39,7 +39,7 @@ export function SplitHeading({ text, className }: { text: string; className?: st
   return (
     <span className={className}>
       {words.map((w, i) => (
-        <span key={i} className="inline-block overflow-hidden pb-1 pr-[0.25em] align-top">
+        <span key={i} className="inline-block overflow-hidden pb-[0.16em] pr-[0.22em] align-top leading-[1.22]">
           <motion.span
             initial={{ y: "110%" }}
             whileInView={{ y: 0 }}

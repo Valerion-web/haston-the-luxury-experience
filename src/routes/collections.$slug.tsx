@@ -93,23 +93,24 @@ function CollectionPage() {
       />
 
       <section className="mx-auto max-w-[1600px] px-6 py-12 md:px-10">
-        <div className="flex items-center justify-between gap-4 pb-8 hairline">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-8 hairline">
           <button
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.28em] transition-colors hover:bg-primary hover:text-primary-foreground"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.22em] transition-colors hover:bg-primary hover:text-primary-foreground md:px-5 md:py-2.5 md:text-[11px] md:tracking-[0.28em]"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" /> Filters
           </button>
-          <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="order-3 w-full text-[10px] uppercase tracking-[0.22em] text-muted-foreground md:order-none md:w-auto md:text-[11px] md:tracking-[0.28em]">
             {products.length} pieces
           </p>
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               onClick={() => setSortOpen((v) => !v)}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.28em]"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] uppercase tracking-[0.22em] md:px-5 md:py-2.5 md:text-[11px] md:tracking-[0.28em]"
             >
               {sort} <ChevronDown className="h-3.5 w-3.5" />
             </button>
+
             <AnimatePresence>
               {sortOpen && (
                 <motion.div
@@ -136,7 +137,7 @@ function CollectionPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[280px_1fr]">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
           <AnimatePresence initial={false}>
             {open && (
               <motion.aside
@@ -163,7 +164,7 @@ function CollectionPage() {
 
           <div className={open ? "lg:col-start-2" : "lg:col-span-2"}>
             {products.length === 0 ? (
-              <div className="grid place-items-center py-32 text-center">
+              <div className="grid place-items-center py-10 text-center">
                 <p className="text-display text-2xl">No pieces match these filters.</p>
                 <button
                   onClick={() => {
@@ -177,7 +178,7 @@ function CollectionPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                 {products.map((p, i) => (
                   <ProductCard key={p.id} product={p} index={i} />
                 ))}
@@ -242,7 +243,7 @@ interface FilterPanelProps {
 
 function FilterPanel(p: FilterPanelProps) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
         <p className="text-eyebrow">Price</p>
         <input

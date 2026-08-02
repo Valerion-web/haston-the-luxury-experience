@@ -52,7 +52,7 @@ function BannerCard({ banner, index }: { banner: Banner; index: number }) {
       className="group"
     >
       <Link to={banner.to} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-md luxe-shadow transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl">
+        <div className="relative aspect-[4/5] max-h-[380px] overflow-hidden rounded-sm soft-shadow transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl">
           <motion.img
             src={banner.image}
             alt={banner.title}
@@ -63,7 +63,7 @@ function BannerCard({ banner, index }: { banner: Banner; index: number }) {
           <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/40 to-primary/10 transition-opacity duration-500 group-hover:opacity-80" />
 
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-8 text-ivory md:p-10">
-            <h3 className="text-display text-3xl uppercase tracking-wide transition-transform duration-500 group-hover:-translate-y-1.5 md:text-4xl lg:text-5xl">
+            <h3 className="text-display text-3xl uppercase tracking-wide transition-transform duration-500 group-hover:-translate-y-1.5 md:text-4xl lg:text-3xl">
               {banner.title}
             </h3>
             <p className="max-w-xs text-sm leading-relaxed opacity-85 md:text-base">
@@ -85,13 +85,13 @@ function BannerCard({ banner, index }: { banner: Banner; index: number }) {
 
 export function FeaturedCasualCollections() {
   return (
-    <section className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
-      <div className="mb-16 flex flex-col gap-6 md:mb-20 md:flex-row md:items-end md:justify-between">
+    <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <div className="mb-8 flex flex-col gap-6 md:mb-6 md:flex-row md:items-end md:justify-between">
         <div className="max-w-xl">
           <Reveal>
             <p className="text-eyebrow text-muted-foreground">Featured casual collections</p>
           </Reveal>
-          <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-6xl">
+          <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">
             <SplitHeading text="Curated edits" />
             <span className="mt-1 block italic">
               <SplitHeading text="for every day." />

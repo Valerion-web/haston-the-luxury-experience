@@ -37,7 +37,7 @@ function Login() {
         </div>
       </motion.div>
 
-      <div className="grid place-items-center px-6 py-16 md:px-16">
+      <div className="grid place-items-center px-6 py-10 md:px-16">
         <motion.form
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -45,12 +45,12 @@ function Login() {
           className="w-full max-w-md"
         >
           <p className="text-eyebrow text-muted-foreground">Welcome back</p>
-          <h1 className="mt-4 text-display text-4xl md:text-5xl">Sign in.</h1>
+          <h1 className="mt-4 text-display text-4xl md:text-3xl">Sign in.</h1>
           <p className="mt-4 text-sm text-muted-foreground">
             Access orders, saved pieces and private previews.
           </p>
 
-          <div className="mt-10 space-y-5">
+          <div className="mt-6 space-y-5">
             <Input label="Email" type="email" />
             <Input label="Password" type="password" />
             <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em]">
@@ -80,7 +80,7 @@ function Login() {
             </button>
           </div>
 
-          <p className="mt-10 text-center text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="mt-6 text-center text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
             New here?{" "}
             <Link to="/register" className="underline">
               Create an account

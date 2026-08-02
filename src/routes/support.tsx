@@ -62,7 +62,7 @@ function Support() {
         description="Answers within 24 hours. Real humans, no scripts."
         breadcrumb={[{ label: "Support" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {topics.map((t) => (
             <motion.button
@@ -76,7 +76,7 @@ function Support() {
           ))}
         </div>
 
-        <div className="mx-auto mt-16 max-w-3xl">
+        <div className="mx-auto mt-8 max-w-3xl">
           <p className="text-eyebrow text-muted-foreground">Frequently asked</p>
           <div className="mt-6">
             {faqs.map((f, i) => (

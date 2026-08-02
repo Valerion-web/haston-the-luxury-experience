@@ -34,16 +34,16 @@ function Cart() {
   return (
     <>
       <PageHero eyebrow="Your bag" title="The bag" breadcrumb={[{ label: "Cart" }]} />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         {items.length === 0 ? (
-          <div className="grid place-items-center py-24 text-center">
+          <div className="grid place-items-center py-14 text-center">
             <p className="text-display text-3xl">Your bag is empty.</p>
             <LuxeButton to="/collections" className="mt-8" arrow>
               Continue shopping
             </LuxeButton>
           </div>
         ) : (
-          <div className="grid gap-12 lg:grid-cols-[1fr_420px]">
+          <div className="grid gap-7 lg:grid-cols-[1fr_420px]">
             <div>
               <div className="hairline pb-4 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
                 <div className="grid grid-cols-[100px_1fr_auto] gap-4 md:grid-cols-[120px_1fr_120px_80px]">
@@ -180,9 +180,9 @@ function Cart() {
           </div>
         )}
 
-        <div className="mt-24">
+        <div className="mt-6">
           <SectionHeader eyebrow="Complete the look" title="You may also like." />
-          <div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
             {PRODUCTS.slice(0, 4).map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}

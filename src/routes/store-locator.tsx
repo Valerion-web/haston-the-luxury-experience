@@ -23,7 +23,7 @@ function StoreLocator() {
         description="Twelve ateliers, worldwide. Private appointments on request."
         breadcrumb={[{ label: "Stores" }]}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {STORES.map((s, i) => (
             <motion.div

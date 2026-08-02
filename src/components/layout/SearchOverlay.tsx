@@ -59,7 +59,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -30, opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="relative mx-auto max-w-[1100px] px-6 pt-16 md:pt-24"
+            className="relative mx-auto max-w-[1100px] px-6 pt-10 md:pt-14"
           >
             <div className="glass-panel overflow-hidden rounded-2xl soft-shadow">
               <div className="flex items-center gap-4 border-b border-border/50 px-6 py-5">

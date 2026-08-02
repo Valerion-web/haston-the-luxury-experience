@@ -52,7 +52,7 @@ function PDP() {
 
   return (
     <>
-      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10 md:py-16">
+      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10 md:py-10">
         <nav className="mb-8 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           <Link to="/">Home</Link>
           <span>/</span>
@@ -61,7 +61,7 @@ function PDP() {
           <span className="text-foreground">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_460px] md:gap-16">
+        <div className="grid grid-cols-1 gap-7 md:grid-cols-[1fr_460px] md:gap-8">
           {/* Gallery */}
           <div className="flex gap-4">
             <div className="hidden w-20 shrink-0 flex-col gap-3 md:flex">
@@ -107,7 +107,7 @@ function PDP() {
             <p className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
               {product.category}
             </p>
-            <h1 className="mt-3 text-display text-4xl leading-[1.05] md:text-5xl">
+            <h1 className="mt-3 text-display text-4xl leading-[1.05] md:text-3xl">
               {product.name}
             </h1>
             <div className="mt-4 flex items-center gap-3">
@@ -136,7 +136,7 @@ function PDP() {
               {product.description}
             </p>
 
-            <div className="mt-10">
+            <div className="mt-6">
               <p className="text-eyebrow">
                 Color ·{" "}
                 <span className="normal-case tracking-normal text-foreground">
@@ -224,7 +224,7 @@ function PDP() {
               </div>
             </div>
 
-            <div className="mt-10 border-t border-border">
+            <div className="mt-6 border-t border-border">
               {[
                 {
                   id: "details",
@@ -273,9 +273,9 @@ function PDP() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1600px] px-6 pb-24 md:px-10 md:pb-32">
+      <section className="mx-auto max-w-[1600px] px-6 pb-14 md:px-10 md:pb-18">
         <SectionHeader eyebrow="Also loved" title="You may also like." />
-        <div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
           {related.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}

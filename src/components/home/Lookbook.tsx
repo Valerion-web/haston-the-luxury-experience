@@ -17,7 +17,7 @@ export function Lookbook() {
   const x = useTransform(scrollYProgress, [0, 1], ["8%", "-40%"]);
 
   return (
-    <section ref={ref} className="relative py-24 md:py-32">
+    <section ref={ref} className="relative py-14 md:py-10">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
         <SectionHeader
           eyebrow="Lookbook"
@@ -25,7 +25,7 @@ export function Lookbook() {
           link={{ to: "/lookbook", label: "View the full edit" }}
         />
       </div>
-      <div className="mt-16 overflow-hidden">
+      <div className="mt-8 overflow-hidden">
         <motion.div style={{ x }} className="flex gap-6 pl-6 md:pl-10">
           {shots.map((s, i) => (
             <motion.div
@@ -38,7 +38,7 @@ export function Lookbook() {
                 src={s.src}
                 alt={s.title}
                 loading="lazy"
-                className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
+                className="aspect-[4/5] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/80 to-transparent p-6 text-primary-foreground">
                 <p className="text-[10px] uppercase tracking-[0.32em] opacity-70">{s.tag}</p>

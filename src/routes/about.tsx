@@ -38,14 +38,14 @@ function About() {
         breadcrumb={[{ label: "About" }]}
       />
 
-      <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
-        <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-2">
+      <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+        <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
           <motion.div style={{ y }} className="overflow-hidden rounded-md luxe-shadow">
             <img src={IMG.aboutStory} alt="" className="aspect-[4/5] w-full object-cover" />
           </motion.div>
           <div>
             <p className="text-eyebrow text-muted-foreground">Chapter one</p>
-            <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-5xl">
+            <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">
               <SplitHeading text="Founded in Milano, 2016." />
             </h2>
             <Reveal delay={0.2}>
@@ -70,7 +70,7 @@ function About() {
         </div>
       </section>
 
-      <section className="bg-primary py-24 text-primary-foreground md:py-32">
+      <section className="bg-primary py-14 text-primary-foreground md:py-10">
         <div className="mx-auto grid max-w-[1600px] grid-cols-2 gap-8 px-6 md:grid-cols-4 md:px-10">
           {[
             { n: 240, s: "+", l: "Artisans in our workshops" },
@@ -85,7 +85,7 @@ function About() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: i * 0.1 }}
             >
-              <p className="text-display text-5xl md:text-6xl">
+              <p className="text-display text-3xl md:text-3xl">
                 <CountUp end={s.n} />
                 <span className="text-accent">{s.s}</span>
               </p>
@@ -95,8 +95,8 @@ function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1600px] px-6 py-24 md:px-10 md:py-32">
-        <div className="grid grid-cols-1 gap-16 md:grid-cols-2">
+      <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div>
             <p className="text-eyebrow text-muted-foreground">Materials</p>
             <h2 className="mt-4 text-display text-4xl leading-[1.05]">Fibre first.</h2>
@@ -115,7 +115,7 @@ function About() {
             </p>
           </div>
         </div>
-        <div className="mt-16 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <LuxeButton to="/journal" variant="outline" arrow>
             Read the journal
           </LuxeButton>

@@ -32,7 +32,7 @@ function Track() {
         title="Where is my order?"
         breadcrumb={[{ label: "Order tracking" }]}
       />
-      <section className="mx-auto max-w-3xl px-6 py-16 md:px-10">
+      <section className="mx-auto max-w-3xl px-6 py-10 md:px-10">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -53,7 +53,7 @@ function Track() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-16 rounded-md border border-border bg-card p-8 soft-shadow"
+            className="mt-8 rounded-md border border-border bg-card p-8 soft-shadow"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -65,7 +65,7 @@ function Track() {
               </p>
             </div>
 
-            <div className="mt-10 space-y-8">
+            <div className="mt-6 space-y-8">
               {steps.map((s, i) => (
                 <motion.div
                   key={i}
