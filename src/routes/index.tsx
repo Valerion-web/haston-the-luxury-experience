@@ -8,7 +8,9 @@ import { FeaturedCasualCollections } from "@/components/home/FeaturedCasualColle
 import { WhyHaston } from "@/components/home/WhyHaston";
 import { Lookbook } from "@/components/home/Lookbook";
 import { InstagramFeed } from "@/components/home/InstagramFeed";
+import { EditorialStrip } from "@/components/home/EditorialStrip";
 import { Newsletter } from "@/components/home/Newsletter";
+
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -24,7 +26,9 @@ function Home() {
       <FeaturedCasualCollections />
       <FeaturedCollection />
       <BestSellers />
+      <EditorialStrip />
       <WhyHaston />
+
       <Lookbook />
       <InstagramFeed />
       <Newsletter />
