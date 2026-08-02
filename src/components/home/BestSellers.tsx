@@ -14,7 +14,7 @@ export function BestSellers() {
         description="The pieces our clients return to, season after season."
         link={{ to: "/collections/bestsellers", label: "Shop all" }}
       />
-      <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
         {items.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} />
         ))}
@@ -36,7 +36,7 @@ export function NewArrivals() {
           description="Fresh silhouettes, refined fabrics — first-look pieces from our autumn collection."
           link={{ to: "/collections/new-arrivals", label: "Discover new" }}
         />
-        <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           {items.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}

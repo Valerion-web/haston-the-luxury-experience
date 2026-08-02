@@ -36,7 +36,7 @@ function Wishlist() {
             </LuxeButton>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
             {items.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}

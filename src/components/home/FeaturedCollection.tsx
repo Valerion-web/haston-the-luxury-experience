@@ -17,7 +17,7 @@ export function FeaturedCollection() {
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/60 to-primary/85" />
 
-      <div className="relative mx-auto grid max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[1fr_1fr] md:px-10 md:py-44">
+      <div className="relative mx-auto grid max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[1fr_1fr] md:px-10 md:py-24">
         <div>
           <Reveal>
             <p className="text-eyebrow opacity-70">The autumn edit</p>

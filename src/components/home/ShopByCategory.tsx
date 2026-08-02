@@ -10,7 +10,7 @@ export function ShopByCategory() {
         title="Wardrobe essentials, made deliberately."
         link={{ to: "/collections", label: "View all" }}
       />
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {CATEGORIES.map((c, i) => (
           <CategoryCard key={c.slug} {...c} index={i} />
         ))}

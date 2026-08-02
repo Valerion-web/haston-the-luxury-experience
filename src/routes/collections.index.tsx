@@ -78,7 +78,7 @@ function CollectionsIndex() {
         </div>
 
         <h2 className="mt-6 text-eyebrow text-muted-foreground">Shop by category</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {CATEGORIES.map((c, i) => (
             <CategoryCard key={c.slug} {...c} index={i} />
           ))}
