@@ -38,7 +38,7 @@ export function Lookbook() {
                 src={s.src}
                 alt={s.title}
                 loading="lazy"
-                className="aspect-[3/4] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
+                className="aspect-[4/5] w-full object-cover transition-transform duration-[1400ms] hover:scale-110"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/80 to-transparent p-6 text-primary-foreground">
                 <p className="text-[10px] uppercase tracking-[0.32em] opacity-70">{s.tag}</p>

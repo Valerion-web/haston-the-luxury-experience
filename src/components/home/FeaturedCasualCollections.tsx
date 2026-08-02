@@ -52,7 +52,7 @@ function BannerCard({ banner, index }: { banner: Banner; index: number }) {
       className="group"
     >
       <Link to={banner.to} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-md luxe-shadow transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl">
+        <div className="relative aspect-[4/5] max-h-[380px] overflow-hidden rounded-sm soft-shadow transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl">
           <motion.img
             src={banner.image}
             alt={banner.title}
