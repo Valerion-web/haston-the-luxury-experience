@@ -54,7 +54,7 @@ export function Navbar() {
             <img
               src={logo.url}
               alt="HASTON"
-              className="h-9 w-auto object-contain md:h-10"
+              className="h-9 w-auto object-contain mix-blend-multiply md:h-10"
               loading="eager"
               decoding="async"
             />
@@ -187,7 +187,7 @@ export function Navbar() {
             className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
           >
             <div className="mb-8 flex items-center justify-between">
-              <img src={logo.url} alt="HASTON" className="h-9 w-auto object-contain" />
+              <img src={logo.url} alt="HASTON" className="h-9 w-auto object-contain mix-blend-multiply" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
                 <X className="h-5 w-5" strokeWidth={1.4} />
               </button>

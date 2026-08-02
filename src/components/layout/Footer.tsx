@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Youtube, Facebook, ShieldCheck, Truck, RotateCcw, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import logo from "@/assets/haston-logo.png.asset.json";
 
 const columns = [
   {
@@ -75,12 +74,7 @@ export function Footer() {
           className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[1.3fr_1fr_1fr_1fr]"
         >
           <div>
-            <img
-              src={logo.url}
-              alt="HASTON"
-              loading="lazy"
-              className="h-11 w-auto object-contain brightness-0 invert-0 mix-blend-screen"
-            />
+            <p className="text-display text-lg uppercase tracking-[0.28em]">HASTON</p>
             <p className="mt-2 text-[7.5px] uppercase tracking-[0.22em] opacity-70">
               by House of Valerion
             </p>
