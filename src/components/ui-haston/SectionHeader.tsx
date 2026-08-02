@@ -15,24 +15,34 @@ export function SectionHeader({
   link?: { to: string; label: string };
   align?: "start" | "center";
 }) {
+  const centered = align === "center";
   return (
     <div
-      className={`flex flex-col gap-8 md:flex-row md:items-end md:justify-between ${
-        align === "center" ? "text-center md:flex-col md:items-center" : ""
+      className={`flex flex-col gap-4 md:flex-row md:items-end md:justify-between ${
+        centered ? "text-center md:flex-col md:items-center" : ""
       }`}
     >
-      <div className={`max-w-2xl ${align === "center" ? "mx-auto" : ""}`}>
+      <div className={`max-w-3xl ${centered ? "mx-auto" : ""}`}>
         {eyebrow && (
           <Reveal>
-            <p className="text-eyebrow text-muted-foreground">{eyebrow}</p>
+            <div className={`flex items-center gap-3 ${centered ? "justify-center" : ""}`}>
+              <span className="h-px w-8 bg-sand" />
+              <p className="text-eyebrow text-gold">{eyebrow}</p>
+              {centered && <span className="h-px w-8 bg-sand" />}
+            </div>
           </Reveal>
         )}
-        <h2 className="mt-4 text-display text-4xl leading-[1.05] md:text-3xl">
+        <h2 className="mt-3 text-display text-xl leading-[1.15] sm:text-2xl md:text-[2rem]">
           <SplitHeading text={title} />
         </h2>
+        <div
+          className={`mt-4 h-px w-24 bg-gradient-to-r from-sand to-transparent ${
+            centered ? "mx-auto from-sand via-sand/40 to-transparent" : ""
+          }`}
+        />
         {description && (
           <Reveal delay={0.15}>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+            <p className="mt-4 max-w-xl text-[11px] leading-relaxed tracking-[0.02em] text-muted-foreground">
               {description}
             </p>
           </Reveal>
@@ -42,13 +52,13 @@ export function SectionHeader({
         <Reveal delay={0.2}>
           <Link
             to={link.to}
-            className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em]"
+            className="group inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.24em]"
           >
             <span className="relative">
               {link.label}
               <span className="absolute -bottom-1 left-0 h-px w-full origin-right scale-x-100 bg-current transition-transform duration-500 group-hover:origin-left group-hover:scale-x-0" />
             </span>
-            <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
           </Link>
         </Reveal>
       )}
