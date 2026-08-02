@@ -105,7 +105,7 @@ export function Hero() {
       ref={ref}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative isolate min-h-[92vh] overflow-hidden bg-primary text-primary-foreground"
+      className="relative isolate min-h-[76vh] overflow-hidden bg-primary text-primary-foreground"
     >
       {/* Ambient glow */}
       <motion.div
@@ -135,7 +135,7 @@ export function Hero() {
         }}
       />
 
-      <div className="relative z-10 mx-auto grid min-h-[92vh] max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pb-10 pt-14 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-14 md:pt-18">
+      <div className="relative z-10 mx-auto grid min-h-[76vh] max-w-[1600px] grid-cols-1 items-center gap-6 px-6 pb-10 pt-14 md:grid-cols-[1.1fr_1fr] md:px-10 md:pb-14 md:pt-18">
         {/* Copy */}
         <motion.div style={{ y: textY, opacity }} className="relative z-20">
           <AnimatePresence mode="wait">
@@ -146,12 +146,12 @@ export function Hero() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className="text-[10px] uppercase tracking-[0.4em] text-primary-foreground/70">
+              <p className="text-[8px] uppercase tracking-[0.3em] text-sand/80">
                 {slide.eyebrow}
               </p>
 
-              <h1 className="mt-6 text-display text-[clamp(3rem,7vw,6.75rem)] leading-[0.95]">
-                <span className="block overflow-hidden">
+              <h1 className="mt-6 text-display text-[clamp(1.7rem,4vw,3.4rem)] leading-[1.16] uppercase">
+                <span className="block overflow-hidden pb-[0.12em]">
                   <motion.span
                     initial={{ y: "110%" }}
                     animate={{ y: 0 }}
@@ -161,17 +161,17 @@ export function Hero() {
                     {slide.title[0]}
                   </motion.span>
                 </span>
-                <span className="block overflow-hidden">
+                <span className="block overflow-hidden pb-[0.12em]">
                   <motion.span
                     initial={{ y: "110%" }}
                     animate={{ y: 0 }}
                     transition={{ duration: 1, delay: 0.17, ease: [0.16, 1, 0.3, 1] }}
-                    className="block italic"
+                    className="block text-sand"
                   >
                     {slide.title[1]}
                   </motion.span>
                 </span>
-                <span className="block overflow-hidden">
+                <span className="block overflow-hidden pb-[0.12em]">
                   <motion.span
                     initial={{ y: "110%" }}
                     animate={{ y: 0 }}
@@ -183,7 +183,7 @@ export function Hero() {
                 </span>
               </h1>
 
-              <p className="mt-8 max-w-md text-base leading-relaxed text-primary-foreground/75">
+              <p className="mt-5 max-w-md text-[11px] leading-relaxed text-primary-foreground/75">
                 {slide.copy}
               </p>
 
