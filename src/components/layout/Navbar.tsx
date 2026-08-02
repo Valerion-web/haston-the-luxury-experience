@@ -1,9 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
+import logo from "@/assets/haston-logo.png.asset.json";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -26,9 +27,10 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoverMega, setHoverMega] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -37,16 +39,33 @@ export function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-        scrolled ? "glass-panel py-3 soft-shadow" : "bg-transparent py-5"
+        scrolled
+          ? "border-b border-border/60 bg-background/70 py-2 backdrop-blur-xl backdrop-saturate-150 soft-shadow"
+          : "bg-transparent py-3.5"
       }`}
     >
-      <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr_auto] items-center gap-6 px-6 md:px-10">
-        <div className="flex items-center gap-4">
+      <div className="mx-auto flex max-w-[1600px] items-center gap-6 px-5 md:px-8">
+        {/* Logo — left */}
+        <div className="flex min-w-[130px] items-center gap-3">
           <button className="lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" strokeWidth={1.4} />
           </button>
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navLinks.map((l) => (
+          <Link to="/" className="flex items-center gap-2.5" aria-label="HASTON home">
+            <img
+              src={logo.url}
+              alt="HASTON"
+              className="h-9 w-auto object-contain md:h-10"
+              loading="eager"
+              decoding="async"
+            />
+          </Link>
+        </div>
+
+        {/* Nav — immediately after logo */}
+        <nav className="hidden flex-1 items-center gap-5 lg:flex">
+          {navLinks.map((l) => {
+            const active = pathname === l.to || (l.to !== "/" && pathname.startsWith(l.to));
+            return (
               <div
                 key={l.label}
                 onMouseEnter={() => l.mega && setHoverMega(true)}
@@ -54,40 +73,38 @@ export function Navbar() {
               >
                 <Link
                   to={l.to}
-                  className="group relative text-[11px] uppercase tracking-[0.28em] transition-colors"
+                  className={`group relative py-1 text-[9px] uppercase tracking-[0.2em] transition-colors ${
+                    active ? "text-foreground" : "text-foreground/60 hover:text-foreground"
+                  }`}
                 >
                   <span>{l.label}</span>
-                  <span className="absolute -bottom-1 left-0 h-px w-full origin-right scale-x-0 bg-current transition-transform duration-500 group-hover:origin-left group-hover:scale-x-100" />
+                  <span
+                    className={`absolute -bottom-0.5 left-0 h-px w-full bg-sand transition-transform duration-500 ${
+                      active
+                        ? "scale-x-100"
+                        : "origin-right scale-x-0 group-hover:origin-left group-hover:scale-x-100"
+                    }`}
+                  />
                 </Link>
               </div>
-            ))}
-          </nav>
-        </div>
+            );
+          })}
+        </nav>
 
-        <Link to="/" className="flex flex-col items-center leading-none">
-          <span className="text-display text-2xl tracking-[0.3em] md:text-3xl">HASTON</span>
-          <span className="mt-1 text-[9px] uppercase tracking-[0.4em] text-muted-foreground">
-            by House of Valerion
-          </span>
-        </Link>
-
-        <div className="flex items-center justify-end gap-3 md:gap-5">
-          <button
-            aria-label="Search"
-            onClick={() => setSearchOpen(true)}
-            className="hover:opacity-70"
-          >
-            <Search className="h-[18px] w-[18px]" />
+        {/* Icons — right */}
+        <div className="ml-auto flex items-center gap-3.5 md:gap-4">
+          <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:opacity-60">
+            <Search className="h-4 w-4" strokeWidth={1.4} />
           </button>
-          <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-70">
-            <Heart className="h-[18px] w-[18px]" />
+          <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-60">
+            <Heart className="h-4 w-4" strokeWidth={1.4} />
           </Link>
-          <Link to="/account" aria-label="Account" className="hidden hover:opacity-70 md:block">
-            <User className="h-[18px] w-[18px]" />
+          <Link to="/account" aria-label="Account" className="hidden hover:opacity-60 md:block">
+            <User className="h-4 w-4" strokeWidth={1.4} />
           </Link>
-          <Link to="/cart" aria-label="Cart" className="relative hover:opacity-70">
-            <ShoppingBag className="h-[18px] w-[18px]" />
-            <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] text-accent-foreground">
+          <Link to="/cart" aria-label="Cart" className="relative hover:opacity-60">
+            <ShoppingBag className="h-4 w-4" strokeWidth={1.4} />
+            <span className="absolute -right-2 -top-2 flex h-[15px] w-[15px] items-center justify-center rounded-full bg-accent text-[7px] text-accent-foreground">
               2
             </span>
           </Link>
@@ -104,21 +121,21 @@ export function Navbar() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             onMouseEnter={() => setHoverMega(true)}
             onMouseLeave={() => setHoverMega(false)}
-            className="absolute left-0 right-0 top-full hidden border-t border-border/50 glass-panel lg:block"
+            className="absolute left-0 right-0 top-full hidden border-t border-border/50 bg-background/85 backdrop-blur-xl lg:block"
           >
-            <div className="mx-auto grid max-w-[1600px] grid-cols-[1.4fr_2fr] gap-6 px-10 py-12">
-              <div className="grid grid-cols-4 gap-8">
+            <div className="mx-auto grid max-w-[1600px] grid-cols-[1.2fr_2fr] gap-8 px-8 py-8">
+              <div className="grid grid-cols-4 gap-5">
                 {MEGA_COLUMNS.map((col) => (
                   <div key={col.title}>
-                    <p className="mb-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+                    <p className="mb-3 text-[8px] uppercase tracking-[0.22em] text-gold">
                       {col.title}
                     </p>
-                    <ul className="space-y-2.5">
+                    <ul className="space-y-2">
                       {col.items.map((it) => (
                         <li key={it}>
                           <Link
                             to="/collections"
-                            className="text-sm text-foreground/80 hover:text-foreground hover:underline underline-offset-4"
+                            className="text-[10px] text-foreground/70 transition-colors hover:text-foreground"
                           >
                             {it}
                           </Link>
@@ -128,24 +145,26 @@ export function Navbar() {
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-3">
                 {CATEGORIES.map((c) => (
                   <Link
                     key={c.slug}
                     to="/collections/$slug"
                     params={{ slug: c.slug }}
-                    className="group relative overflow-hidden rounded-md"
+                    className="group relative overflow-hidden rounded-sm"
                   >
-                    <div className="aspect-[3/4] overflow-hidden">
+                    <div className="aspect-square overflow-hidden">
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-[1100ms] group-hover:scale-[1.08]"
                       />
                     </div>
-                    <div className="mt-3">
-                      <p className="text-display text-base">{c.name}</p>
-                      <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                    <div className="mt-2">
+                      <p className="text-display text-[10px]">{c.name}</p>
+                      <p className="text-[7.5px] uppercase tracking-[0.2em] text-muted-foreground">
                         {c.tagline}
                       </p>
                     </div>
@@ -165,36 +184,36 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[60] bg-background p-8 lg:hidden"
+            className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
           >
-            <div className="mb-6 flex items-center justify-between">
-              <span className="text-display text-xl tracking-[0.3em]">HASTON</span>
+            <div className="mb-8 flex items-center justify-between">
+              <img src={logo.url} alt="HASTON" className="h-9 w-auto object-contain" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" strokeWidth={1.4} />
               </button>
             </div>
-            <nav className="flex flex-col gap-6">
+            <nav className="flex flex-col gap-4">
               {navLinks.map((l) => (
                 <Link
                   key={l.label}
                   to={l.to}
                   onClick={() => setMenuOpen(false)}
-                  className="text-display text-3xl"
+                  className="text-display text-base uppercase tracking-[0.14em]"
                 >
                   {l.label}
                 </Link>
               ))}
-              <div className="mt-8 hairline pt-8 text-xs uppercase tracking-[0.28em] text-muted-foreground">
-                <Link to="/account" onClick={() => setMenuOpen(false)} className="block py-2">
+              <div className="mt-6 hairline pt-6 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                <Link to="/account" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Account
                 </Link>
-                <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="block py-2">
+                <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Wishlist
                 </Link>
-                <Link to="/order-tracking" onClick={() => setMenuOpen(false)} className="block py-2">
+                <Link to="/order-tracking" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Track Order
                 </Link>
-                <Link to="/support" onClick={() => setMenuOpen(false)} className="block py-2">
+                <Link to="/support" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Support
                 </Link>
               </div>
