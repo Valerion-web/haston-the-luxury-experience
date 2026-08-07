@@ -99,19 +99,19 @@ export function Navbar() {
 
 
         {/* Icons — right */}
-        <div className="ml-auto flex items-center gap-3.5 md:gap-4">
+        <div className="ml-auto flex items-center gap-4 md:gap-5">
           <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:opacity-60">
-            <Search className="h-4 w-4" strokeWidth={1.4} />
+            <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </button>
           <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-60">
-            <Heart className="h-4 w-4" strokeWidth={1.4} />
+            <Heart className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </Link>
           <Link to="/account" aria-label="Account" className="hidden hover:opacity-60 md:block">
-            <User className="h-4 w-4" strokeWidth={1.4} />
+            <User className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </Link>
           <Link to="/cart" aria-label="Cart" className="relative hover:opacity-60">
-            <ShoppingBag className="h-4 w-4" strokeWidth={1.4} />
-            <span className="absolute -right-2 -top-2 flex h-[15px] w-[15px] items-center justify-center rounded-full bg-accent text-[7px] text-accent-foreground">
+            <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.6} />
+            <span className="absolute -right-2 -top-2 flex h-[16px] w-[16px] items-center justify-center rounded-full bg-accent text-[8px] text-accent-foreground">
               2
             </span>
           </Link>

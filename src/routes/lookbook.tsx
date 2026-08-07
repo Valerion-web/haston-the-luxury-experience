@@ -29,12 +29,13 @@ function Lookbook() {
     <>
       <PageHero
         eyebrow="Vol. 07"
-        title="A study in stillness."
+        title="Modern casual editorial."
         description="Autumn / Winter — sixty pieces photographed across Milan, Portofino and Casa Valerion."
         breadcrumb={[{ label: "Lookbook" }]}
+        image={IMG.heroLookbook}
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-24 px-6 py-14 md:px-10 md:py-10">
+      <div className="mx-auto max-w-[1600px] space-y-14 px-6 py-9 md:space-y-20 md:px-10 md:py-12">
         {shots.map((s, i) => (
           <Shot key={i} {...s} reverse={i % 2 === 1} />
         ))}

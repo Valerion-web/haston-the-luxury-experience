@@ -33,9 +33,10 @@ function About() {
     <>
       <PageHero
         eyebrow="The house"
-        title="Casual wear, considered."
+        title="The house behind HASTON."
         description="HASTON began with a discipline — every casual piece deserves the same care as a bespoke suit. A decade on, that hasn't changed."
         breadcrumb={[{ label: "About" }]}
+        image={IMG.heroAbout}
       />
 
       <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
