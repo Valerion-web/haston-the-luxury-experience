@@ -90,7 +90,14 @@ function CollectionPage() {
         title={title}
         description={cat?.tagline || "A considered edit from the HASTON archive."}
         breadcrumb={[{ label: "Collections", to: "/collections" }, { label: title }]}
-        image={cat?.image || IMG.heroShop}
+        image={
+          slug === "new-arrivals"
+            ? IMG.heroNew
+            : slug === "bestsellers"
+              ? IMG.heroLookbook
+              : cat?.image || IMG.heroShop
+        }
+
       />
 
       <section className="mx-auto max-w-[1600px] px-6 py-8 md:px-10">
