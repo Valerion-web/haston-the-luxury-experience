@@ -8,7 +8,7 @@ export function Newsletter() {
   const [done, setDone] = useState(false);
 
   return (
-    <section className="relative overflow-hidden bg-primary py-14 text-primary-foreground md:py-10">
+    <section className="relative overflow-hidden bg-primary py-9 text-primary-foreground md:py-10">
       <div
         className="absolute inset-0 opacity-40"
         style={{

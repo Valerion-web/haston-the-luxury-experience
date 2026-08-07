@@ -50,7 +50,7 @@ function SearchPage() {
             ))}
           </div>
         ) : (
-          <p className="py-14 text-center text-display text-2xl">No pieces match your search.</p>
+          <p className="py-9 text-center text-display text-2xl">No pieces match your search.</p>
         )}
       </section>
     </>

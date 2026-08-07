@@ -11,7 +11,7 @@ export function AboutBlock() {
   const y = useTransform(scrollYProgress, [0, 1], [-80, 80]);
 
   return (
-    <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+    <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
       <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-24">
         <div className="relative">
           <motion.div style={{ y }} className="relative overflow-hidden rounded-md luxe-shadow">

@@ -20,7 +20,7 @@ export function EditorialStrip() {
 
   return (
     <section ref={ref} className="relative overflow-hidden texture-linen">
-      <div className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-14">
+      <div className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-9">
         <SectionHeader
           eyebrow="Editorial"
           title="The HASTON Index"

@@ -85,7 +85,7 @@ function BannerCard({ banner, index }: { banner: Banner; index: number }) {
 
 export function FeaturedCasualCollections() {
   return (
-    <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+    <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
       <div className="mb-8 flex flex-col gap-6 md:mb-6 md:flex-row md:items-end md:justify-between">
         <div className="max-w-xl">
           <Reveal>

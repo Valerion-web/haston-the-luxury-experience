@@ -17,7 +17,7 @@ export function Lookbook() {
   const x = useTransform(scrollYProgress, [0, 1], ["8%", "-40%"]);
 
   return (
-    <section ref={ref} className="relative py-14 md:py-10">
+    <section ref={ref} className="relative py-9 md:py-10">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
         <SectionHeader
           eyebrow="Lookbook"

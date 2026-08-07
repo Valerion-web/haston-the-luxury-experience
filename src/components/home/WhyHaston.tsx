@@ -45,7 +45,7 @@ export function WhyHaston() {
             "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.4), transparent 50%)",
         }}
       />
-      <div className="relative mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <div className="relative mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
         <SectionHeader
           eyebrow="Why HASTON"
           title="Six commitments. One standard."

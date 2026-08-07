@@ -36,7 +36,7 @@ function Cart() {
       <PageHero eyebrow="Your bag" title="The bag" breadcrumb={[{ label: "Cart" }]} />
       <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         {items.length === 0 ? (
-          <div className="grid place-items-center py-14 text-center">
+          <div className="grid place-items-center py-9 text-center">
             <p className="text-display text-3xl">Your bag is empty.</p>
             <LuxeButton to="/collections" className="mt-8" arrow>
               Continue shopping
