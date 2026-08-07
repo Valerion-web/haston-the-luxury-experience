@@ -46,10 +46,17 @@ function PDP() {
   const [open, setOpen] = useState<string | null>("details");
 
   const gallery = [product.image, product.hoverImage, product.image, product.hoverImage];
-  const related = PRODUCTS.filter(
-    (p) => p.category === product.category && p.id !== product.id,
+  const related = Array.from(
+    new Map(
+      [
+        ...PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id),
+        ...PRODUCTS.filter((p) => p.id !== product.id),
+      ].map((p) => [p.id, p]),
+    ).values(),
   ).slice(0, 5);
-  const recentlyViewed = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 5);
+  const recentlyViewed = PRODUCTS.filter((p) => p.id !== product.id)
+    .slice(-5)
+    .reverse();
   const completeTheLook = PRODUCTS.filter(
     (p) => p.category !== product.category && p.id !== product.id,
   ).slice(0, 3);
@@ -68,7 +75,7 @@ function PDP() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[60fr_40fr] lg:gap-12">
           {/* Gallery */}
           <div className="flex flex-col-reverse gap-3 md:flex-row md:gap-4">
-            <div className="flex shrink-0 gap-3 md:w-[70px] md:flex-col">
+            <div className="flex shrink-0 gap-3 md:w-[68px] md:flex-col">
               {gallery.map((src, i) => (
                 <button
                   key={i}
@@ -94,12 +101,12 @@ function PDP() {
               initial={{ opacity: 0.4, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative flex-1 overflow-hidden rounded-lg bg-muted soft-shadow"
+              className="group relative h-[52vh] max-h-[650px] min-h-[340px] flex-1 self-start overflow-hidden rounded-lg bg-muted soft-shadow md:h-[650px]"
             >
               <img
                 src={gallery[imgIdx]}
                 alt={product.name}
-                className="h-[52vh] max-h-[650px] min-h-[340px] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105 md:h-[650px]"
+                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
               />
               <div className="absolute left-4 top-4 flex flex-col gap-2">
                 {product.isNew && (
