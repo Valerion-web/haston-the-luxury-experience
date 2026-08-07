@@ -86,9 +86,14 @@ function CollectionPage() {
   return (
     <>
       <PageHero
-        eyebrow="Collection"
-        title={title}
-        description={cat?.tagline || "A considered edit from the HASTON archive."}
+        eyebrow={slug === "new-arrivals" ? "New" : "Collection"}
+        title={slug === "new-arrivals" ? "Premium casual arrivals." : title}
+        description={
+          slug === "new-arrivals"
+            ? "The latest pieces to join the house — linen, denim and knitwear, made for everyday elegance."
+            : cat?.tagline || "A considered edit from the HASTON archive."
+        }
+
         breadcrumb={[{ label: "Collections", to: "/collections" }, { label: title }]}
         image={
           slug === "new-arrivals"
