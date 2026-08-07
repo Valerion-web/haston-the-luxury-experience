@@ -288,14 +288,63 @@ function PDP() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1600px] px-6 pb-14 md:px-10 md:pb-18">
+      <section className="mx-auto max-w-[1600px] px-5 pb-10 md:px-8 md:pb-12">
         <SectionHeader eyebrow="Also loved" title="You may also like." />
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
           {related.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}
         </div>
       </section>
+
+      <section className="border-t border-border bg-secondary/20">
+        <div className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-12">
+          <SectionHeader eyebrow="Styling" title="Complete the look." />
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {completeTheLook.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.8, delay: i * 0.08 }}
+              >
+                <Link
+                  to="/product/$slug"
+                  params={{ slug: p.slug }}
+                  className="group flex items-center gap-4 rounded-lg border border-border/70 bg-card p-3 transition-shadow duration-500 hover:soft-shadow"
+                >
+                  <div className="h-24 w-20 shrink-0 overflow-hidden rounded-md">
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-[1100ms] group-hover:scale-110"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[8px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {p.category}
+                    </p>
+                    <p className="mt-1.5 text-display text-[11px] leading-snug">{p.name}</p>
+                    <p className="mt-1.5 text-[11px]">${p.price}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-12">
+        <SectionHeader eyebrow="Your history" title="Recently viewed." />
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+          {recentlyViewed.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} />
+          ))}
+        </div>
+      </section>
+
     </>
   );
 }
