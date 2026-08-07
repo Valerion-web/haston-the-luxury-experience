@@ -4,7 +4,7 @@ import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 
 export function ShopByCategory() {
   return (
-    <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+    <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
       <SectionHeader
         eyebrow="Shop by category"
         title="Wardrobe essentials, made deliberately."

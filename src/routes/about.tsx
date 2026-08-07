@@ -33,12 +33,13 @@ function About() {
     <>
       <PageHero
         eyebrow="The house"
-        title="Casual wear, considered."
+        title="The house behind HASTON."
         description="HASTON began with a discipline — every casual piece deserves the same care as a bespoke suit. A decade on, that hasn't changed."
         breadcrumb={[{ label: "About" }]}
+        image={IMG.heroAbout}
       />
 
-      <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
           <motion.div style={{ y }} className="overflow-hidden rounded-md luxe-shadow">
             <img src={IMG.aboutStory} alt="" className="aspect-[4/5] w-full object-cover" />
@@ -70,7 +71,7 @@ function About() {
         </div>
       </section>
 
-      <section className="bg-primary py-14 text-primary-foreground md:py-10">
+      <section className="bg-primary py-9 text-primary-foreground md:py-10">
         <div className="mx-auto grid max-w-[1600px] grid-cols-2 gap-8 px-6 md:grid-cols-4 md:px-10">
           {[
             { n: 240, s: "+", l: "Artisans in our workshops" },
@@ -95,7 +96,7 @@ function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div>
             <p className="text-eyebrow text-muted-foreground">Materials</p>

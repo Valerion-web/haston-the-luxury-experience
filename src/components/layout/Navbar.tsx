@@ -40,21 +40,27 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "border-b border-border/60 bg-background/70 py-2 backdrop-blur-xl backdrop-saturate-150 soft-shadow"
-          : "bg-transparent py-3.5"
+          ? "border-b border-border/60 bg-background/75 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_10px_40px_-18px_oklch(0.24_0.05_258/0.28)]"
+          : "border-b border-border/40 bg-background/45 backdrop-blur-xl"
       }`}
     >
-      <div className="mx-auto flex max-w-[1600px] items-center gap-6 px-5 md:px-8">
+      <div
+        className={`mx-auto flex max-w-[1600px] items-center gap-8 px-5 transition-all duration-500 md:px-8 ${
+          scrolled ? "h-[76px] md:h-[84px]" : "h-[84px] md:h-[96px]"
+        }`}
+      >
         {/* Logo — left */}
-        <div className="flex min-w-[130px] items-center gap-3">
+        <div className="flex min-w-[150px] items-center gap-3">
           <button className="lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-            <Menu className="h-5 w-5" strokeWidth={1.4} />
+            <Menu className="h-5 w-5" strokeWidth={1.6} />
           </button>
           <Link to="/" className="flex items-center gap-2.5" aria-label="HASTON home">
             <img
               src={logo}
               alt="HASTON"
-              className="h-9 w-auto object-contain mix-blend-multiply md:h-10"
+              width={220}
+              height={64}
+              className="h-12 w-auto object-contain mix-blend-multiply md:h-14"
               loading="eager"
               decoding="async"
             />
@@ -62,7 +68,7 @@ export function Navbar() {
         </div>
 
         {/* Nav — immediately after logo */}
-        <nav className="hidden flex-1 items-center gap-5 lg:flex">
+        <nav className="hidden flex-1 items-center gap-8 lg:flex xl:gap-10">
           {navLinks.map((l) => {
             const active = pathname === l.to || (l.to !== "/" && pathname.startsWith(l.to));
             return (
@@ -73,8 +79,8 @@ export function Navbar() {
               >
                 <Link
                   to={l.to}
-                  className={`group relative py-1 text-[9px] uppercase tracking-[0.2em] transition-colors ${
-                    active ? "text-foreground" : "text-foreground/60 hover:text-foreground"
+                  className={`group relative py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] transition-colors ${
+                    active ? "text-foreground" : "text-foreground/70 hover:text-foreground"
                   }`}
                 >
                   <span>{l.label}</span>
@@ -91,20 +97,21 @@ export function Navbar() {
           })}
         </nav>
 
+
         {/* Icons — right */}
-        <div className="ml-auto flex items-center gap-3.5 md:gap-4">
+        <div className="ml-auto flex items-center gap-4 md:gap-5">
           <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:opacity-60">
-            <Search className="h-4 w-4" strokeWidth={1.4} />
+            <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </button>
           <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-60">
-            <Heart className="h-4 w-4" strokeWidth={1.4} />
+            <Heart className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </Link>
           <Link to="/account" aria-label="Account" className="hidden hover:opacity-60 md:block">
-            <User className="h-4 w-4" strokeWidth={1.4} />
+            <User className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </Link>
           <Link to="/cart" aria-label="Cart" className="relative hover:opacity-60">
-            <ShoppingBag className="h-4 w-4" strokeWidth={1.4} />
-            <span className="absolute -right-2 -top-2 flex h-[15px] w-[15px] items-center justify-center rounded-full bg-accent text-[7px] text-accent-foreground">
+            <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.6} />
+            <span className="absolute -right-2 -top-2 flex h-[16px] w-[16px] items-center justify-center rounded-full bg-accent text-[8px] text-accent-foreground">
               2
             </span>
           </Link>

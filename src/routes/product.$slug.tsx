@@ -46,14 +46,25 @@ function PDP() {
   const [open, setOpen] = useState<string | null>("details");
 
   const gallery = [product.image, product.hoverImage, product.image, product.hoverImage];
-  const related = PRODUCTS.filter(
-    (p) => p.category === product.category && p.id !== product.id,
-  ).slice(0, 4);
+  const related = Array.from(
+    new Map(
+      [
+        ...PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id),
+        ...PRODUCTS.filter((p) => p.id !== product.id),
+      ].map((p) => [p.id, p]),
+    ).values(),
+  ).slice(0, 5);
+  const recentlyViewed = PRODUCTS.filter((p) => p.id !== product.id)
+    .slice(-5)
+    .reverse();
+  const completeTheLook = PRODUCTS.filter(
+    (p) => p.category !== product.category && p.id !== product.id,
+  ).slice(0, 3);
 
   return (
     <>
-      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10 md:py-10">
-        <nav className="mb-8 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+      <section className="mx-auto max-w-[1600px] px-5 py-6 md:px-8 md:py-8">
+        <nav className="mb-5 flex flex-wrap gap-2 text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
           <Link to="/">Home</Link>
           <span>/</span>
           <Link to="/collections">Collections</Link>
@@ -61,17 +72,27 @@ function PDP() {
           <span className="text-foreground">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 gap-7 md:grid-cols-[1fr_460px] md:gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[60fr_40fr] lg:gap-12">
           {/* Gallery */}
-          <div className="flex gap-4">
-            <div className="hidden w-20 shrink-0 flex-col gap-3 md:flex">
+          <div className="flex flex-col-reverse gap-3 md:flex-row md:gap-4">
+            <div className="flex shrink-0 gap-3 md:w-[68px] md:flex-col">
               {gallery.map((src, i) => (
                 <button
                   key={i}
                   onClick={() => setImgIdx(i)}
-                  className={`overflow-hidden rounded-md border-2 transition-all ${imgIdx === i ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"}`}
+                  aria-label={`View image ${i + 1}`}
+                  className={`overflow-hidden rounded-lg border transition-all duration-300 ${
+                    imgIdx === i
+                      ? "border-sand ring-1 ring-sand"
+                      : "border-border/60 opacity-65 hover:opacity-100"
+                  }`}
                 >
-                  <img src={src} alt="" className="aspect-[4/5] w-full object-cover" />
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-[4/5] w-16 object-cover md:w-full"
+                  />
                 </button>
               ))}
             </div>
@@ -80,27 +101,28 @@ function PDP() {
               initial={{ opacity: 0.4, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative flex-1 overflow-hidden rounded-md bg-muted luxe-shadow"
+              className="group relative h-[52vh] max-h-[650px] min-h-[340px] flex-1 self-start overflow-hidden rounded-lg bg-muted soft-shadow md:h-[650px]"
             >
               <img
                 src={gallery[imgIdx]}
                 alt={product.name}
-                className="aspect-[4/5] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
               />
               <div className="absolute left-4 top-4 flex flex-col gap-2">
                 {product.isNew && (
-                  <span className="rounded-full bg-primary px-3 py-1 text-[9px] uppercase tracking-[0.28em] text-primary-foreground">
+                  <span className="rounded-full bg-primary px-3 py-1 text-[9px] uppercase tracking-[0.24em] text-primary-foreground">
                     New
                   </span>
                 )}
                 {product.isBestseller && (
-                  <span className="rounded-full bg-accent px-3 py-1 text-[9px] uppercase tracking-[0.28em] text-accent-foreground">
+                  <span className="rounded-full bg-accent px-3 py-1 text-[9px] uppercase tracking-[0.24em] text-accent-foreground">
                     Bestseller
                   </span>
                 )}
               </div>
             </motion.div>
           </div>
+
 
           {/* Sticky purchase panel */}
           <div className="md:sticky md:top-32 md:self-start">
@@ -273,14 +295,63 @@ function PDP() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1600px] px-6 pb-14 md:px-10 md:pb-18">
+      <section className="mx-auto max-w-[1600px] px-5 pb-10 md:px-8 md:pb-12">
         <SectionHeader eyebrow="Also loved" title="You may also like." />
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
           {related.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}
         </div>
       </section>
+
+      <section className="border-t border-border bg-secondary/20">
+        <div className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-12">
+          <SectionHeader eyebrow="Styling" title="Complete the look." />
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {completeTheLook.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.8, delay: i * 0.08 }}
+              >
+                <Link
+                  to="/product/$slug"
+                  params={{ slug: p.slug }}
+                  className="group flex items-center gap-4 rounded-lg border border-border/70 bg-card p-3 transition-shadow duration-500 hover:soft-shadow"
+                >
+                  <div className="h-24 w-20 shrink-0 overflow-hidden rounded-md">
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-[1100ms] group-hover:scale-110"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[8px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {p.category}
+                    </p>
+                    <p className="mt-1.5 text-display text-[11px] leading-snug">{p.name}</p>
+                    <p className="mt-1.5 text-[11px]">${p.price}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1600px] px-5 py-10 md:px-8 md:py-12">
+        <SectionHeader eyebrow="Your history" title="Recently viewed." />
+        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+          {recentlyViewed.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} />
+          ))}
+        </div>
+      </section>
+
     </>
   );
 }

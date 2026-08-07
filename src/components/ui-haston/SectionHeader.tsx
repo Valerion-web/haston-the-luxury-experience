@@ -32,17 +32,17 @@ export function SectionHeader({
             </div>
           </Reveal>
         )}
-        <h2 className="mt-3 text-display text-xl leading-[1.15] sm:text-2xl md:text-[2rem]">
+        <h2 className="mt-3 text-display text-[1.35rem] leading-[1.14] sm:text-[1.7rem] md:text-[2.2rem]">
           <SplitHeading text={title} />
         </h2>
         <div
-          className={`mt-4 h-px w-24 bg-gradient-to-r from-sand to-transparent ${
+          className={`mt-4 h-[2px] w-28 bg-gradient-to-r from-sand to-transparent ${
             centered ? "mx-auto from-sand via-sand/40 to-transparent" : ""
           }`}
         />
         {description && (
           <Reveal delay={0.15}>
-            <p className="mt-4 max-w-xl text-[11px] leading-relaxed tracking-[0.02em] text-muted-foreground">
+            <p className="mt-4 max-w-xl text-[12px] leading-relaxed tracking-[0.02em] text-muted-foreground">
               {description}
             </p>
           </Reveal>

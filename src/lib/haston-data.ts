@@ -14,9 +14,20 @@ import p3 from "@/assets/product-3.jpg";
 import p4 from "@/assets/product-4.jpg";
 import p5 from "@/assets/product-5.jpg";
 import p6 from "@/assets/product-6.jpg";
+import heroNew from "@/assets/hero-new.jpg";
+import heroShop from "@/assets/hero-shop.jpg";
+import heroLookbook from "@/assets/hero-lookbook.jpg";
+import heroJournal from "@/assets/hero-journal.jpg";
+import heroAbout from "@/assets/hero-about.jpg";
 
 export const IMG = {
   hero,
+  heroNew,
+  heroShop,
+  heroLookbook,
+  heroJournal,
+  heroAbout,
+
   catKnit,
   catShirts,
   catTrousers,

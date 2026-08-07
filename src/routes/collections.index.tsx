@@ -36,13 +36,14 @@ function CollectionsIndex() {
     <>
       <PageHero
         eyebrow="Collections"
-        title="Every piece, considered."
-        description="Browse the full HASTON archive — from wardrobe essentials to seasonal edits."
+        title="Designed for everyday elegance."
+        description="Designed for everyday elegance — browse the full HASTON archive, from wardrobe essentials to seasonal edits."
         breadcrumb={[{ label: "Collections" }]}
+        image={IMG.heroShop}
       />
-      <section className="mx-auto max-w-[1600px] px-6 py-12 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10">
         <h2 className="text-eyebrow text-muted-foreground">Seasonal edits</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
           {editorial.map((c, i) => (
             <motion.div
               key={c.slug}
@@ -59,7 +60,7 @@ function CollectionsIndex() {
                 <img
                   src={c.image}
                   alt={c.name}
-                  className="aspect-[4/5] w-full object-cover transition-transform duration-[1400ms] group-hover:scale-110"
+                  className="aspect-[4/5] w-full object-cover md:aspect-[3/4] transition-transform duration-[1400ms] group-hover:scale-110"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/85 to-transparent" />
@@ -77,8 +78,8 @@ function CollectionsIndex() {
           ))}
         </div>
 
-        <h2 className="mt-6 text-eyebrow text-muted-foreground">Shop by category</h2>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <h2 className="mt-12 text-eyebrow text-muted-foreground">Shop by category</h2>
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {CATEGORIES.map((c, i) => (
             <CategoryCard key={c.slug} {...c} index={i} />
           ))}

@@ -11,7 +11,7 @@ export function BestSellers() {
     PRODUCTS.filter((p) => p.isBestseller).concat(PRODUCTS.filter((p) => !p.isBestseller))
   ).slice(0, 12);
   return (
-    <section className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+    <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
       <SectionHeader
         eyebrow="Best sellers"
         title="Loved. Reordered. Rewarded."
@@ -31,7 +31,7 @@ export function NewArrivals() {
   const items = dedupe(PRODUCTS.filter((p) => p.isNew).concat(PRODUCTS)).slice(0, 12);
   return (
     <section className="bg-secondary/40">
-      <div className="mx-auto max-w-[1600px] px-6 py-14 md:px-10 md:py-10">
+      <div className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
         <SectionHeader
           eyebrow="Just arrived"
           title="New for the season."

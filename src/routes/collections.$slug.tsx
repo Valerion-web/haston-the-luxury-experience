@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { PRODUCTS, CATEGORIES, productsByCategory } from "@/lib/haston-data";
+import { PRODUCTS, CATEGORIES, productsByCategory, IMG } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,13 +86,26 @@ function CollectionPage() {
   return (
     <>
       <PageHero
-        eyebrow="Collection"
-        title={title}
-        description={cat?.tagline || "A considered edit from the HASTON archive."}
+        eyebrow={slug === "new-arrivals" ? "New" : "Collection"}
+        title={slug === "new-arrivals" ? "Premium casual arrivals." : title}
+        description={
+          slug === "new-arrivals"
+            ? "The latest pieces to join the house — linen, denim and knitwear, made for everyday elegance."
+            : cat?.tagline || "A considered edit from the HASTON archive."
+        }
+
         breadcrumb={[{ label: "Collections", to: "/collections" }, { label: title }]}
+        image={
+          slug === "new-arrivals"
+            ? IMG.heroNew
+            : slug === "bestsellers"
+              ? IMG.heroLookbook
+              : cat?.image || IMG.heroShop
+        }
+
       />
 
-      <section className="mx-auto max-w-[1600px] px-6 py-12 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-8 md:px-10">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-8 hairline">
           <button
             onClick={() => setOpen((v) => !v)}

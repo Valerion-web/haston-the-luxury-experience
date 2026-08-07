@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { JOURNAL } from "@/lib/haston-data";
+import { JOURNAL, IMG } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
@@ -34,16 +34,17 @@ function Journal() {
       />
       <PageHero
         eyebrow="Journal"
-        title="Slow reads from the house."
+        title="Stories behind craftsmanship."
         description="Essays and portraits. Twice a month, in unhurried prose."
         breadcrumb={[{ label: "Journal" }]}
+        image={IMG.heroJournal}
       >
         <div className="mt-4 flex flex-wrap gap-2">
           {CATS.map((c) => (
             <button
               key={c}
               onClick={() => setCat(c)}
-              className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.24em] transition-colors ${cat === c ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}
+              className={`rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] backdrop-blur-md transition-colors ${cat === c ? "border-sand bg-sand text-navy" : "border-primary-foreground/30 text-primary-foreground/80 hover:border-primary-foreground/70"}`}
             >
               {c}
             </button>
@@ -51,7 +52,7 @@ function Journal() {
         </div>
       </PageHero>
 
-      <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+      <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10">
         {items[0] && (
           <Link
             to="/journal"
