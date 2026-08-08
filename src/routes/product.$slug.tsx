@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { getProduct, PRODUCTS } from "@/lib/haston-data";
+import { getProduct, PRODUCTS, inr } from "@/lib/haston-data";
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -146,10 +146,10 @@ function PDP() {
               </span>
             </div>
             <div className="mt-6 flex items-baseline gap-3">
-              <span className="text-2xl font-medium">${product.price}</span>
+              <span className="text-2xl font-medium">{inr(product.price)}</span>
               {product.compareAt && (
                 <span className="text-base text-muted-foreground line-through">
-                  ${product.compareAt}
+                  {inr(product.compareAt)}
                 </span>
               )}
             </div>
@@ -225,7 +225,7 @@ function PDP() {
 
             <div className="mt-6 flex flex-col gap-3">
               <LuxeButton variant="solid" className="w-full">
-                <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag — ${product.price * qty}
+                <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag — {inr(product.price * qty)}
               </LuxeButton>
               <LuxeButton variant="outline" className="w-full">
                 Buy it now
@@ -234,7 +234,7 @@ function PDP() {
 
             <div className="mt-8 space-y-3 hairline pt-6 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
               <div className="flex items-center gap-3">
-                <Truck className="h-4 w-4" strokeWidth={1.4} /> Free worldwide shipping over $180
+                <Truck className="h-4 w-4" strokeWidth={1.4} /> Free worldwide shipping over ₹15,000
               </div>
               <div className="flex items-center gap-3">
                 <RefreshCw className="h-4 w-4" strokeWidth={1.4} /> 30-day returns, free &
@@ -261,7 +261,7 @@ function PDP() {
                 {
                   id: "shipping",
                   title: "Shipping & returns",
-                  body: "Complimentary worldwide shipping on orders over $180. Free 30-day returns, no questions asked.",
+                  body: "Complimentary worldwide shipping on orders over ₹15,000. Free 30-day returns, no questions asked.",
                 },
                 {
                   id: "reviews",
@@ -334,7 +334,7 @@ function PDP() {
                       {p.category}
                     </p>
                     <p className="mt-1.5 text-display text-[11px] leading-snug">{p.name}</p>
-                    <p className="mt-1.5 text-[11px]">${p.price}</p>
+                    <p className="mt-1.5 text-[11px]">{inr(p.price)}</p>
                   </div>
                 </Link>
               </motion.div>

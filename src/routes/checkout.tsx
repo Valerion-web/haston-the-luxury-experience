@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CreditCard, Truck, User, Lock } from "lucide-react";
-import { PRODUCTS } from "@/lib/haston-data";
+import { PRODUCTS, inr } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 
 export const Route = createFileRoute("/checkout")({
@@ -87,8 +87,8 @@ function Checkout() {
                   <h2 className="text-display text-3xl">Shipping method</h2>
                   {[
                     { title: "Standard", body: "5–7 business days", price: "Complimentary" },
-                    { title: "Express", body: "2–3 business days", price: "$18" },
-                    { title: "White-glove", body: "Next-day, hand-delivered", price: "$45" },
+                    { title: "Express", body: "2–3 business days", price: inr(18) },
+                    { title: "White-glove", body: "Next-day, hand-delivered", price: inr(45) },
                   ].map((s, i) => (
                     <label
                       key={i}
@@ -142,7 +142,7 @@ function Checkout() {
               </LuxeButton>
             ) : (
               <LuxeButton onClick={() => alert("Order placed")} arrow>
-                Place order — ${total}
+                Place order — {inr(total)}
               </LuxeButton>
             )}
           </div>
@@ -165,14 +165,14 @@ function Checkout() {
                       Qty 1
                     </p>
                   </div>
-                  <p className="text-sm">${p.price}</p>
+                  <p className="text-sm">{inr(p.price)}</p>
                 </div>
               ))}
             </div>
             <div className="mt-6 hairline pt-6 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span className="text-foreground">${total}</span>
+                <span className="text-foreground">{inr(total)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping</span>
@@ -180,7 +180,7 @@ function Checkout() {
               </div>
               <div className="mt-3 flex justify-between hairline pt-3 text-lg">
                 <span className="text-display">Total</span>
-                <span className="font-medium">${total}</span>
+                <span className="font-medium">{inr(total)}</span>
               </div>
             </div>
           </div>

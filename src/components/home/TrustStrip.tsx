@@ -2,10 +2,10 @@ import { Truck, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 const items = [
-  { icon: Truck, title: "Complimentary shipping", sub: "Worldwide over $180" },
+  { icon: Truck, title: "Complimentary shipping", sub: "Worldwide over ₹15,000" },
   { icon: RefreshCw, title: "30-day returns", sub: "Free & effortless" },
   { icon: ShieldCheck, title: "Ethically made", sub: "Small-batch European mills" },
-  { icon: Sparkles, title: "Lifetime alterations", sub: "In every HASTON store" },
+  { icon: Sparkles, title: "Lifetime alterations", sub: "At your doorstep, worldwide" },
 ];
 
 export function TrustStrip() {

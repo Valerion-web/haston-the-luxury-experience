@@ -96,7 +96,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             <h3 className="mt-1 truncate text-display text-[11px] leading-snug">{product.name}</h3>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-[11px]">${product.price}</p>
+            <p className="text-[11px]">{inr(product.price)}</p>
             {product.compareAt && (
               <p className="text-[9px] text-muted-foreground line-through">${product.compareAt}</p>
             )}

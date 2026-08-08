@@ -300,3 +300,9 @@ export const STORES = [
     hours: "Mon–Sat 11–20",
   },
 ];
+
+/** Currency: display all prices in Indian Rupees. */
+export const INR_RATE = 85;
+export function inr(amount: number): string {
+  return `₹${Math.round(amount * INR_RATE).toLocaleString("en-IN")}`;
+}
