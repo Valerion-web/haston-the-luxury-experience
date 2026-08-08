@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
-import { Route as StoreLocatorRouteImport } from './routes/store-locator'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
@@ -46,11 +45,6 @@ const TermsRoute = TermsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StoreLocatorRoute = StoreLocatorRouteImport.update({
-  id: '/store-locator',
-  path: '/store-locator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -166,7 +160,6 @@ export interface FileRoutesByFullPath {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -191,7 +184,6 @@ export interface FileRoutesByTo {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -217,7 +209,6 @@ export interface FileRoutesById {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -244,7 +235,6 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -269,7 +259,6 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -294,7 +283,6 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -320,7 +308,6 @@ export interface RootRouteChildren {
   RefundPolicyRoute: typeof RefundPolicyRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
-  StoreLocatorRoute: typeof StoreLocatorRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
@@ -350,13 +337,6 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/store-locator': {
-      id: '/store-locator'
-      path: '/store-locator'
-      fullPath: '/store-locator'
-      preLoaderRoute: typeof StoreLocatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -512,7 +492,6 @@ const rootRouteChildren: RootRouteChildren = {
   RefundPolicyRoute: RefundPolicyRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
-  StoreLocatorRoute: StoreLocatorRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,

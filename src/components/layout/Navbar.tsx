@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
-import logo from "@/assets/haston-logo.png";
+import logoAsset from "@/assets/haston-logo-3d.jpg.asset.json";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -12,7 +12,6 @@ const navLinks = [
   { label: "Lookbook", to: "/lookbook" },
   { label: "Journal", to: "/journal" },
   { label: "About", to: "/about" },
-  { label: "Stores", to: "/store-locator" },
 ];
 
 const MEGA_COLUMNS: { title: string; items: string[] }[] = [
@@ -45,30 +44,33 @@ export function Navbar() {
       }`}
     >
       <div
-        className={`mx-auto flex max-w-[1600px] items-center gap-8 px-5 transition-all duration-500 md:px-8 ${
-          scrolled ? "h-[76px] md:h-[84px]" : "h-[84px] md:h-[96px]"
+        className={`mx-auto flex max-w-[1600px] items-center gap-6 px-5 transition-all duration-500 md:px-8 ${
+          scrolled ? "h-[56px] md:h-[60px]" : "h-[62px] md:h-[68px]"
         }`}
       >
         {/* Logo — left */}
-        <div className="flex min-w-[150px] items-center gap-3">
+        <div className="flex items-center gap-3">
           <button className="lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" strokeWidth={1.6} />
           </button>
           <Link to="/" className="flex items-center gap-2.5" aria-label="HASTON home">
             <img
-              src={logo}
+              src={logoAsset.url}
               alt="HASTON"
-              width={220}
-              height={64}
-              className="h-12 w-auto object-contain mix-blend-multiply md:h-14"
+              width={512}
+              height={512}
+              className="h-9 w-9 rounded-sm object-contain md:h-10 md:w-10"
               loading="eager"
               decoding="async"
             />
+            <span className="text-display text-[13px] uppercase tracking-[0.3em] md:text-[15px]">
+              HASTON
+            </span>
           </Link>
         </div>
 
         {/* Nav — immediately after logo */}
-        <nav className="hidden flex-1 items-center gap-8 lg:flex xl:gap-10">
+        <nav className="hidden flex-1 items-center gap-7 lg:flex xl:gap-9">
           {navLinks.map((l) => {
             const active = pathname === l.to || (l.to !== "/" && pathname.startsWith(l.to));
             return (
@@ -194,7 +196,7 @@ export function Navbar() {
             className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
           >
             <div className="mb-8 flex items-center justify-between">
-              <img src={logo} alt="HASTON" className="h-9 w-auto object-contain mix-blend-multiply" />
+              <img src={logoAsset.url} alt="HASTON" className="h-9 w-9 rounded-sm object-contain" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
                 <X className="h-5 w-5" strokeWidth={1.4} />
               </button>
