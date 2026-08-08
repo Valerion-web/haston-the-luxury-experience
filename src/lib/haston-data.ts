@@ -268,38 +268,6 @@ export const JOURNAL = [
   },
 ];
 
-export const STORES = [
-  {
-    city: "Milan",
-    address: "Via della Spiga 27, 20121",
-    phone: "+39 02 7600 1234",
-    hours: "Mon–Sat 10–19",
-  },
-  {
-    city: "London",
-    address: "8 Mount Street, Mayfair, W1K",
-    phone: "+44 20 7499 5678",
-    hours: "Mon–Sat 10–19, Sun 12–18",
-  },
-  {
-    city: "New York",
-    address: "112 Prince Street, SoHo, NY",
-    phone: "+1 212 555 0921",
-    hours: "Mon–Sat 11–20, Sun 12–18",
-  },
-  {
-    city: "Tokyo",
-    address: "5-3-10 Minami-Aoyama, Minato-ku",
-    phone: "+81 3 3400 1111",
-    hours: "Daily 11–20",
-  },
-  {
-    city: "Mumbai",
-    address: "Kala Ghoda, Fort, Mumbai 400001",
-    phone: "+91 22 4000 8888",
-    hours: "Mon–Sat 11–20",
-  },
-];
 
 /** Currency: display all prices in Indian Rupees. */
 export const INR_RATE = 85;

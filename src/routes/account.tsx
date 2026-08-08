@@ -215,7 +215,7 @@ function WishlistTab() {
             />
           </div>
           <p className="mt-3 text-display text-lg">{p.name}</p>
-          <p className="text-xs">${p.price}</p>
+          <p className="text-xs">{inr(p.price)}</p>
         </Link>
       ))}
     </div>
