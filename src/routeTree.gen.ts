@@ -18,6 +18,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as PressRouteImport } from './routes/press'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OrderTrackingRouteImport } from './routes/order-tracking'
 import { Route as LookbookRouteImport } from './routes/lookbook'
@@ -78,6 +79,11 @@ const RefundPolicyRoute = RefundPolicyRouteImport.update({
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PressRoute = PressRouteImport.update({
+  id: '/press',
+  path: '/press',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   LookbookRoute: typeof LookbookRoute
   OrderTrackingRoute: typeof OrderTrackingRoute
   OrdersRoute: typeof OrdersRoute
+  PressRoute: typeof PressRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   RegisterRoute: typeof RegisterRoute
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy-policy'
       fullPath: '/privacy-policy'
       preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/press': {
+      id: '/press'
+      path: '/press'
+      fullPath: '/press'
+      preLoaderRoute: typeof PressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -549,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   LookbookRoute: LookbookRoute,
   OrderTrackingRoute: OrderTrackingRoute,
   OrdersRoute: OrdersRoute,
+  PressRoute: PressRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   RegisterRoute: RegisterRoute,
