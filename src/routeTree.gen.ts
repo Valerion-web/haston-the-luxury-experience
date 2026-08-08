@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as ShippingRouteImport } from './routes/shipping'
@@ -44,6 +45,11 @@ const WishlistRoute = WishlistRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/shipping': typeof ShippingRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/shipping': typeof ShippingRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/shipping': typeof ShippingRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   ShippingRoute: typeof ShippingRoute
   SizeGuideRoute: typeof SizeGuideRoute
   SupportRoute: typeof SupportRoute
+  SustainabilityRoute: typeof SustainabilityRoute
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
   CollectionsSlugRoute: typeof CollectionsSlugRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -577,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShippingRoute: ShippingRoute,
   SizeGuideRoute: SizeGuideRoute,
   SupportRoute: SupportRoute,
+  SustainabilityRoute: SustainabilityRoute,
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
   CollectionsSlugRoute: CollectionsSlugRoute,
