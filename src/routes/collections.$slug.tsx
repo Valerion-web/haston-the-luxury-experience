@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { PRODUCTS, CATEGORIES, productsByCategory, IMG } from "@/lib/haston-data";
+import { PRODUCTS, CATEGORIES, productsByCategory, IMG, inr } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -268,8 +268,8 @@ function FilterPanel(p: FilterPanelProps) {
           className="mt-6 w-full accent-primary"
         />
         <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-          <span>$50</span>
-          <span>Up to ${p.priceMax}</span>
+          <span>{inr(50)}</span>
+          <span>Up to {inr(p.priceMax)}</span>
         </div>
       </div>
       <div>

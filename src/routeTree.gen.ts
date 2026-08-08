@@ -11,12 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as SupportRouteImport } from './routes/support'
-import { Route as StoreLocatorRouteImport } from './routes/store-locator'
+import { Route as SizeGuideRouteImport } from './routes/size-guide'
+import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as PressRouteImport } from './routes/press'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OrderTrackingRouteImport } from './routes/order-tracking'
 import { Route as LookbookRouteImport } from './routes/lookbook'
@@ -25,6 +28,7 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as R404RouteImport } from './routes/404'
@@ -43,14 +47,24 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StoreLocatorRoute = StoreLocatorRouteImport.update({
-  id: '/store-locator',
-  path: '/store-locator',
+const SizeGuideRoute = SizeGuideRouteImport.update({
+  id: '/size-guide',
+  path: '/size-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShippingRoute = ShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -71,6 +85,11 @@ const RefundPolicyRoute = RefundPolicyRouteImport.update({
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PressRoute = PressRouteImport.update({
+  id: '/press',
+  path: '/press',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRoute = OrdersRouteImport.update({
@@ -111,6 +130,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -154,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -162,12 +187,15 @@ export interface FileRoutesByFullPath {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
+  '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -179,6 +207,7 @@ export interface FileRoutesByTo {
   '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -187,12 +216,15 @@ export interface FileRoutesByTo {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
+  '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -205,6 +237,7 @@ export interface FileRoutesById {
   '/404': typeof R404Route
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -213,12 +246,15 @@ export interface FileRoutesById {
   '/lookbook': typeof LookbookRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
+  '/press': typeof PressRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
-  '/store-locator': typeof StoreLocatorRoute
+  '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
+  '/sustainability': typeof SustainabilityRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -232,6 +268,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/about'
     | '/account'
+    | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -240,12 +277,15 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
+    | '/shipping'
+    | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -257,6 +297,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/about'
     | '/account'
+    | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -265,12 +306,15 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
+    | '/shipping'
+    | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -282,6 +326,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/about'
     | '/account'
+    | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -290,12 +335,15 @@ export interface FileRouteTypes {
     | '/lookbook'
     | '/order-tracking'
     | '/orders'
+    | '/press'
     | '/privacy-policy'
     | '/refund-policy'
     | '/register'
     | '/search'
-    | '/store-locator'
+    | '/shipping'
+    | '/size-guide'
     | '/support'
+    | '/sustainability'
     | '/terms'
     | '/wishlist'
     | '/collections/$slug'
@@ -308,6 +356,7 @@ export interface RootRouteChildren {
   R404Route: typeof R404Route
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  CareersRoute: typeof CareersRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -316,12 +365,15 @@ export interface RootRouteChildren {
   LookbookRoute: typeof LookbookRoute
   OrderTrackingRoute: typeof OrderTrackingRoute
   OrdersRoute: typeof OrdersRoute
+  PressRoute: typeof PressRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
-  StoreLocatorRoute: typeof StoreLocatorRoute
+  ShippingRoute: typeof ShippingRoute
+  SizeGuideRoute: typeof SizeGuideRoute
   SupportRoute: typeof SupportRoute
+  SustainabilityRoute: typeof SustainabilityRoute
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
   CollectionsSlugRoute: typeof CollectionsSlugRoute
@@ -345,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -352,11 +411,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/store-locator': {
-      id: '/store-locator'
-      path: '/store-locator'
-      fullPath: '/store-locator'
-      preLoaderRoute: typeof StoreLocatorRouteImport
+    '/size-guide': {
+      id: '/size-guide'
+      path: '/size-guide'
+      fullPath: '/size-guide'
+      preLoaderRoute: typeof SizeGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping': {
+      id: '/shipping'
+      path: '/shipping'
+      fullPath: '/shipping'
+      preLoaderRoute: typeof ShippingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -385,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy-policy'
       fullPath: '/privacy-policy'
       preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/press': {
+      id: '/press'
+      path: '/press'
+      fullPath: '/press'
+      preLoaderRoute: typeof PressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders': {
@@ -441,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -500,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   R404Route: R404Route,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  CareersRoute: CareersRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
@@ -508,12 +589,15 @@ const rootRouteChildren: RootRouteChildren = {
   LookbookRoute: LookbookRoute,
   OrderTrackingRoute: OrderTrackingRoute,
   OrdersRoute: OrdersRoute,
+  PressRoute: PressRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
-  StoreLocatorRoute: StoreLocatorRoute,
+  ShippingRoute: ShippingRoute,
+  SizeGuideRoute: SizeGuideRoute,
   SupportRoute: SupportRoute,
+  SustainabilityRoute: SustainabilityRoute,
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
   CollectionsSlugRoute: CollectionsSlugRoute,

@@ -13,7 +13,7 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
-import { PRODUCTS } from "@/lib/haston-data";
+import { PRODUCTS, inr } from "@/lib/haston-data";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -98,7 +98,7 @@ function Account() {
                 {tab === "wallet" && (
                   <PanelCard
                     title="Wallet"
-                    body="Store credit: $180.00 — from your recent return."
+                    body="Store credit: ₹15,300 — from your recent return."
                   />
                 )}
                 {tab === "loyalty" && <Loyalty />}
@@ -119,10 +119,10 @@ function Account() {
 
 function Overview() {
   const stats = [
-    { label: "Lifetime spend", value: "$3,420" },
+    { label: "Lifetime spend", value: "₹2,90,700" },
     { label: "Orders", value: "14" },
     { label: "Loyalty tier", value: "Atelier" },
-    { label: "Store credit", value: "$180" },
+    { label: "Store credit", value: "₹15,300" },
   ];
   return (
     <div className="space-y-8">
@@ -182,7 +182,7 @@ function Orders() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm">${o.total}</p>
+                <p className="text-sm">{inr(o.total)}</p>
                 <p
                   className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.28em] ${o.status === "Delivered" ? "bg-accent/20 text-accent" : "bg-mustard/25 text-graphite"}`}
                 >
@@ -215,7 +215,7 @@ function WishlistTab() {
             />
           </div>
           <p className="mt-3 text-display text-lg">{p.name}</p>
-          <p className="text-xs">${p.price}</p>
+          <p className="text-xs">{inr(p.price)}</p>
         </Link>
       ))}
     </div>

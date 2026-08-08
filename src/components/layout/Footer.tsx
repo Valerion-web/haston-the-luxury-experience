@@ -6,6 +6,7 @@ const columns = [
   {
     title: "Shop",
     links: [
+      { label: "Shop All", to: "/collections" },
       { label: "New Arrivals", to: "/collections/new-arrivals" },
       { label: "Best Sellers", to: "/collections/bestsellers" },
       { label: "Knitwear", to: "/collections/knitwear" },
@@ -19,9 +20,9 @@ const columns = [
     links: [
       { label: "Support", to: "/support" },
       { label: "Order Tracking", to: "/order-tracking" },
-      { label: "Shipping", to: "/support" },
+      { label: "Shipping", to: "/shipping" },
       { label: "Returns", to: "/refund-policy" },
-      { label: "Size Guide", to: "/support" },
+      { label: "Size Guide", to: "/size-guide" },
       { label: "Contact", to: "/contact" },
     ],
   },
@@ -30,13 +31,13 @@ const columns = [
     links: [
       { label: "About HASTON", to: "/about" },
       { label: "Journal", to: "/journal" },
-      { label: "Store Locator", to: "/store-locator" },
-      { label: "Careers", to: "/about" },
-      { label: "Press", to: "/journal" },
-      { label: "Sustainability", to: "/about" },
+      { label: "Careers", to: "/careers" },
+      { label: "Press", to: "/press" },
+      { label: "Sustainability", to: "/sustainability" },
     ],
   },
 ];
+
 
 const badges = [
   { icon: Truck, label: "Free Shipping ₹999+" },

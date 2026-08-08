@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PRODUCTS } from "@/lib/haston-data";
+import { PRODUCTS, inr } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { Package } from "lucide-react";
 
@@ -59,7 +59,7 @@ function Orders() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm">${o.total}</p>
+                  <p className="text-sm">{inr(o.total)}</p>
                   <p
                     className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.28em] ${o.status === "Delivered" ? "bg-accent/20 text-accent" : "bg-mustard/25 text-graphite"}`}
                   >

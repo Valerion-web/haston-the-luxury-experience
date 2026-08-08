@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { PRODUCTS } from "@/lib/haston-data";
+import { PRODUCTS, inr } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { X, Plus, Minus, ShieldCheck, Tag } from "lucide-react";
@@ -117,7 +117,7 @@ function Cart() {
                         <Plus className="h-3 w-3" />
                       </button>
                     </div>
-                    <p className="text-right text-sm font-medium">${product.price * qty}</p>
+                    <p className="text-right text-sm font-medium">{inr(product.price * qty)}</p>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -129,23 +129,23 @@ function Cart() {
                 <div className="mt-6 space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${subtotal}</span>
+                    <span>{inr(subtotal)}</span>
                   </div>
                   {applied && (
                     <div className="flex justify-between text-accent">
                       <span>Discount (WELCOME10)</span>
-                      <span>-${discount}</span>
+                      <span>-{inr(discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shipping === 0 ? "Complimentary" : `$${shipping}`}</span>
+                    <span>{shipping === 0 ? "Complimentary" : inr(shipping)}</span>
                   </div>
                 </div>
                 <div className="mt-6 hairline pt-6">
                   <div className="flex justify-between text-lg">
                     <span className="text-display">Total</span>
-                    <span className="font-medium">${total}</span>
+                    <span className="font-medium">{inr(total)}</span>
                   </div>
                 </div>
 
