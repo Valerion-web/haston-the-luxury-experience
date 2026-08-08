@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -46,6 +47,11 @@ const TermsRoute = TermsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SizeGuideRoute = SizeGuideRouteImport.update({
+  id: '/size-guide',
+  path: '/size-guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShippingRoute = ShippingRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/size-guide'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/size-guide'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/size-guide'
     | '/support'
     | '/terms'
     | '/wishlist'
@@ -321,6 +333,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   ShippingRoute: typeof ShippingRoute
+  SizeGuideRoute: typeof SizeGuideRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/size-guide': {
+      id: '/size-guide'
+      path: '/size-guide'
+      fullPath: '/size-guide'
+      preLoaderRoute: typeof SizeGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shipping': {
@@ -513,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   ShippingRoute: ShippingRoute,
+  SizeGuideRoute: SizeGuideRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
