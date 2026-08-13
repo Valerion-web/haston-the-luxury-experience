@@ -119,7 +119,7 @@ function About() {
               </div>
             </Reveal>
             <h2 className="mt-4 text-display text-[1.5rem] leading-[1.12] md:text-[2.1rem]">
-              <SplitHeading text="A house built around quality." />
+              <SplitHeading text="Built around quality." />
             </h2>
             <Reveal delay={0.15}>
               <div className="mt-6 space-y-4 text-[14.5px] leading-[1.8] text-muted-foreground md:text-[16px]">
