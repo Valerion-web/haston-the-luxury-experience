@@ -19,6 +19,21 @@ import heroShop from "@/assets/hero-shop.jpg";
 import heroLookbook from "@/assets/hero-lookbook.jpg";
 import heroJournal from "@/assets/hero-journal.jpg";
 import heroAbout from "@/assets/hero-about.jpg";
+import aboutHeroEditorial from "@/assets/about-hero-editorial.jpg";
+import aboutIntro from "@/assets/about-intro.jpg";
+import aboutOrigin from "@/assets/about-origin.jpg";
+import aboutPhilosophy from "@/assets/about-philosophy.jpg";
+import aboutCraft from "@/assets/about-craft.jpg";
+import aboutPeople from "@/assets/about-people.jpg";
+import aboutPromise from "@/assets/about-promise.jpg";
+import fabricLinen from "@/assets/fabric-linen.jpg";
+import fabricKnit from "@/assets/fabric-knit.jpg";
+import fabricCotton from "@/assets/fabric-cotton.jpg";
+import journalHero from "@/assets/journal-hero.jpg";
+import journalPhilosophy from "@/assets/journal-philosophy.jpg";
+import journalCraft from "@/assets/journal-craft.jpg";
+import journalPeople from "@/assets/journal-people.jpg";
+import journalFabric from "@/assets/journal-fabric.jpg";
 
 export const IMG = {
   hero,
