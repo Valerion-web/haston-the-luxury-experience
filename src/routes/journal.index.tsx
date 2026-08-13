@@ -5,7 +5,7 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { SplitHeading } from "@/components/ui-haston/Reveal";
 
-export const Route = createFileRoute("/journal")({
+export const Route = createFileRoute("/journal/")({
   head: () => ({
     meta: [
       { title: "Journal — HASTON" },
