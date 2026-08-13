@@ -58,6 +58,22 @@ export const IMG = {
   p4,
   p5,
   p6,
+
+  aboutHeroEditorial,
+  aboutIntro,
+  aboutOrigin,
+  aboutPhilosophy,
+  aboutCraft,
+  aboutPeople,
+  aboutPromise,
+  fabricLinen,
+  fabricKnit,
+  fabricCotton,
+  journalHero,
+  journalPhilosophy,
+  journalCraft,
+  journalPeople,
+  journalFabric,
 };
 
 export type Product = {
