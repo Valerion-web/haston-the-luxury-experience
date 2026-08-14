@@ -80,8 +80,8 @@ export function Footer() {
               <img
                 src={logoMark.url}
                 alt="HASTON"
-                width={537}
-                height={702}
+                width={306}
+                height={400}
                 loading="lazy"
                 className="h-8 w-auto object-contain md:h-9"
               />

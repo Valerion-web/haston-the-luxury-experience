@@ -57,8 +57,8 @@ export function Navbar() {
             <img
               src={logoFull.url}
               alt="HASTON"
-              width={1254}
-              height={1254}
+              width={600}
+              height={600}
               className="h-10 w-auto object-contain md:h-12"
               loading="eager"
               decoding="async"
