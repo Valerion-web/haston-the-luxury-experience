@@ -45,8 +45,8 @@ function Split({
   const y = useTransform(scrollYProgress, [0, 1], [-60, 60]);
 
   return (
-    <section ref={ref} className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-11">
-      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-16">
+    <section ref={ref} className="mx-auto max-w-[1500px] px-6 py-7 md:px-10 md:py-8">
+      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
         <motion.div
           style={{ y }}
           className={`overflow-hidden rounded-md luxe-shadow ${reverse ? "md:order-2" : ""}`}
@@ -55,7 +55,7 @@ function Split({
             src={image}
             alt=""
             loading="lazy"
-            className="aspect-[4/5] w-full object-cover transition-transform duration-[1600ms] hover:scale-[1.04]"
+            className="aspect-[4/3] w-full object-cover transition-transform duration-[1600ms] hover:scale-[1.04] md:aspect-[5/4]"
           />
         </motion.div>
         <div className={reverse ? "md:order-1" : ""}>
@@ -255,7 +255,7 @@ function About() {
       </Split>
 
       {/* Fabrics */}
-      <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-11">
+      <section className="mx-auto max-w-[1500px] px-6 py-7 md:px-10 md:py-8">
         <Reveal>
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-sand" />
