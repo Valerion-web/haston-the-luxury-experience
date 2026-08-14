@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
-import logo3d from "@/assets/haston-logo-3d.jpeg";
+import logoFull from "@/assets/haston-logo-mark.png.asset.json";
+import logoMark from "@/assets/haston-h.png.asset.json";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -55,17 +56,14 @@ export function Navbar() {
           </button>
           <Link to="/" className="flex items-center gap-2.5" aria-label="HASTON home">
             <img
-              src={logo3d}
+              src={logoFull.url}
               alt="HASTON"
-              width={512}
-              height={512}
-              className="h-9 w-9 rounded-sm object-contain md:h-10 md:w-10"
+              width={1254}
+              height={1254}
+              className="h-10 w-auto object-contain md:h-12"
               loading="eager"
               decoding="async"
             />
-            <span className="text-display text-[13px] uppercase tracking-[0.3em] md:text-[15px]">
-              HASTON
-            </span>
           </Link>
         </div>
 
@@ -196,7 +194,7 @@ export function Navbar() {
             className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
           >
             <div className="mb-8 flex items-center justify-between">
-              <img src={logo3d} alt="HASTON" className="h-9 w-9 rounded-sm object-contain" />
+              <img src={logoFull.url} alt="HASTON" className="h-10 w-auto object-contain" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
                 <X className="h-5 w-5" strokeWidth={1.4} />
               </button>

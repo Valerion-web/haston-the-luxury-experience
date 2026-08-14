@@ -119,7 +119,7 @@ function Account() {
 
 function Overview() {
   const stats = [
-    { label: "Lifetime spend", value: "₹2,90,700" },
+    { label: "Member benefits", value: "10% off" },
     { label: "Orders", value: "14" },
     { label: "Loyalty tier", value: "Atelier" },
     { label: "Store credit", value: "₹15,300" },
