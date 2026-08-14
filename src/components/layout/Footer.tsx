@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Youtube, Facebook, ShieldCheck, Truck, RotateCcw, Lock } from "lucide-react";
 import { motion } from "framer-motion";
-import logoMark from "@/assets/haston-h.png.asset.json";
+import logoMark from "@/assets/haston-mark.png";
 
 const columns = [
   {
@@ -78,7 +78,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3">
               <img
-                src={logoMark.url}
+                src={logoMark}
                 alt="HASTON"
                 width={306}
                 height={400}

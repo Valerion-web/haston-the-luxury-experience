@@ -95,14 +95,14 @@ function Article() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-                  className={`md:col-span-5 ${flip ? "md:order-2" : "md:order-1"}`}
+                  className={`md:col-span-4 ${flip ? "md:order-2" : "md:order-1"}`}
                 >
                   <div className="overflow-hidden rounded-md luxe-shadow">
                     <img
                       src={img.src}
                       alt={img.alt}
                       loading="lazy"
-                      className="aspect-[4/3] w-full object-cover transition-transform duration-[1600ms] hover:scale-[1.04] md:aspect-[4/5]"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-[1600ms] hover:scale-[1.04] md:aspect-[3/4]"
                     />
                   </div>
                   <figcaption className="mt-2.5 text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
@@ -110,7 +110,7 @@ function Article() {
                   </figcaption>
                 </motion.figure>
 
-                <Reveal delay={0.08} className={`md:col-span-7 ${flip ? "md:order-1" : "md:order-2"}`}>
+                <Reveal delay={0.08} className={`md:col-span-8 ${flip ? "md:order-1" : "md:order-2"}`}>
                   <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sand" />
                     <h2 className="text-display text-lg leading-tight md:text-xl">{s.heading}</h2>

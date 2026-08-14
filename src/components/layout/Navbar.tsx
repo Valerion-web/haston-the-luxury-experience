@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
-import logoFull from "@/assets/haston-logo-mark.png.asset.json";
+import logoFull from "@/assets/haston-logo.png";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -55,10 +55,10 @@ export function Navbar() {
           </button>
           <Link to="/" className="flex items-center gap-2.5" aria-label="HASTON home">
             <img
-              src={logoFull.url}
+              src={logoFull}
               alt="HASTON"
-              width={600}
-              height={600}
+              width={342}
+              height={320}
               className="h-10 w-auto object-contain md:h-12"
               loading="eager"
               decoding="async"
@@ -193,7 +193,7 @@ export function Navbar() {
             className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
           >
             <div className="mb-8 flex items-center justify-between">
-              <img src={logoFull.url} alt="HASTON" className="h-10 w-auto object-contain" />
+              <img src={logoFull} alt="HASTON" className="h-10 w-auto object-contain" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
                 <X className="h-5 w-5" strokeWidth={1.4} />
               </button>
