@@ -109,8 +109,8 @@ function About() {
       />
 
       {/* Introduction */}
-      <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-11">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-16">
+      <section className="mx-auto max-w-[1400px] px-6 py-7 md:px-10 md:py-8">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-7">
             <Reveal>
               <div className="flex items-center gap-3">
@@ -118,11 +118,11 @@ function About() {
                 <p className="text-eyebrow text-gold">Introduction</p>
               </div>
             </Reveal>
-            <h2 className="mt-4 text-display text-[1.5rem] leading-[1.12] md:text-[2.1rem]">
+            <h2 className="mt-3 text-display text-[1.4rem] leading-[1.12] md:text-[1.9rem]">
               <SplitHeading text="Built around quality." />
             </h2>
             <Reveal delay={0.15}>
-              <div className="mt-6 space-y-4 text-[14.5px] leading-[1.8] text-muted-foreground md:text-[16px]">
+              <div className="mt-4 space-y-3.5 text-[14px] leading-[1.75] text-muted-foreground md:text-[15.5px]">
                 <p>
                   HASTON is a premium menswear label from House of Valerion, created for men who
                   want clothing that feels as considered as it looks. Every piece is designed for
@@ -143,13 +143,14 @@ function About() {
                   src={IMG.aboutIntro}
                   alt="HASTON garments and materials"
                   loading="lazy"
-                  className="aspect-[4/5] w-full object-cover"
+                  className="aspect-[4/3] w-full object-cover md:aspect-[5/4]"
                 />
               </div>
             </Reveal>
           </div>
         </div>
       </section>
+
 
       {/* Our Story */}
       <Split eyebrow="Our story" title="It began with a simple frustration." image={IMG.aboutOrigin}>
