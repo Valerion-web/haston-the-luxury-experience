@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { JOURNAL, getArticle } from "@/lib/haston-data";
+import { IMG, JOURNAL, getArticle } from "@/lib/haston-data";
 import { Reveal, SplitHeading } from "@/components/ui-haston/Reveal";
 
 export const Route = createFileRoute("/journal/$slug")({
@@ -24,6 +24,15 @@ export const Route = createFileRoute("/journal/$slug")({
   },
   component: Article,
 });
+
+const EDITORIAL = [
+  { src: IMG.fabricLinen, alt: "Close detail of linen weave", caption: "Fabric — linen, close up" },
+  { src: IMG.aboutCraft, alt: "Hand finishing a garment", caption: "Craft — hand finishing" },
+  { src: IMG.aboutPeople, alt: "Man in HASTON casualwear", caption: "The HASTON wearer" },
+  { src: IMG.fabricKnit, alt: "Fine merino knit detail", caption: "Fabric — fine knit" },
+  { src: IMG.aboutPromise, alt: "Everyday city wear", caption: "Everyday — worn in" },
+  { src: IMG.fabricCotton, alt: "Cotton twill detail", caption: "Fabric — cotton twill" },
+];
 
 function Article() {
   const { article } = Route.useLoaderData() as { article: NonNullable<ReturnType<typeof getArticle>> };
