@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { JOURNAL, getArticle } from "@/lib/haston-data";
+import { IMG, JOURNAL, getArticle } from "@/lib/haston-data";
 import { Reveal, SplitHeading } from "@/components/ui-haston/Reveal";
 
 export const Route = createFileRoute("/journal/$slug")({
@@ -24,6 +24,15 @@ export const Route = createFileRoute("/journal/$slug")({
   },
   component: Article,
 });
+
+const EDITORIAL = [
+  { src: IMG.fabricLinen, alt: "Close detail of linen weave", caption: "Fabric — linen, close up" },
+  { src: IMG.aboutCraft, alt: "Hand finishing a garment", caption: "Craft — hand finishing" },
+  { src: IMG.aboutPeople, alt: "Man in HASTON casualwear", caption: "The HASTON wearer" },
+  { src: IMG.fabricKnit, alt: "Fine merino knit detail", caption: "Fabric — fine knit" },
+  { src: IMG.aboutPromise, alt: "Everyday city wear", caption: "Everyday — worn in" },
+  { src: IMG.fabricCotton, alt: "Cotton twill detail", caption: "Fabric — cotton twill" },
+];
 
 function Article() {
   const { article } = Route.useLoaderData() as { article: NonNullable<ReturnType<typeof getArticle>> };
@@ -64,30 +73,64 @@ function Article() {
       </section>
 
       {/* Body */}
-      <article className="mx-auto max-w-[720px] px-6 py-9 md:py-12">
+      <article className="mx-auto max-w-[1080px] px-6 py-9 md:py-12">
         <Reveal>
-          <p className="text-[15px] leading-[1.75] text-foreground md:text-[17px]">
+          <p className="mx-auto max-w-[760px] text-[15.5px] leading-[1.75] text-foreground md:text-[17.5px]">
             {article.intro}
           </p>
         </Reveal>
 
-        {article.sections.map((s, i) => (
-          <Reveal key={i} delay={0.05}>
-            <section className="mt-9">
-              <div className="flex items-center gap-3">
-                <span className="h-px w-8 bg-sand" />
-                <h2 className="text-display text-lg leading-tight md:text-xl">{s.heading}</h2>
-              </div>
-              <div className="mt-4 space-y-4">
-                {s.paragraphs.map((p, k) => (
-                  <p key={k} className="text-[14px] leading-[1.8] text-muted-foreground md:text-[15.5px]">
-                    {p}
-                  </p>
-                ))}
+        {article.sections.map((s, i) => {
+          const img = EDITORIAL[i % EDITORIAL.length];
+          const flip = i % 2 === 1;
+          return (
+            <section key={i} className="mt-10 md:mt-12">
+              <div
+                className={`grid grid-cols-1 items-start gap-6 md:grid-cols-12 md:gap-10 ${
+                  flip ? "" : ""
+                }`}
+              >
+                <motion.figure
+                  initial={{ opacity: 0, y: 28, scale: 1.02 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                  className={`md:col-span-4 ${flip ? "md:order-2" : "md:order-1"}`}
+                >
+                  <div className="overflow-hidden rounded-md luxe-shadow">
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-[1600ms] hover:scale-[1.04] md:aspect-[3/4]"
+                    />
+                  </div>
+                  <figcaption className="mt-2.5 text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
+                    {img.caption}
+                  </figcaption>
+                </motion.figure>
+
+                <Reveal delay={0.08} className={`md:col-span-8 ${flip ? "md:order-1" : "md:order-2"}`}>
+                  <div className="flex items-center gap-3">
+                    <span className="h-px w-8 bg-sand" />
+                    <h2 className="text-display text-lg leading-tight md:text-xl">{s.heading}</h2>
+                  </div>
+                  <div className="mt-4 space-y-4">
+                    {s.paragraphs.map((p, k) => (
+                      <p
+                        key={k}
+                        className="text-[14px] leading-[1.8] text-muted-foreground md:text-[15.5px]"
+                      >
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+                </Reveal>
               </div>
             </section>
-          </Reveal>
-        ))}
+          );
+        })}
+
 
         <Reveal>
           <blockquote className="mt-10 hairline border-l-0 pt-8">
