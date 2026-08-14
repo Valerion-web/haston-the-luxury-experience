@@ -5,7 +5,6 @@ import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
 import logoFull from "@/assets/haston-logo-mark.png.asset.json";
-import logoMark from "@/assets/haston-h.png.asset.json";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },

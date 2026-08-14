@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Youtube, Facebook, ShieldCheck, Truck, RotateCcw, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import logoMark from "@/assets/haston-h.png.asset.json";
 
 const columns = [
   {
@@ -75,7 +76,17 @@ export function Footer() {
           className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[1.3fr_1fr_1fr_1fr]"
         >
           <div>
-            <p className="text-display text-lg uppercase tracking-[0.28em]">HASTON</p>
+            <div className="flex items-center gap-3">
+              <img
+                src={logoMark.url}
+                alt="HASTON"
+                width={537}
+                height={702}
+                loading="lazy"
+                className="h-8 w-auto object-contain md:h-9"
+              />
+              <p className="text-display text-lg uppercase tracking-[0.28em]">HASTON</p>
+            </div>
             <p className="mt-2 text-[7.5px] uppercase tracking-[0.22em] opacity-70">
               by House of Valerion
             </p>
