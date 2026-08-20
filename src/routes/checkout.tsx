@@ -1,9 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, CreditCard, Truck, User, Lock } from "lucide-react";
-import { PRODUCTS, inr } from "@/lib/haston-data";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Lock, ShieldCheck, ArrowLeft } from "lucide-react";
+import { inr } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import {
+  EMPTY_DETAILS,
+  INDIAN_STATES,
+  getCheckoutItems,
+  getDetails,
+  getTotals,
+  saveDetails,
+  validateDetails,
+  type CheckoutDetails,
+  type DetailErrors,
+} from "@/lib/checkout";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -15,189 +26,198 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
 });
 
-const STEPS = [
-  { key: "info", label: "Information", icon: User },
-  { key: "ship", label: "Shipping", icon: Truck },
-  { key: "pay", label: "Payment", icon: CreditCard },
-];
-
 function Checkout() {
-  const [step, setStep] = useState(0);
-  const items = [PRODUCTS[0], PRODUCTS[2]];
-  const total = items.reduce((s, p) => s + p.price, 0);
+  const navigate = useNavigate();
+  const items = useMemo(() => getCheckoutItems(), []);
+  const totals = useMemo(() => getTotals(items), [items]);
+  const [form, setForm] = useState<CheckoutDetails>(() => getDetails() ?? EMPTY_DETAILS);
+  const [errors, setErrors] = useState<DetailErrors>({});
+
+  const set = (k: keyof CheckoutDetails) => (v: string) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: undefined }));
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const found = validateDetails(form);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+    saveDetails(form);
+    // No order is created here — the order exists only after payment succeeds.
+    navigate({ to: "/payment" });
+  };
 
   return (
-    <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
-      <Link to="/" className="text-display text-xl tracking-[0.3em]">
-        HASTON
-      </Link>
-
-      <div className="mt-6 grid gap-7 lg:grid-cols-[1fr_440px]">
+    <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          {/* Progress */}
-          <div className="mb-6 flex items-center gap-4">
-            {STEPS.map((s, i) => (
-              <div key={s.key} className="flex flex-1 items-center gap-3">
-                <div
-                  className={`grid h-10 w-10 place-items-center rounded-full border transition-all ${i <= step ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}
-                >
-                  {i < step ? <Check className="h-4 w-4" /> : <s.icon className="h-4 w-4" />}
-                </div>
-                <span
-                  className={`hidden text-[11px] uppercase tracking-[0.28em] md:inline ${i <= step ? "text-foreground" : "text-muted-foreground"}`}
-                >
-                  {s.label}
-                </span>
-                {i < STEPS.length - 1 && (
-                  <div
-                    className={`ml-2 h-px flex-1 transition-colors ${i < step ? "bg-primary" : "bg-border"}`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-6"
-            >
-              {step === 0 && (
-                <>
-                  <h2 className="text-display text-3xl">Contact & delivery</h2>
-                  <Field label="Email" placeholder="your@email.com" />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="First name" />
-                    <Field label="Last name" />
-                  </div>
-                  <Field label="Address" />
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <Field label="City" />
-                    <Field label="Postal code" />
-                    <Field label="Country" />
-                  </div>
-                </>
-              )}
-              {step === 1 && (
-                <>
-                  <h2 className="text-display text-3xl">Shipping method</h2>
-                  {[
-                    { title: "Standard", body: "5–7 business days", price: "Complimentary" },
-                    { title: "Express", body: "2–3 business days", price: inr(18) },
-                    { title: "White-glove", body: "Next-day, hand-delivered", price: inr(45) },
-                  ].map((s, i) => (
-                    <label
-                      key={i}
-                      className="flex cursor-pointer items-center justify-between gap-4 rounded-md border border-border p-5 transition-colors hover:border-primary"
-                    >
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="radio"
-                          name="ship"
-                          defaultChecked={i === 0}
-                          className="accent-primary"
-                        />
-                        <div>
-                          <p className="text-sm font-medium">{s.title}</p>
-                          <p className="text-xs text-muted-foreground">{s.body}</p>
-                        </div>
-                      </div>
-                      <span className="text-sm">{s.price}</span>
-                    </label>
-                  ))}
-                </>
-              )}
-              {step === 2 && (
-                <>
-                  <h2 className="text-display text-3xl">Payment</h2>
-                  <Field label="Card number" placeholder="1234 5678 9012 3456" />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Expiration" placeholder="MM / YY" />
-                    <Field label="CVC" placeholder="123" />
-                  </div>
-                  <Field label="Name on card" />
-                  <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                    <Lock className="h-3.5 w-3.5" /> Encrypted with 256-bit SSL
-                  </p>
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-6 flex items-center justify-between">
-            <button
-              onClick={() => setStep(Math.max(0, step - 1))}
-              disabled={step === 0}
-              className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground disabled:opacity-30"
-            >
-              ← Back
-            </button>
-            {step < 2 ? (
-              <LuxeButton onClick={() => setStep(step + 1)} arrow>
-                Continue
-              </LuxeButton>
-            ) : (
-              <LuxeButton onClick={() => alert("Order placed")} arrow>
-                Place order — {inr(total)}
-              </LuxeButton>
-            )}
-          </div>
+          <p className="text-eyebrow">Step 1 of 2 — Details</p>
+          <h1 className="text-display mt-2 text-3xl md:text-4xl">Checkout</h1>
         </div>
-
-        <aside className="md:sticky md:top-16 md:self-start">
-          <div className="rounded-md border border-border bg-card p-8 soft-shadow">
-            <p className="text-eyebrow">Order summary</p>
-            <div className="mt-6 space-y-4">
-              {items.map((p) => (
-                <div key={p.id} className="flex gap-4">
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className="h-20 w-16 shrink-0 rounded object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm">{p.name}</p>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                      Qty 1
-                    </p>
-                  </div>
-                  <p className="text-sm">{inr(p.price)}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 hairline pt-6 space-y-2 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Subtotal</span>
-                <span className="text-foreground">{inr(total)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Shipping</span>
-                <span className="text-foreground">Complimentary</span>
-              </div>
-              <div className="mt-3 flex justify-between hairline pt-3 text-lg">
-                <span className="text-display">Total</span>
-                <span className="font-medium">{inr(total)}</span>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <Link
+          to="/cart"
+          className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to bag
+        </Link>
       </div>
+
+      {items.length === 0 ? (
+        <div className="grid place-items-center py-16 text-center">
+          <p className="text-display text-2xl">Your bag is empty.</p>
+          <LuxeButton to="/collections" className="mt-8" arrow>
+            Continue shopping
+          </LuxeButton>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_440px]">
+          <form onSubmit={submit} noValidate className="space-y-6">
+            <div className="rounded-md border border-border bg-card p-6 md:p-8 soft-shadow">
+              <p className="text-eyebrow">Contact</p>
+              <div className="mt-6 space-y-5">
+                <Field
+                  label="Full name"
+                  value={form.fullName}
+                  onChange={set("fullName")}
+                  error={errors.fullName}
+                  autoComplete="name"
+                />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field
+                    label="Email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={form.email}
+                    onChange={set("email")}
+                    error={errors.email}
+                    autoComplete="email"
+                  />
+                  <Field
+                    label="Phone number"
+                    type="tel"
+                    placeholder="98765 43210"
+                    value={form.phone}
+                    onChange={set("phone")}
+                    error={errors.phone}
+                    autoComplete="tel"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-card p-6 md:p-8 soft-shadow">
+              <p className="text-eyebrow">Delivery address</p>
+              <div className="mt-6 space-y-5">
+                <Field
+                  label="Address"
+                  placeholder="House / flat, street, area"
+                  value={form.address}
+                  onChange={set("address")}
+                  error={errors.address}
+                  autoComplete="street-address"
+                />
+                <div className="grid gap-5 sm:grid-cols-3">
+                  <Field
+                    label="City"
+                    value={form.city}
+                    onChange={set("city")}
+                    error={errors.city}
+                    autoComplete="address-level2"
+                  />
+                  <label className="block">
+                    <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                      State
+                    </span>
+                    <select
+                      value={form.state}
+                      onChange={(e) => set("state")(e.target.value)}
+                      className={`mt-2 block w-full rounded-md border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none ${errors.state ? "border-destructive" : "border-border"}`}
+                    >
+                      <option value="">Select</option>
+                      {INDIAN_STATES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.state && (
+                      <span className="mt-1.5 block text-[10px] uppercase tracking-[0.2em] text-destructive">
+                        {errors.state}
+                      </span>
+                    )}
+                  </label>
+                  <Field
+                    label="Pincode"
+                    inputMode="numeric"
+                    value={form.pincode}
+                    onChange={(v) => set("pincode")(v.replace(/\D/g, "").slice(0, 6))}
+                    error={errors.pincode}
+                    autoComplete="postal-code"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                <ShieldCheck className="h-4 w-4" /> Details are used only for this delivery
+              </p>
+              <LuxeButton type="submit" onClick={() => {}} arrow>
+                Continue to payment
+              </LuxeButton>
+            </div>
+          </form>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <OrderSummary items={items} totals={totals} />
+            <p className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" /> You will not be charged {inr(totals.total)} until
+              payment
+            </p>
+          </aside>
+        </div>
+      )}
     </section>
   );
 }
 
-function Field({ label, placeholder }: { label: string; placeholder?: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  error,
+  placeholder,
+  type = "text",
+  inputMode,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  placeholder?: string;
+  type?: string;
+  inputMode?: "numeric" | "text" | "tel";
+  autoComplete?: string;
+}) {
   return (
     <label className="block">
       <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{label}</span>
       <input
+        type={type}
+        value={value}
         placeholder={placeholder}
-        className="mt-2 block w-full rounded-md border border-border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none"
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        onChange={(e) => onChange(e.target.value)}
+        className={`mt-2 block w-full rounded-md border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none ${error ? "border-destructive" : "border-border"}`}
       />
+      {error && (
+        <span className="mt-1.5 block text-[10px] uppercase tracking-[0.2em] text-destructive">
+          {error}
+        </span>
+      )}
     </label>
   );
 }
