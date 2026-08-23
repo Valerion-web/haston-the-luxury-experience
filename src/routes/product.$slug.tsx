@@ -16,6 +16,11 @@ import {
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
+import { hastonApi } from "@/lib/haston-api";
+import { useHastonSession } from "@/hooks/use-haston-session";
+import { useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/lib/api-client";
+import { clearSession } from "@/lib/haston-session";
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
@@ -28,22 +33,34 @@ export const Route = createFileRoute("/product/$slug")({
       ].filter((m) => m.content !== ""),
     };
   },
-  loader: ({ params }) => {
-    const product = getProduct(params.slug);
-    if (!product) throw notFound();
-    return { product };
+  loader: async ({ params }) => {
+    try {
+      return { product: await hastonApi.productBySlug(params.slug) };
+    } catch {
+      const product = getProduct(params.slug);
+      if (!product) throw notFound();
+      return { product };
+    }
   },
   component: PDP,
 });
 
 function PDP() {
-  const { product } = Route.useLoaderData() as { product: NonNullable<ReturnType<typeof getProduct>> };
+  const { product } = Route.useLoaderData() as {
+    product: NonNullable<ReturnType<typeof getProduct>>;
+  };
   const [imgIdx, setImgIdx] = useState(0);
   const [color, setColor] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [wished, setWished] = useState(false);
   const [open, setOpen] = useState<string | null>("details");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const session = useHastonSession();
+  const queryClient = useQueryClient();
+  const selectedVariant = product.variants?.find(
+    (variant) => variant.color === product.colors[color]?.name && variant.size === size,
+  );
 
   const gallery = [product.image, product.hoverImage, product.image, product.hoverImage];
   const related = Array.from(
@@ -122,7 +139,6 @@ function PDP() {
               </div>
             </motion.div>
           </div>
-
 
           {/* Sticky purchase panel */}
           <div className="md:sticky md:top-32 md:self-start">
@@ -224,12 +240,52 @@ function PDP() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3">
-              <LuxeButton variant="solid" className="w-full">
-                <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag — {inr(product.price * qty)}
+              <LuxeButton
+                variant="solid"
+                className="w-full"
+                onClick={async () => {
+                  setActionError(null);
+                  if (!session) {
+                    setActionError("Please sign in to add items to your bag.");
+                    return;
+                  }
+                  if (!size) {
+                    setActionError("Please select a size before adding this piece to your bag.");
+                    return;
+                  }
+                  if (!selectedVariant) {
+                    setActionError("This color and size combination is unavailable.");
+                    return;
+                  }
+                  try {
+                    await hastonApi.addCartItem(Number(product.id), qty, selectedVariant.id);
+                    await queryClient.invalidateQueries({ queryKey: ["haston", "cart"] });
+                    setActionError("Added to your bag");
+                  } catch (error) {
+                    if (error instanceof ApiError && error.status === 401) {
+                      clearSession();
+                      setActionError("Please sign in to add items to your bag.");
+                      return;
+                    }
+                    setActionError(
+                      error instanceof Error
+                        ? error.message
+                        : "Unable to add this piece to your bag",
+                    );
+                  }
+                }}
+              >
+                <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag —{" "}
+                {inr(product.price * qty)}
               </LuxeButton>
               <LuxeButton variant="outline" className="w-full">
                 Buy it now
               </LuxeButton>
+              {actionError && (
+                <p role="status" className="mt-3 text-xs text-destructive">
+                  {actionError}
+                </p>
+              )}
             </div>
 
             <div className="mt-8 space-y-3 hairline pt-6 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
@@ -351,7 +407,6 @@ function PDP() {
           ))}
         </div>
       </section>
-
     </>
   );
 }

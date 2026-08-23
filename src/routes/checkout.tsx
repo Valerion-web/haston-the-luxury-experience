@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, CreditCard, Truck, User, Lock } from "lucide-react";
+import { Check, Truck, User } from "lucide-react";
 import { PRODUCTS, inr } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
+import { saveCheckoutDraft } from "@/lib/mock-commerce";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -18,13 +19,27 @@ export const Route = createFileRoute("/checkout")({
 const STEPS = [
   { key: "info", label: "Information", icon: User },
   { key: "ship", label: "Shipping", icon: Truck },
-  { key: "pay", label: "Payment", icon: CreditCard },
 ];
 
 function Checkout() {
   const [step, setStep] = useState(0);
-  const items = [PRODUCTS[0], PRODUCTS[2]];
-  const total = items.reduce((s, p) => s + p.price, 0);
+  const [details, setDetails] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof details, string>>>({});
+  const items = [
+    { product: PRODUCTS[0], quantity: 1, size: "M", color: "Navy" },
+    { product: PRODUCTS[2], quantity: 2, size: "L", color: "Olive" },
+  ];
+  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const shipping = subtotal > 180 ? 0 : 12;
+  const total = subtotal + shipping;
 
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
@@ -69,16 +84,52 @@ function Checkout() {
               {step === 0 && (
                 <>
                   <h2 className="text-display text-3xl">Contact & delivery</h2>
-                  <Field label="Email" placeholder="your@email.com" />
+                  <Field
+                    label="Email"
+                    placeholder="your@email.com"
+                    value={details.email}
+                    error={errors.email}
+                    onChange={(value) => setDetails({ ...details, email: value })}
+                  />
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="First name" />
-                    <Field label="Last name" />
+                    <Field
+                      label="First name"
+                      value={details.firstName}
+                      error={errors.firstName}
+                      onChange={(value) => setDetails({ ...details, firstName: value })}
+                    />
+                    <Field
+                      label="Last name"
+                      value={details.lastName}
+                      error={errors.lastName}
+                      onChange={(value) => setDetails({ ...details, lastName: value })}
+                    />
                   </div>
-                  <Field label="Address" />
+                  <Field
+                    label="Address"
+                    value={details.address}
+                    error={errors.address}
+                    onChange={(value) => setDetails({ ...details, address: value })}
+                  />
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <Field label="City" />
-                    <Field label="Postal code" />
-                    <Field label="Country" />
+                    <Field
+                      label="City"
+                      value={details.city}
+                      error={errors.city}
+                      onChange={(value) => setDetails({ ...details, city: value })}
+                    />
+                    <Field
+                      label="Postal code"
+                      value={details.postalCode}
+                      error={errors.postalCode}
+                      onChange={(value) => setDetails({ ...details, postalCode: value })}
+                    />
+                    <Field
+                      label="Country"
+                      value={details.country}
+                      error={errors.country}
+                      onChange={(value) => setDetails({ ...details, country: value })}
+                    />
                   </div>
                 </>
               )}
@@ -111,20 +162,6 @@ function Checkout() {
                   ))}
                 </>
               )}
-              {step === 2 && (
-                <>
-                  <h2 className="text-display text-3xl">Payment</h2>
-                  <Field label="Card number" placeholder="1234 5678 9012 3456" />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Expiration" placeholder="MM / YY" />
-                    <Field label="CVC" placeholder="123" />
-                  </div>
-                  <Field label="Name on card" />
-                  <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                    <Lock className="h-3.5 w-3.5" /> Encrypted with 256-bit SSL
-                  </p>
-                </>
-              )}
             </motion.div>
           </AnimatePresence>
 
@@ -136,13 +173,36 @@ function Checkout() {
             >
               ← Back
             </button>
-            {step < 2 ? (
-              <LuxeButton onClick={() => setStep(step + 1)} arrow>
+            {step < 1 ? (
+              <LuxeButton
+                onClick={() => {
+                  const nextErrors = validateDetails(details);
+                  setErrors(nextErrors);
+                  if (Object.keys(nextErrors).length === 0) setStep(1);
+                }}
+                arrow
+              >
                 Continue
               </LuxeButton>
             ) : (
-              <LuxeButton onClick={() => alert("Order placed")} arrow>
-                Place order — {inr(total)}
+              <LuxeButton
+                onClick={() => {
+                  const nextErrors = validateDetails(details);
+                  setErrors(nextErrors);
+                  if (Object.keys(nextErrors).length > 0) return;
+                  saveCheckoutDraft({
+                    items,
+                    subtotal,
+                    shipping,
+                    total,
+                    paymentMethod: "upi",
+                    shippingAddress: details,
+                  });
+                  window.location.assign("/payment");
+                }}
+                arrow
+              >
+                Continue to payment
               </LuxeButton>
             )}
           </div>
@@ -152,31 +212,33 @@ function Checkout() {
           <div className="rounded-md border border-border bg-card p-8 soft-shadow">
             <p className="text-eyebrow">Order summary</p>
             <div className="mt-6 space-y-4">
-              {items.map((p) => (
-                <div key={p.id} className="flex gap-4">
+              {items.map(({ product, quantity, color, size }) => (
+                <div key={product.id} className="flex gap-4">
                   <img
-                    src={p.image}
-                    alt={p.name}
+                    src={product.image}
+                    alt={product.name}
                     className="h-20 w-16 shrink-0 rounded object-cover"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm">{p.name}</p>
+                    <p className="truncate text-sm">{product.name}</p>
                     <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                      Qty 1
+                      {color} · Size {size} · Qty {quantity}
                     </p>
                   </div>
-                  <p className="text-sm">{inr(p.price)}</p>
+                  <p className="text-sm">{inr(product.price * quantity)}</p>
                 </div>
               ))}
             </div>
             <div className="mt-6 hairline pt-6 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span className="text-foreground">{inr(total)}</span>
+                <span className="text-foreground">{inr(subtotal)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping</span>
-                <span className="text-foreground">Complimentary</span>
+                <span className="text-foreground">
+                  {shipping === 0 ? "Complimentary" : inr(shipping)}
+                </span>
               </div>
               <div className="mt-3 flex justify-between hairline pt-3 text-lg">
                 <span className="text-display">Total</span>
@@ -190,14 +252,44 @@ function Checkout() {
   );
 }
 
-function Field({ label, placeholder }: { label: string; placeholder?: string }) {
+function Field({
+  label,
+  placeholder,
+  value,
+  error,
+  onChange,
+}: {
+  label: string;
+  placeholder?: string;
+  value: string;
+  error?: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="block">
       <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{label}</span>
       <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-invalid={Boolean(error)}
         placeholder={placeholder}
-        className="mt-2 block w-full rounded-md border border-border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none"
+        className={`mt-2 block w-full rounded-md border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none ${error ? "border-destructive" : "border-border"}`}
       />
+      {error && <span className="mt-1 block text-xs text-destructive">{error}</span>}
     </label>
   );
+}
+
+function validateDetails(details: Record<string, string>) {
+  const errors: Partial<Record<keyof typeof details, string>> = {};
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email.trim()))
+    errors.email = "Enter a valid email address.";
+  if (!details.firstName.trim()) errors.firstName = "First name is required.";
+  if (!details.lastName.trim()) errors.lastName = "Last name is required.";
+  if (!details.address.trim()) errors.address = "Address is required.";
+  if (!details.city.trim()) errors.city = "City is required.";
+  if (!/^\d{5,6}(-\d{4})?$/.test(details.postalCode.trim()))
+    errors.postalCode = "Enter a valid postal code.";
+  if (!details.country.trim()) errors.country = "Country is required.";
+  return errors;
 }

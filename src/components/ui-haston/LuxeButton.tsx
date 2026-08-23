@@ -21,6 +21,7 @@ type Props = {
   className?: string;
   arrow?: boolean;
   type?: "button" | "submit";
+  disabled?: boolean;
 };
 
 export function LuxeButton({
@@ -31,6 +32,7 @@ export function LuxeButton({
   className = "",
   arrow,
   type = "button",
+  disabled = false,
 }: Props) {
   const cls = `group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-[9px] uppercase tracking-[0.24em] transition-all duration-500 hover:-translate-y-[1px] ${styles[variant]} ${className}`;
   const inner = (
@@ -49,7 +51,12 @@ export function LuxeButton({
       </Link>
     );
   return (
-    <button type={type} onClick={onClick} className={cls}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${cls} disabled:cursor-wait disabled:opacity-60`}
+    >
       {inner}
     </button>
   );

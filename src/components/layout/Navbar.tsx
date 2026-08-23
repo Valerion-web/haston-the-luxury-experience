@@ -5,6 +5,9 @@ import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
 import logoFull from "@/assets/haston-logo.png";
+import { useQuery } from "@tanstack/react-query";
+import { hastonApi } from "@/lib/haston-api";
+import { useHastonSession } from "@/hooks/use-haston-session";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -27,6 +30,12 @@ export function Navbar() {
   const [hoverMega, setHoverMega] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const session = useHastonSession();
+  const { data: cart } = useQuery({
+    queryKey: ["haston", "cart"],
+    queryFn: hastonApi.cart,
+    enabled: Boolean(session),
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -96,10 +105,13 @@ export function Navbar() {
           })}
         </nav>
 
-
         {/* Icons — right */}
         <div className="ml-auto flex items-center gap-4 md:gap-5">
-          <button aria-label="Search" onClick={() => setSearchOpen(true)} className="hover:opacity-60">
+          <button
+            aria-label="Search"
+            onClick={() => setSearchOpen(true)}
+            className="hover:opacity-60"
+          >
             <Search className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </button>
           <Link to="/wishlist" aria-label="Wishlist" className="hover:opacity-60">
@@ -111,7 +123,7 @@ export function Navbar() {
           <Link to="/cart" aria-label="Cart" className="relative hover:opacity-60">
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.6} />
             <span className="absolute -right-2 -top-2 flex h-[16px] w-[16px] items-center justify-center rounded-full bg-accent text-[8px] text-accent-foreground">
-              2
+              {cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0}
             </span>
           </Link>
         </div>
@@ -216,7 +228,11 @@ export function Navbar() {
                 <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Wishlist
                 </Link>
-                <Link to="/order-tracking" onClick={() => setMenuOpen(false)} className="block py-1.5">
+                <Link
+                  to="/order-tracking"
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-1.5"
+                >
                   Track Order
                 </Link>
                 <Link to="/support" onClick={() => setMenuOpen(false)} className="block py-1.5">

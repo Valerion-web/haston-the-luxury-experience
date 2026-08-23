@@ -92,6 +92,13 @@ export type Product = {
   isNew?: boolean;
   isBestseller?: boolean;
   description: string;
+  variants?: {
+    id: number;
+    sku?: string;
+    size?: string | null;
+    color?: string | null;
+    quantityOnHand?: number;
+  }[];
 };
 
 export const CATEGORIES = [
@@ -434,13 +441,11 @@ export const JOURNAL: JournalArticle[] = [
       },
     ],
     pullQuote: "If it does not feel right, it does not go further.",
-    closing:
-      "Material is where quality begins and where it is judged. We start there, every time.",
+    closing: "Material is where quality begins and where it is judged. We start there, every time.",
   },
 ];
 
 export const getArticle = (slug: string) => JOURNAL.find((j) => j.slug === slug);
-
 
 /** Currency: display all prices in Indian Rupees. */
 export const INR_RATE = 85;

@@ -7,6 +7,9 @@ import { X, Plus, Minus, ShieldCheck, Tag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { hastonApi } from "@/lib/haston-api";
+import { useHastonSession } from "@/hooks/use-haston-session";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -18,18 +21,30 @@ export const Route = createFileRoute("/cart")({
 type Line = { id: string; qty: number; size: string; color: string };
 
 function Cart() {
+  const session = useHastonSession();
+  const queryClient = useQueryClient();
+  const { data: remoteCart } = useQuery({
+    queryKey: ["haston", "cart"],
+    queryFn: hastonApi.cart,
+    enabled: Boolean(session),
+  });
   const [lines, setLines] = useState<Line[]>([
     { id: "1", qty: 1, size: "M", color: "Navy" },
     { id: "3", qty: 2, size: "L", color: "Olive" },
   ]);
   const [promo, setPromo] = useState("");
   const [applied, setApplied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const items = lines.map((l) => ({ ...l, product: PRODUCTS.find((p) => p.id === l.id)! }));
-  const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0);
+  const localItems = lines.map((l) => ({ ...l, product: PRODUCTS.find((p) => p.id === l.id)! }));
+  const items = session ? remoteCart?.items || [] : localItems;
+  const subtotal = session
+    ? items.reduce((s, i) => s + i.lineTotal, 0)
+    : items.reduce((s, i) => s + i.product.price * i.qty, 0);
   const discount = applied ? Math.round(subtotal * 0.1) : 0;
   const shipping = subtotal > 180 ? 0 : 12;
   const total = subtotal - discount + shipping;
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["haston", "cart"] });
 
   return (
     <>
@@ -54,72 +69,95 @@ function Cart() {
                 </div>
               </div>
               <AnimatePresence initial={false}>
-                {items.map(({ product, qty, size, color, id }) => (
-                  <motion.div
-                    key={id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -40 }}
-                    className="grid grid-cols-[100px_1fr_auto] items-center gap-4 border-b border-border py-6 md:grid-cols-[120px_1fr_120px_80px]"
-                  >
-                    <Link
-                      to="/product/$slug"
-                      params={{ slug: product.slug }}
-                      className="block overflow-hidden rounded"
+                {items.map((item) => {
+                  const product = item.product;
+                  const quantity = session ? item.quantity : item.qty;
+                  const variant = session ? item.variant : { color: item.color, size: item.size };
+                  const lineTotal = session ? item.lineTotal : product.price * quantity;
+                  return (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      className="grid grid-cols-[100px_1fr_auto] items-center gap-4 border-b border-border py-6 md:grid-cols-[120px_1fr_120px_80px]"
                     >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="aspect-[4/5] w-full object-cover"
-                      />
-                    </Link>
-                    <div className="min-w-0">
                       <Link
                         to="/product/$slug"
                         params={{ slug: product.slug }}
-                        className="text-display text-lg"
+                        className="block overflow-hidden rounded"
                       >
-                        {product.name}
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="aspect-[4/5] w-full object-cover"
+                        />
                       </Link>
-                      <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                        {color} · Size {size}
-                      </p>
-                      <button
-                        onClick={() => setLines((ls) => ls.filter((l) => l.id !== id))}
-                        className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground transition-colors hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" /> Remove
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-1 justify-self-center rounded-full border border-border p-1">
-                      <button
-                        onClick={() =>
-                          setLines((ls) =>
-                            ls.map((l) =>
-                              l.id === id ? { ...l, qty: Math.max(1, l.qty - 1) } : l,
-                            ),
-                          )
-                        }
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="w-7 text-center text-sm">{qty}</span>
-                      <button
-                        onClick={() =>
-                          setLines((ls) =>
-                            ls.map((l) => (l.id === id ? { ...l, qty: l.qty + 1 } : l)),
-                          )
-                        }
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                    </div>
-                    <p className="text-right text-sm font-medium">{inr(product.price * qty)}</p>
-                  </motion.div>
-                ))}
+                      <div className="min-w-0">
+                        <Link
+                          to="/product/$slug"
+                          params={{ slug: product.slug }}
+                          className="text-display text-lg"
+                        >
+                          {product.name}
+                        </Link>
+                        <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                          {variant?.color || "Selected"} · Size {variant?.size || "Standard"}
+                        </p>
+                        <button
+                          onClick={() =>
+                            session
+                              ? hastonApi
+                                  .removeCartItem(item.id)
+                                  .then(refresh)
+                                  .catch((e) => setError(e.message))
+                              : setLines((ls) => ls.filter((l) => l.id !== item.id))
+                          }
+                          className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground transition-colors hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" /> Remove
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1 justify-self-center rounded-full border border-border p-1">
+                        <button
+                          onClick={() =>
+                            session
+                              ? hastonApi
+                                  .updateCartItem(item.id, Math.max(1, quantity - 1))
+                                  .then(refresh)
+                                  .catch((e) => setError(e.message))
+                              : setLines((ls) =>
+                                  ls.map((l) =>
+                                    l.id === item.id ? { ...l, qty: Math.max(1, l.qty - 1) } : l,
+                                  ),
+                                )
+                          }
+                          className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="w-7 text-center text-sm">{quantity}</span>
+                        <button
+                          onClick={() =>
+                            session
+                              ? hastonApi
+                                  .updateCartItem(item.id, quantity + 1)
+                                  .then(refresh)
+                                  .catch((e) => setError(e.message))
+                              : setLines((ls) =>
+                                  ls.map((l) => (l.id === item.id ? { ...l, qty: l.qty + 1 } : l)),
+                                )
+                          }
+                          className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <p className="text-right text-sm font-medium">{inr(lineTotal)}</p>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
 
@@ -175,6 +213,11 @@ function Cart() {
                 <p className="mt-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
                   <ShieldCheck className="h-4 w-4" /> Secure encrypted checkout
                 </p>
+                {error && (
+                  <p role="alert" className="mt-3 text-xs text-destructive">
+                    {error}
+                  </p>
+                )}
               </div>
             </aside>
           </div>
