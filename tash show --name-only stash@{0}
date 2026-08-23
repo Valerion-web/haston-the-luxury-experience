@@ -1,0 +1,20 @@
+ src/components/home/BestSellers.tsx      |   8 [32m+[m[31m-[m
+ src/components/home/ShopByCategory.tsx   |   8 [32m+[m[31m-[m
+ src/components/layout/Navbar.tsx         |  15 [32m+[m[31m-[m
+ src/components/layout/SearchOverlay.tsx  |  23 [32m+[m[31m-[m
+ src/components/ui-haston/ProductCard.tsx |  11 [32m+[m
+ src/lib/haston-data.ts                   |   1 [32m+[m
+ src/routeTree.gen.ts                     | 458 [32m+++++++++++++++[m[31m----------------[m
+ src/routes/account.tsx                   |  69 [32m++[m[31m---[m
+ src/routes/cart.tsx                      |  51 [32m++[m[31m--[m
+ src/routes/checkout.tsx                  |  68 [32m+++[m[31m--[m
+ src/routes/collections.$slug.tsx         |  16 [32m+[m[31m-[m
+ src/routes/collections.index.tsx         |   8 [32m+[m[31m-[m
+ src/routes/login.tsx                     |  39 [32m++[m[31m-[m
+ src/routes/order-tracking.tsx            |  24 [32m+[m[31m-[m
+ src/routes/orders.tsx                    |  38 [32m+[m[31m--[m
+ src/routes/product.$slug.tsx             |  80 [32m++++[m[31m--[m
+ src/routes/register.tsx                  |  43 [32m++[m[31m-[m
+ src/routes/search.tsx                    |  10 [32m+[m[31m-[m
+ src/routes/wishlist.tsx                  |  13 [32m+[m[31m-[m
+ 19 files changed, 571 insertions(+), 412 deletions(-)
