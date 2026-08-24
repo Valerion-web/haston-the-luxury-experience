@@ -18,6 +18,7 @@ import { hastonApi } from "@/lib/haston-api";
 import { clearSession } from "@/lib/haston-session";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -183,47 +184,50 @@ function Overview() {
 }
 
 function Orders() {
-  const orders = [
-    {
-      id: "HV-10238",
-      date: "May 18, 2025",
-      total: 465,
-      status: "In transit",
-      items: [PRODUCTS[0], PRODUCTS[3]],
-    },
-    {
-      id: "HV-09918",
-      date: "March 02, 2025",
-      total: 210,
-      status: "Delivered",
-      items: [PRODUCTS[2]],
-    },
-    {
-      id: "HV-09721",
-      date: "January 14, 2025",
-      total: 285,
-      status: "Delivered",
-      items: [PRODUCTS[1]],
-    },
-  ];
+  const session = useHastonSession();
+  const {
+    data: orders = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["haston", "orders"],
+    queryFn: hastonApi.orders,
+    enabled: Boolean(session),
+  });
   return (
     <div>
       <h2 className="text-display text-2xl">Recent orders</h2>
+      {isLoading && <p className="mt-6 text-sm text-muted-foreground">Loading your orders...</p>}
+      {error && (
+        <p role="alert" className="mt-6 text-sm text-destructive">
+          {error instanceof Error ? error.message : "Unable to load your orders."}
+        </p>
+      )}
+      {!isLoading && !error && orders.length === 0 && (
+        <p className="mt-6 text-sm text-muted-foreground">You have no orders yet.</p>
+      )}
       <div className="mt-6 space-y-4">
         {orders.map((o) => (
-          <div key={o.id} className="rounded-md border border-border bg-card p-6 soft-shadow">
+          <Link
+            key={o.id}
+            to="/order-details/$id"
+            params={{ id: String(o.id) }}
+            className="block rounded-md border border-border bg-card p-6 soft-shadow transition-shadow hover:soft-shadow"
+          >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
                   Order
                 </p>
-                <p className="mt-1 text-display text-lg">{o.id}</p>
+                <p className="mt-1 text-display text-lg">HV-{o.id}</p>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-                  {o.date}
+                  {o.createdAt
+                    ? new Date(o.createdAt).toLocaleDateString("en-IN", { dateStyle: "long" })
+                    : "Recent order"}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm">{inr(o.total)}</p>
+                <p className="text-sm">{inr(o.totalPrice)}</p>
                 <p
                   className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.28em] ${o.status === "Delivered" ? "bg-accent/20 text-accent" : "bg-mustard/25 text-graphite"}`}
                 >
@@ -232,11 +236,16 @@ function Orders() {
               </div>
             </div>
             <div className="mt-4 flex gap-3">
-              {o.items.map((i) => (
-                <img key={i.id} src={i.image} alt="" className="h-20 w-16 rounded object-cover" />
+              {o.items.map((item) => (
+                <img
+                  key={item.id}
+                  src={item.product.image}
+                  alt={item.product.name}
+                  className="h-20 w-16 rounded object-cover"
+                />
               ))}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

@@ -34,7 +34,7 @@ function Login() {
     try {
       const response = await hastonApi.login(email.trim(), password);
       saveSession(response.token, response.user);
-      await navigate({ to: "/account", replace: true });
+      await navigate({ to: response.user.role === "ADMIN" ? "/admin" : "/account", replace: true });
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "Unable to sign in.");
       setSubmitting(false);

@@ -63,7 +63,7 @@ function OrderConfirmation() {
               <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
                 Order number
               </p>
-              <p className="mt-1 text-display text-xl">{order.orderNumber}</p>
+              <p className="mt-1 text-display text-xl">{order.order.id}</p>
             </div>
           </div>
           <div className="text-right">
@@ -72,37 +72,46 @@ function OrderConfirmation() {
           </div>
         </div>
         <div className="divide-y divide-border">
-          {order.items.map((item) => (
-            <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex gap-4 py-5">
+          {order.order.items.map((item) => (
+            <div key={item.id} className="flex gap-4 py-5">
               <img
-                src={item.product.image}
+                src={item.product.image || undefined}
                 alt={item.product.name}
                 className="h-20 w-16 rounded object-cover"
               />
               <div className="flex-1">
                 <p className="text-sm">{item.product.name}</p>
                 <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {item.color} · Size {item.size} · Qty {item.quantity}
+                  {item.variant?.color || "Selected"} · Size {item.variant?.size || "Standard"} ·
+                  Qty {item.quantity}
                 </p>
               </div>
-              <p className="text-sm">{inr(item.product.price * item.quantity)}</p>
+              <p className="text-sm">{inr(item.price * item.quantity)}</p>
             </div>
           ))}
         </div>
         <div className="space-y-2 border-t border-border pt-5 text-sm">
           <div className="flex justify-between text-muted-foreground">
             <span>Subtotal</span>
-            <span className="text-foreground">{inr(order.subtotal)}</span>
+            <span className="text-foreground">
+              {inr(order.order.items.reduce((sum, item) => sum + item.price * item.quantity, 0))}
+            </span>
           </div>
           <div className="flex justify-between text-muted-foreground">
             <span>Shipping</span>
             <span className="text-foreground">
-              {order.shipping === 0 ? "Complimentary" : inr(order.shipping)}
+              {inr(
+                Math.max(
+                  0,
+                  order.order.totalPrice -
+                    order.order.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                ),
+              )}
             </span>
           </div>
           <div className="flex justify-between pt-3 text-lg">
             <span className="text-display">Total</span>
-            <span className="font-medium">{inr(order.total)}</span>
+            <span className="font-medium">{inr(order.order.totalPrice)}</span>
           </div>
         </div>
       </div>
@@ -111,7 +120,7 @@ function OrderConfirmation() {
           Continue shopping
         </LuxeButton>
         <p className="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          This is a demo order. No real payment was processed.
+          Your order has been saved to your HASTON account.
         </p>
       </div>
     </section>

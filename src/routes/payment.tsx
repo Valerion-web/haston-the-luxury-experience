@@ -12,14 +12,16 @@ import {
 } from "lucide-react";
 import { inr } from "@/lib/haston-data";
 import {
-  createMockOrder,
   mockPaymentGateway,
   readCheckoutDraft,
+  saveConfirmedOrder,
   saveCheckoutDraft,
   type OrderDraft,
   type PaymentMethod,
 } from "@/lib/mock-commerce";
+import { hastonApi } from "@/lib/haston-api";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/payment")({
   head: () => ({
@@ -51,6 +53,7 @@ function Payment() {
   const [wallet, setWallet] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setDraft(readCheckoutDraft());
@@ -89,7 +92,18 @@ function Payment() {
         if (!result.success)
           throw new Error("The mock payment was declined. Check your details and try again.");
       }
-      await createMockOrder({ ...draft, paymentMethod: method });
+      if (!draft.shippingAddress) {
+        throw new Error("Your shipping details are missing. Please return to checkout.");
+      }
+      const order = await hastonApi.createOrder({
+        shippingAddress: draft.shippingAddress,
+        billingAddress: draft.shippingAddress,
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["haston", "cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["haston", "orders"] }),
+      ]);
+      saveConfirmedOrder(order, method);
       window.location.assign("/order-confirmation");
     } catch (submissionError) {
       setError(

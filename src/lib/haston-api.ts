@@ -7,7 +7,8 @@ export type BackendProduct = {
   name: string;
   price: number;
   description?: string | null;
-  images?: string[];
+  images?: string[] | string;
+  imagesList?: Array<{ url: string; sortOrder?: number }>;
   image?: string | null;
   hoverImage?: string | null;
   sizes?: string[];
@@ -58,8 +59,25 @@ export const mapProduct = (product: BackendProduct): Product => ({
   category:
     product.category?.slug || product.category?.name?.toLowerCase().replace(/\s+/g, "-") || "",
   price: Number(product.price),
-  image: resolveBackendAssetUrl(product.image || product.images?.[0]),
-  hoverImage: resolveBackendAssetUrl(product.hoverImage || product.images?.[1] || product.image),
+  image: resolveBackendAssetUrl(
+    product.image ||
+      product.imagesList?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))[0]?.url ||
+      (Array.isArray(product.images)
+        ? product.images[0]
+        : product.images
+          ? parseImageList(product.images)[0]
+          : undefined),
+  ),
+  hoverImage: resolveBackendAssetUrl(
+    product.hoverImage ||
+      product.imagesList?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))[1]?.url ||
+      (Array.isArray(product.images)
+        ? product.images[1]
+        : product.images
+          ? parseImageList(product.images)[1]
+          : undefined) ||
+      product.image,
+  ),
   colors: (product.colors || []).map((name) => ({ name, hex: colorHex[name] || "#888888" })),
   sizes: product.sizes || [],
   rating: 0,
@@ -69,6 +87,22 @@ export const mapProduct = (product: BackendProduct): Product => ({
   description: product.description || "",
   variants: product.variants,
 });
+const parseImageList = (value: string): string[] => {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed
+      : value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+  } catch {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+};
 export type CartItem = {
   id: number;
   product: Product;
@@ -79,6 +113,26 @@ export type CartItem = {
   availableQuantity: number;
 };
 export type CartResponse = { id: number | null; items: CartItem[] };
+export type OrderItem = {
+  id: number;
+  product: Product;
+  variant?: { id: number; size?: string | null; color?: string | null } | null;
+  quantity: number;
+  price: number;
+};
+export type OrderResponse = {
+  id: number;
+  status: string;
+  totalPrice: number;
+  currency: string;
+  shippingAddress?: string | null;
+  billingAddress?: string | null;
+  createdAt?: string;
+  items: OrderItem[];
+};
+export type AdminOrderResponse = OrderResponse & {
+  user?: { id: number; name?: string | null; email?: string | null; role?: string } | null;
+};
 type BackendCartResponse = {
   id: number | null;
   items: Array<{
@@ -91,9 +145,29 @@ type BackendCartResponse = {
     availableQuantity: number;
   }>;
 };
+type BackendOrderResponse = Omit<OrderResponse, "items"> & {
+  items: Array<Omit<OrderItem, "product"> & { product: BackendProduct }>;
+};
+type BackendAdminOrderResponse = Omit<AdminOrderResponse, "items"> & {
+  user?: AdminOrderResponse["user"];
+  items: Array<Omit<OrderItem, "product"> & { product: BackendProduct }>;
+};
 const mapCart = (cart: BackendCartResponse): CartResponse => ({
   id: cart.id,
   items: cart.items.map((item) => ({ ...item, product: mapProduct(item.product) })),
+});
+const mapOrder = (order: BackendOrderResponse): OrderResponse => ({
+  ...order,
+  totalPrice: Number(order.totalPrice),
+  items: order.items.map((item) => ({
+    ...item,
+    price: Number(item.price),
+    product: mapProduct(item.product),
+  })),
+});
+const mapAdminOrder = (order: BackendAdminOrderResponse): AdminOrderResponse => ({
+  ...mapOrder(order),
+  user: order.user,
 });
 export const hastonApi = {
   login: (email: string, password: string) =>
@@ -123,6 +197,29 @@ export const hastonApi = {
       `/categories/${encodeURIComponent(slug)}`,
     ),
   logout: () => apiRequest<{ message: string }>("/auth/logout", { method: "POST" }),
+  createOrder: (body: {
+    shippingAddress: Record<string, string>;
+    billingAddress?: Record<string, string>;
+    couponCode?: string;
+  }) =>
+    apiRequest<BackendOrderResponse>("/orders", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }).then(mapOrder),
+  orders: () =>
+    apiRequest<BackendOrderResponse[]>("/orders").then((orders) => orders.map(mapOrder)),
+  order: (id: number) => apiRequest<BackendOrderResponse>(`/orders/${id}`).then(mapOrder),
+  adminOrders: () =>
+    apiRequest<BackendAdminOrderResponse[]>("/admin/orders").then((orders) =>
+      orders.map(mapAdminOrder),
+    ),
+  adminOrder: (id: number) =>
+    apiRequest<BackendAdminOrderResponse>(`/admin/orders/${id}`).then(mapAdminOrder),
+  updateAdminOrderStatus: (id: number, status: string) =>
+    apiRequest<AdminOrderResponse>(`/admin/orders/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
   cart: () => apiRequest<BackendCartResponse>("/cart").then(mapCart),
   addCartItem: (productId: number, quantity: number, variantId?: number) =>
     apiRequest<BackendCartResponse>("/cart/items", {

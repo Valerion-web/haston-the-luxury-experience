@@ -1,4 +1,5 @@
 import type { Product } from "@/lib/haston-data";
+import type { OrderResponse } from "@/lib/haston-api";
 
 export type CheckoutItem = {
   product: Product;
@@ -18,8 +19,9 @@ export type OrderDraft = {
   shippingAddress?: Record<string, string>;
 };
 
-export type CreatedOrder = OrderDraft & {
-  orderNumber: string;
+export type CreatedOrder = {
+  order: OrderResponse;
+  paymentMethod: PaymentMethod;
 };
 
 const DRAFT_KEY = "haston_checkout_draft";
@@ -52,12 +54,9 @@ export const mockPaymentGateway = async (
   return { success: !declined, method, reference: `MOCK-${Date.now()}` };
 };
 
-export const createMockOrder = async (draft: OrderDraft): Promise<CreatedOrder> => {
-  await new Promise((resolve) => window.setTimeout(resolve, 500));
-  const order = { ...draft, orderNumber: `HV-${String(Date.now()).slice(-6)}` };
-  sessionStorage.setItem(CONFIRMED_ORDER_KEY, JSON.stringify(order));
+export const saveConfirmedOrder = (order: OrderResponse, paymentMethod: PaymentMethod) => {
+  sessionStorage.setItem(CONFIRMED_ORDER_KEY, JSON.stringify({ order, paymentMethod }));
   sessionStorage.removeItem(DRAFT_KEY);
-  return order;
 };
 
 export const readConfirmedOrder = (): CreatedOrder | null => {
