@@ -1,7 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHero } from "@/components/ui-haston/PageHero";
-import { ChevronDown, Truck, RefreshCw, Ruler, Shield, HelpCircle } from "lucide-react";
+import {
+  ChevronDown,
+  Truck,
+  RefreshCw,
+  Ruler,
+  Shield,
+  HelpCircle,
+  Mail,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/support")({
@@ -63,6 +73,26 @@ function Support() {
         breadcrumb={[{ label: "Support" }]}
       />
       <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
+        <div className="mb-10 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              icon: MessageCircle,
+              title: "Live chat",
+              body: "Speak with the client service desk.",
+            },
+            { icon: Mail, title: "Email the house", body: "care@haston.house" },
+            { icon: Phone, title: "Call the atelier", body: "+91 22 4890 1400" },
+          ].map((item) => (
+            <button
+              key={item.title}
+              className="rounded-md border border-border bg-card p-6 text-left soft-shadow transition-transform hover:-translate-y-1"
+            >
+              <item.icon className="h-5 w-5 text-accent" strokeWidth={1.4} />
+              <p className="mt-4 text-[11px] uppercase tracking-[0.24em]">{item.title}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
+            </button>
+          ))}
+        </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {topics.map((t) => (
             <motion.button
@@ -103,6 +133,37 @@ function Support() {
             ))}
           </div>
         </div>
+        <form
+          className="mx-auto mt-12 max-w-3xl border-t border-border pt-8"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <p className="text-eyebrow text-muted-foreground">Need a hand?</p>
+          <h2 className="mt-3 text-display text-2xl">Raise a ticket.</h2>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <input
+              required
+              placeholder="Your name"
+              className="border-b border-border bg-transparent px-1 py-3 text-sm focus:border-primary focus:outline-none"
+            />
+            <input
+              required
+              type="email"
+              placeholder="Email address"
+              className="border-b border-border bg-transparent px-1 py-3 text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
+          <textarea
+            required
+            placeholder="How can we help?"
+            className="mt-5 min-h-28 w-full border-b border-border bg-transparent px-1 py-3 text-sm focus:border-primary focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="mt-5 rounded-full bg-primary px-6 py-3 text-[10px] uppercase tracking-[0.24em] text-primary-foreground"
+          >
+            Send request
+          </button>
+        </form>
       </section>
     </>
   );

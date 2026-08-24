@@ -17,7 +17,11 @@ export const Route = createFileRoute("/order-tracking")({
 
 const steps = [
   { icon: Check, title: "Order placed", note: "May 18 · 10:14 CET", done: true },
+  { icon: Check, title: "Payment confirmed", note: "May 18 · 10:15 CET", done: true },
+  { icon: Package, title: "Queued for the atelier", note: "May 18 · 11:40 CET", done: true },
   { icon: Package, title: "Prepared in atelier", note: "May 19 · 09:30 CET", done: true },
+  { icon: Package, title: "Quality checked", note: "May 19 · 12:10 CET", done: true },
+  { icon: Truck, title: "Handed to courier", note: "May 20 · 09:00 CET", done: true },
   { icon: Truck, title: "In transit", note: "May 20 · 14:12 CET", done: true, active: true },
   { icon: MapPin, title: "Delivered", note: "Expected May 22", done: false },
 ];

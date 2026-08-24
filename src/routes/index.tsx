@@ -10,7 +10,7 @@ import { Lookbook } from "@/components/home/Lookbook";
 import { InstagramFeed } from "@/components/home/InstagramFeed";
 import { EditorialStrip } from "@/components/home/EditorialStrip";
 import { Newsletter } from "@/components/home/Newsletter";
-
+import { AppPromo } from "@/components/home/AppPromo";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -31,6 +31,7 @@ function Home() {
 
       <Lookbook />
       <InstagramFeed />
+      <AppPromo />
       <Newsletter />
     </>
   );

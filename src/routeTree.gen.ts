@@ -14,12 +14,17 @@ import { Route as R404RouteImport } from './routes/404'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AiFeaturesRouteImport } from './routes/ai-features'
+import { Route as CancellationPolicyRouteImport } from './routes/cancellation-policy'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
+import { Route as ExchangePolicyRouteImport } from './routes/exchange-policy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LookbookRouteImport } from './routes/lookbook'
+import { Route as LoyaltyRouteImport } from './routes/loyalty'
 import { Route as OrderConfirmationRouteImport } from './routes/order-confirmation'
 import { Route as OrderTrackingRouteImport } from './routes/order-tracking'
 import { Route as OrdersRouteImport } from './routes/orders'
@@ -69,6 +74,16 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiFeaturesRoute = AiFeaturesRouteImport.update({
+  id: '/ai-features',
+  path: '/ai-features',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CancellationPolicyRoute = CancellationPolicyRouteImport.update({
+  id: '/cancellation-policy',
+  path: '/cancellation-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CareersRoute = CareersRouteImport.update({
   id: '/careers',
   path: '/careers',
@@ -89,6 +104,16 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExchangePolicyRoute = ExchangePolicyRouteImport.update({
+  id: '/exchange-policy',
+  path: '/exchange-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -97,6 +122,11 @@ const LoginRoute = LoginRouteImport.update({
 const LookbookRoute = LookbookRouteImport.update({
   id: '/lookbook',
   path: '/lookbook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoyaltyRoute = LoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrderConfirmationRoute = OrderConfirmationRouteImport.update({
@@ -221,12 +251,17 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
+  '/ai-features': typeof AiFeaturesRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/exchange-policy': typeof ExchangePolicyRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
+  '/loyalty': typeof LoyaltyRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
@@ -257,12 +292,17 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
+  '/ai-features': typeof AiFeaturesRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/exchange-policy': typeof ExchangePolicyRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
+  '/loyalty': typeof LoyaltyRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
@@ -294,12 +334,17 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
+  '/ai-features': typeof AiFeaturesRoute
+  '/cancellation-policy': typeof CancellationPolicyRoute
   '/careers': typeof CareersRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/exchange-policy': typeof ExchangePolicyRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
+  '/loyalty': typeof LoyaltyRoute
   '/order-confirmation': typeof OrderConfirmationRoute
   '/order-tracking': typeof OrderTrackingRoute
   '/orders': typeof OrdersRoute
@@ -332,12 +377,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/admin'
+    | '/ai-features'
+    | '/cancellation-policy'
     | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/cookie-policy'
+    | '/exchange-policy'
     | '/login'
     | '/lookbook'
+    | '/loyalty'
     | '/order-confirmation'
     | '/order-tracking'
     | '/orders'
@@ -368,12 +418,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/admin'
+    | '/ai-features'
+    | '/cancellation-policy'
     | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/cookie-policy'
+    | '/exchange-policy'
     | '/login'
     | '/lookbook'
+    | '/loyalty'
     | '/order-confirmation'
     | '/order-tracking'
     | '/orders'
@@ -404,12 +459,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/admin'
+    | '/ai-features'
+    | '/cancellation-policy'
     | '/careers'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/cookie-policy'
+    | '/exchange-policy'
     | '/login'
     | '/lookbook'
+    | '/loyalty'
     | '/order-confirmation'
     | '/order-tracking'
     | '/orders'
@@ -441,12 +501,17 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AiFeaturesRoute: typeof AiFeaturesRoute
+  CancellationPolicyRoute: typeof CancellationPolicyRoute
   CareersRoute: typeof CareersRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  CookiePolicyRoute: typeof CookiePolicyRoute
+  ExchangePolicyRoute: typeof ExchangePolicyRoute
   LoginRoute: typeof LoginRoute
   LookbookRoute: typeof LookbookRoute
+  LoyaltyRoute: typeof LoyaltyRoute
   OrderConfirmationRoute: typeof OrderConfirmationRoute
   OrderTrackingRoute: typeof OrderTrackingRoute
   OrdersRoute: typeof OrdersRoute
@@ -507,6 +572,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-features': {
+      id: '/ai-features'
+      path: '/ai-features'
+      fullPath: '/ai-features'
+      preLoaderRoute: typeof AiFeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cancellation-policy': {
+      id: '/cancellation-policy'
+      path: '/cancellation-policy'
+      fullPath: '/cancellation-policy'
+      preLoaderRoute: typeof CancellationPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/careers': {
       id: '/careers'
       path: '/careers'
@@ -535,6 +614,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exchange-policy': {
+      id: '/exchange-policy'
+      path: '/exchange-policy'
+      fullPath: '/exchange-policy'
+      preLoaderRoute: typeof ExchangePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -547,6 +640,13 @@ declare module '@tanstack/react-router' {
       path: '/lookbook'
       fullPath: '/lookbook'
       preLoaderRoute: typeof LookbookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loyalty': {
+      id: '/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof LoyaltyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/order-confirmation': {
@@ -741,12 +841,17 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
+  AiFeaturesRoute: AiFeaturesRoute,
+  CancellationPolicyRoute: CancellationPolicyRoute,
   CareersRoute: CareersRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  CookiePolicyRoute: CookiePolicyRoute,
+  ExchangePolicyRoute: ExchangePolicyRoute,
   LoginRoute: LoginRoute,
   LookbookRoute: LookbookRoute,
+  LoyaltyRoute: LoyaltyRoute,
   OrderConfirmationRoute: OrderConfirmationRoute,
   OrderTrackingRoute: OrderTrackingRoute,
   OrdersRoute: OrdersRoute,

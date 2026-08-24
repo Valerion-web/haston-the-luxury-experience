@@ -6,12 +6,14 @@ const items = [
   { icon: RefreshCw, title: "30-day returns", sub: "Free & effortless" },
   { icon: ShieldCheck, title: "Ethically made", sub: "Small-batch European mills" },
   { icon: Sparkles, title: "Lifetime alterations", sub: "At your doorstep, worldwide" },
+  { icon: ShieldCheck, title: "Secure payments", sub: "Razorpay · Visa · UPI · COD" },
+  { icon: Truck, title: "Reliable delivery", sub: "Delhivery · Blue Dart · DTDC" },
 ];
 
 export function TrustStrip() {
   return (
     <section className="relative border-y border-border/60 bg-card">
-      <div className="mx-auto grid max-w-[1600px] grid-cols-2 gap-8 px-6 py-10 md:grid-cols-4 md:px-10">
+      <div className="mx-auto grid max-w-[1600px] grid-cols-2 gap-8 px-6 py-10 md:grid-cols-3 md:px-10 lg:grid-cols-6">
         {items.map((it, i) => (
           <motion.div
             key={it.title}

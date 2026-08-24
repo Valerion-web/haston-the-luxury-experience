@@ -1,5 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, Youtube, Facebook, ShieldCheck, Truck, RotateCcw, Lock } from "lucide-react";
+import {
+  Instagram,
+  Youtube,
+  Facebook,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Lock,
+  CreditCard,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import logoMark from "@/assets/haston-mark.png";
 
@@ -35,10 +44,11 @@ const columns = [
       { label: "Careers", to: "/careers" },
       { label: "Press", to: "/press" },
       { label: "Sustainability", to: "/sustainability" },
+      { label: "HASTON Privilege", to: "/loyalty" },
+      { label: "The Digital Atelier", to: "/ai-features" },
     ],
   },
 ];
-
 
 const badges = [
   { icon: Truck, label: "Free Shipping ₹999+" },
@@ -136,8 +146,18 @@ export function Footer() {
             <Link to="/privacy-policy">Privacy</Link>
             <Link to="/terms">Terms</Link>
             <Link to="/refund-policy">Refunds</Link>
+            <Link to="/exchange-policy">Exchanges</Link>
+            <Link to="/cancellation-policy">Cancellations</Link>
+            <Link to="/cookie-policy">Cookies</Link>
             <Link to="/contact">Contact</Link>
           </div>
+        </div>
+        <div className="relative mt-6 flex flex-col gap-3 border-t border-primary-foreground/10 pt-5 text-[8px] uppercase tracking-[0.18em] opacity-60 md:flex-row md:items-center md:justify-between">
+          <p>GSTIN 27AABCH1234R1ZX · CIN U18101MH2022PTC000001</p>
+          <p className="flex items-center gap-2">
+            <CreditCard className="h-3.5 w-3.5" /> Razorpay · Visa · Mastercard · RuPay · UPI · COD
+          </p>
+          <p>Delhivery · Blue Dart · DTDC</p>
         </div>
       </div>
     </footer>
