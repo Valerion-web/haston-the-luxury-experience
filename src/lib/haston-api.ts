@@ -38,6 +38,24 @@ export type BackendBrand = {
   description?: string | null;
   logo?: string | null;
 };
+export type BackendWishlistItem = {
+  id: number;
+  product: BackendProduct;
+  createdAt?: string;
+};
+export type BackendWishlistResponse = {
+  id: number | null;
+  items: BackendWishlistItem[];
+};
+export type WishlistItem = {
+  id: number;
+  product: Product;
+  createdAt?: string;
+};
+export type WishlistResponse = {
+  id: number | null;
+  items: WishlistItem[];
+};
 export type AuthResponse = {
   token: string;
   user: import("@/lib/haston-session").SessionUser;
@@ -54,6 +72,7 @@ const colorHex: Record<string, string> = {
 };
 export const mapProduct = (product: BackendProduct): Product => ({
   id: String(product.id),
+  backendId: product.id,
   slug: product.slug,
   name: product.name,
   category:
@@ -169,6 +188,14 @@ const mapAdminOrder = (order: BackendAdminOrderResponse): AdminOrderResponse => 
   ...mapOrder(order),
   user: order.user,
 });
+const mapWishlist = (wishlist: BackendWishlistResponse): WishlistResponse => ({
+  id: wishlist.id,
+  items: wishlist.items.map((item) => ({
+    id: item.id,
+    product: mapProduct(item.product),
+    createdAt: item.createdAt,
+  })),
+});
 export const hastonApi = {
   login: (email: string, password: string) =>
     apiRequest<AuthResponse>("/auth/login", {
@@ -196,6 +223,16 @@ export const hastonApi = {
     apiRequest<BackendCategory & { products: BackendProduct[] }>(
       `/categories/${encodeURIComponent(slug)}`,
     ),
+  getWishlist: () => apiRequest<BackendWishlistResponse>("/wishlist").then(mapWishlist),
+  addWishlistItem: (productId: number) =>
+    apiRequest<BackendWishlistResponse>("/wishlist/items", {
+      method: "POST",
+      body: JSON.stringify({ productId }),
+    }).then(mapWishlist),
+  removeWishlistItem: (productId: number) =>
+    apiRequest<BackendWishlistResponse>(`/wishlist/items/${productId}`, {
+      method: "DELETE",
+    }).then(mapWishlist),
   logout: () => apiRequest<{ message: string }>("/auth/logout", { method: "POST" }),
   createOrder: (body: {
     shippingAddress: Record<string, string>;

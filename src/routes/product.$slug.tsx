@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { getProduct, PRODUCTS, inr } from "@/lib/haston-data";
 import { motion } from "framer-motion";
@@ -18,6 +18,8 @@ import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 import { hastonApi } from "@/lib/haston-api";
 import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonProduct } from "@/hooks/use-haston-data";
+import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
 import { useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
@@ -53,11 +55,15 @@ function PDP() {
   const [color, setColor] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
-  const [wished, setWished] = useState(false);
   const [open, setOpen] = useState<string | null>("details");
   const [actionError, setActionError] = useState<string | null>(null);
   const session = useHastonSession();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: resolvedProduct, isLoading: resolvingProduct } = useHastonProduct(product.slug);
+  const { isWishlisted, toggle, isPending } = useHastonWishlist();
+  const backendId = product.backendId ?? resolvedProduct?.backendId;
+  const wished = isWishlisted(backendId);
   const selectedVariant = product.variants?.find(
     (variant) => variant.color === product.colors[color]?.name && variant.size === size,
   );
@@ -77,6 +83,25 @@ function PDP() {
   const completeTheLook = PRODUCTS.filter(
     (p) => p.category !== product.category && p.id !== product.id,
   ).slice(0, 3);
+
+  const toggleProductWishlist = async () => {
+    setActionError(null);
+    if (!session) {
+      await navigate({ to: "/login" });
+      return;
+    }
+    if (backendId === undefined || isPending) return;
+    try {
+      await toggle(backendId);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        clearSession();
+        await navigate({ to: "/login" });
+        return;
+      }
+      setActionError("Unable to update your wishlist.");
+    }
+  };
 
   return (
     <>
@@ -231,9 +256,10 @@ function PDP() {
                 </button>
               </div>
               <button
-                onClick={() => setWished((v) => !v)}
-                aria-label="Wishlist"
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border transition-all hover:scale-105"
+                onClick={toggleProductWishlist}
+                disabled={isPending || resolvingProduct || backendId === undefined}
+                aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border transition-all hover:scale-105 disabled:cursor-wait disabled:opacity-60"
               >
                 <Heart className={`h-4 w-4 ${wished ? "fill-terracotta text-terracotta" : ""}`} />
               </button>

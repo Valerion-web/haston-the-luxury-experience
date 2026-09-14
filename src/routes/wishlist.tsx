@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { PRODUCTS } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { Heart } from "lucide-react";
+import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
@@ -17,7 +17,9 @@ export const Route = createFileRoute("/wishlist")({
 });
 
 function Wishlist() {
-  const [items] = useState(PRODUCTS.slice(0, 6));
+  const session = useHastonSession();
+  const { items, isLoading, error } = useHastonWishlist();
+  const products = items.map((item) => item.product);
   return (
     <>
       <PageHero
@@ -27,7 +29,21 @@ function Wishlist() {
         breadcrumb={[{ label: "Wishlist" }]}
       />
       <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
-        {items.length === 0 ? (
+        {!session ? (
+          <div className="grid place-items-center py-9 text-center">
+            <Heart className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
+            <p className="mt-4 text-display text-2xl">Sign in to view your wishlist.</p>
+            <LuxeButton to="/login" className="mt-8" arrow>
+              Sign in
+            </LuxeButton>
+          </div>
+        ) : isLoading ? (
+          <p className="py-9 text-center text-sm text-muted-foreground">Loading your wishlist...</p>
+        ) : error ? (
+          <p role="alert" className="py-9 text-center text-sm text-destructive">
+            Unable to load your wishlist right now.
+          </p>
+        ) : products.length === 0 ? (
           <div className="grid place-items-center py-9 text-center">
             <Heart className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
             <p className="mt-4 text-display text-2xl">Nothing saved yet.</p>
@@ -37,7 +53,7 @@ function Wishlist() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-            {items.map((p, i) => (
+            {products.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}
           </div>

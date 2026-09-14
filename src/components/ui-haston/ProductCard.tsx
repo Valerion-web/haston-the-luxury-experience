@@ -1,12 +1,46 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, Eye, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { inr, type Product } from "@/lib/haston-data";
+import { useHastonProducts } from "@/hooks/use-haston-data";
+import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
+import { ApiError } from "@/lib/api-client";
+import { clearSession } from "@/lib/haston-session";
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
-  const [wished, setWished] = useState(false);
   const [color, setColor] = useState(0);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const session = useHastonSession();
+  const { data: backendProducts, isLoading: productsLoading } = useHastonProducts();
+  const { isWishlisted, toggle, isPending } = useHastonWishlist();
+  const backendId =
+    product.backendId ?? backendProducts?.find((item) => item.slug === product.slug)?.backendId;
+  const wished = isWishlisted(backendId);
+  const wishlistBusy = isPending || productsLoading || backendId === undefined;
+
+  const toggleProductWishlist = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setWishlistError(null);
+    if (!session) {
+      await navigate({ to: "/login" });
+      return;
+    }
+    if (backendId === undefined || isPending) return;
+    try {
+      await toggle(backendId);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        clearSession();
+        await navigate({ to: "/login" });
+        return;
+      }
+      setWishlistError("Unable to update your wishlist.");
+    }
+  };
 
   return (
     <motion.article
@@ -39,17 +73,20 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
           {/* Wishlist */}
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              setWished((v) => !v);
-            }}
-            aria-label="Wishlist"
+            onClick={toggleProductWishlist}
+            disabled={wishlistBusy}
+            aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
             className="absolute right-2.5 top-2.5 z-10 grid h-8 w-8 place-items-center rounded-full glass-panel opacity-0 transition-all duration-500 group-hover:opacity-100 hover:scale-110 active:scale-90"
           >
             <Heart
               className={`h-[13px] w-[13px] transition-all ${wished ? "fill-terracotta text-terracotta" : ""}`}
             />
           </button>
+          {wishlistError && (
+            <span role="alert" className="absolute right-2.5 top-12 z-10 rounded bg-background/90 px-2 py-1 text-[9px] text-destructive">
+              {wishlistError}
+            </span>
+          )}
 
           {/* Images */}
           <img

@@ -13,10 +13,12 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
-import { PRODUCTS, inr } from "@/lib/haston-data";
+import { inr } from "@/lib/haston-data";
+import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { hastonApi } from "@/lib/haston-api";
 import { clearSession } from "@/lib/haston-session";
 import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -253,20 +255,26 @@ function Orders() {
 }
 
 function WishlistTab() {
+  const { items, isLoading, error } = useHastonWishlist();
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Loading your wishlist...</p>;
+  }
+  if (error) {
+    return (
+      <p role="alert" className="text-sm text-destructive">
+        Unable to load your wishlist right now.
+      </p>
+    );
+  }
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground">Nothing saved yet.</p>;
+  }
+
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3">
-      {PRODUCTS.slice(0, 6).map((p) => (
-        <Link key={p.id} to="/product/$slug" params={{ slug: p.slug }} className="group">
-          <div className="overflow-hidden rounded">
-            <img
-              src={p.image}
-              alt={p.name}
-              className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </div>
-          <p className="mt-3 text-display text-lg">{p.name}</p>
-          <p className="text-xs">{inr(p.price)}</p>
-        </Link>
+      {items.map((item, index) => (
+        <ProductCard key={item.id} product={item.product} index={index} />
       ))}
     </div>
   );

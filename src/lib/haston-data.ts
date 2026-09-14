@@ -78,6 +78,7 @@ export const IMG = {
 
 export type Product = {
   id: string;
+  backendId?: number;
   slug: string;
   name: string;
   category: string;
