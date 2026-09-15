@@ -1,10 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Truck, User } from "lucide-react";
-import { PRODUCTS, inr } from "@/lib/haston-data";
+import { inr } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { saveCheckoutDraft } from "@/lib/mock-commerce";
+import { useHastonCart } from "@/hooks/use-haston-cart";
+import { useHastonSession } from "@/hooks/use-haston-session";
+import { ApiError } from "@/lib/api-client";
+import { clearSession } from "@/lib/haston-session";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -22,9 +26,12 @@ const STEPS = [
 ];
 
 function Checkout() {
+  const session = useHastonSession();
+  const navigate = useNavigate();
+  const { items: cartItems, isLoading, error } = useHastonCart();
   const [step, setStep] = useState(0);
   const [details, setDetails] = useState({
-    email: "",
+    email: session?.email || "",
     firstName: "",
     lastName: "",
     address: "",
@@ -33,11 +40,51 @@ function Checkout() {
     country: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof details, string>>>({});
-  const items = [
-    { product: PRODUCTS[0], quantity: 1, size: "M", color: "Navy" },
-    { product: PRODUCTS[2], quantity: 2, size: "L", color: "Olive" },
-  ];
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  useEffect(() => {
+    if (!session) {
+      void navigate({ to: "/login", replace: true });
+      return;
+    }
+    setDetails((current) => ({ ...current, email: current.email || session.email }));
+  }, [navigate, session]);
+
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 401) {
+      clearSession();
+      void navigate({ to: "/login", replace: true });
+    }
+  }, [error, navigate]);
+
+  if (!session) return null;
+  if (isLoading) {
+    return <p className="mx-auto min-h-[70vh] max-w-2xl px-6 py-16 text-center text-sm text-muted-foreground">Loading your checkout...</p>;
+  }
+  if (error) {
+    return <p role="alert" className="mx-auto min-h-[70vh] max-w-2xl px-6 py-16 text-center text-sm text-destructive">Unable to load your bag. Please return to your cart and try again.</p>;
+  }
+  if (cartItems.length === 0) {
+    return (
+      <section className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-center">
+        <div>
+          <p className="text-eyebrow text-muted-foreground">Checkout unavailable</p>
+          <h1 className="mt-4 text-display text-4xl">Your bag is empty.</h1>
+          <LuxeButton to="/collections" className="mt-8" arrow>
+            Continue shopping
+          </LuxeButton>
+        </div>
+      </section>
+    );
+  }
+
+  const items = cartItems.map((item) => ({
+    id: String(item.id),
+    product: item.product,
+    quantity: item.quantity,
+    size: item.variant?.size || "Standard",
+    color: item.variant?.color || "Selected",
+    lineTotal: item.lineTotal,
+  }));
+  const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
   const shipping = subtotal > 180 ? 0 : 12;
   const total = subtotal + shipping;
 
@@ -212,7 +259,7 @@ function Checkout() {
           <div className="rounded-md border border-border bg-card p-8 soft-shadow">
             <p className="text-eyebrow">Order summary</p>
             <div className="mt-6 space-y-4">
-              {items.map(({ product, quantity, color, size }) => (
+              {items.map(({ product, quantity, color, size, lineTotal }) => (
                 <div key={product.id} className="flex gap-4">
                   <img
                     src={product.image}
@@ -225,7 +272,7 @@ function Checkout() {
                       {color} · Size {size} · Qty {quantity}
                     </p>
                   </div>
-                  <p className="text-sm">{inr(product.price * quantity)}</p>
+                  <p className="text-sm">{inr(lineTotal)}</p>
                 </div>
               ))}
             </div>
