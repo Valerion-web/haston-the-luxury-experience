@@ -20,7 +20,7 @@ import { hastonApi } from "@/lib/haston-api";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { useHastonProduct } from "@/hooks/use-haston-data";
 import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
-import { useQueryClient } from "@tanstack/react-query";
+import { useHastonCart } from "@/hooks/use-haston-cart";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
 
@@ -59,9 +59,9 @@ function PDP() {
   const [actionError, setActionError] = useState<string | null>(null);
   const session = useHastonSession();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { data: resolvedProduct, isLoading: resolvingProduct } = useHastonProduct(product.slug);
   const { isWishlisted, toggle, isPending } = useHastonWishlist();
+  const { addItem, isAdding } = useHastonCart();
   const backendId = product.backendId ?? resolvedProduct?.backendId;
   const wished = isWishlisted(backendId);
   const selectedVariant = product.variants?.find(
@@ -283,9 +283,16 @@ function PDP() {
                     setActionError("This color and size combination is unavailable.");
                     return;
                   }
+                  if (backendId === undefined) {
+                    setActionError("This piece is not currently available to add to your bag.");
+                    return;
+                  }
                   try {
-                    await hastonApi.addCartItem(Number(product.id), qty, selectedVariant.id);
-                    await queryClient.invalidateQueries({ queryKey: ["haston", "cart"] });
+                    await addItem({
+                      productId: backendId,
+                      quantity: qty,
+                      variantId: selectedVariant.id,
+                    });
                     setActionError("Added to your bag");
                   } catch (error) {
                     if (error instanceof ApiError && error.status === 401) {
@@ -300,6 +307,7 @@ function PDP() {
                     );
                   }
                 }}
+                disabled={isAdding}
               >
                 <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag —{" "}
                 {inr(product.price * qty)}

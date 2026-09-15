@@ -64,7 +64,7 @@ function Account() {
       queryClient.removeQueries({
         predicate: ({ queryKey }) =>
           queryKey[0] === "haston" &&
-          ["account", "profile", "orders", "wishlist", "session"].includes(String(queryKey[1])),
+          ["account", "cart", "profile", "orders", "wishlist", "session"].includes(String(queryKey[1])),
       });
       await navigate({ to: "/login", replace: true });
     }

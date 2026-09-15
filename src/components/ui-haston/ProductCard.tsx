@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Heart, Eye, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -6,16 +6,19 @@ import { inr, type Product } from "@/lib/haston-data";
 import { useHastonProducts } from "@/hooks/use-haston-data";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
+import { useHastonCart } from "@/hooks/use-haston-cart";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const [color, setColor] = useState(0);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
+  const [cartError, setCartError] = useState<string | null>(null);
   const navigate = useNavigate();
   const session = useHastonSession();
   const { data: backendProducts, isLoading: productsLoading } = useHastonProducts();
   const { isWishlisted, toggle, isPending } = useHastonWishlist();
+  const { addItem, isAdding } = useHastonCart();
   const backendId =
     product.backendId ?? backendProducts?.find((item) => item.slug === product.slug)?.backendId;
   const wished = isWishlisted(backendId);
@@ -42,6 +45,36 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
     }
   };
 
+  const addProductToCart = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setCartError(null);
+    if (!session) {
+      await navigate({ to: "/login" });
+      return;
+    }
+    const backendProduct = backendProducts?.find((item) => item.slug === product.slug);
+    const backendId = product.backendId ?? backendProduct?.backendId;
+    if (!backendProduct || backendId === undefined) {
+      await navigate({ to: "/product/$slug", params: { slug: product.slug } });
+      return;
+    }
+    if ((backendProduct.variants?.length ?? 0) > 0 || backendProduct.sizes?.length || backendProduct.colors?.length) {
+      await navigate({ to: "/product/$slug", params: { slug: product.slug } });
+      return;
+    }
+    try {
+      await addItem({ productId: backendId, quantity: 1 });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        clearSession();
+        await navigate({ to: "/login" });
+        return;
+      }
+      setCartError("Unable to add this piece to your bag.");
+    }
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -50,7 +83,21 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       transition={{ duration: 0.7, delay: (index % 6) * 0.04, ease: [0.16, 1, 0.3, 1] }}
       className="group relative"
     >
-      <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={(event) => {
+          if ((event.target as HTMLElement).closest("button")) return;
+          void navigate({ to: "/product/$slug", params: { slug: product.slug } });
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            void navigate({ to: "/product/$slug", params: { slug: product.slug } });
+          }
+        }}
+        className="block"
+      >
         <div className="relative aspect-square overflow-hidden rounded-sm bg-muted">
           {/* Badges */}
           <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
@@ -109,8 +156,9 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
             <div className="m-2 flex items-center gap-1.5 rounded-full glass-panel p-1">
               <button
-                onClick={(e) => e.preventDefault()}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary py-2 text-[8px] uppercase tracking-[0.2em] text-primary-foreground transition-transform hover:scale-[0.98]"
+                onClick={addProductToCart}
+                disabled={isAdding}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary py-2 text-[8px] uppercase tracking-[0.2em] text-primary-foreground transition-transform hover:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
               >
                 <ShoppingBag className="h-[11px] w-[11px]" /> Add
               </button>
@@ -124,6 +172,11 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             </div>
           </div>
         </div>
+        {cartError && (
+          <p role="alert" className="mt-2 text-[9px] text-destructive">
+            {cartError}
+          </p>
+        )}
 
         <div className="mt-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -147,6 +200,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
               key={c.name}
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 setColor(i);
               }}
               aria-label={c.name}
@@ -157,7 +211,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             />
           ))}
         </div>
-      </Link>
+      </div>
     </motion.article>
   );
 }

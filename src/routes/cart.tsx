@@ -1,15 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { PRODUCTS, inr } from "@/lib/haston-data";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { PRODUCTS, inr, type Product } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { X, Plus, Minus, ShieldCheck, Tag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { hastonApi } from "@/lib/haston-api";
 import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonCart } from "@/hooks/use-haston-cart";
+import { ApiError } from "@/lib/api-client";
+import { clearSession } from "@/lib/haston-session";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -19,38 +20,67 @@ export const Route = createFileRoute("/cart")({
 });
 
 type Line = { id: string; qty: number; size: string; color: string };
+type CartEntry = {
+  id: string | number;
+  product: Product;
+  quantity?: number;
+  qty?: number;
+  lineTotal?: number;
+  variant?: { color?: string | null; size?: string | null } | null;
+  color?: string;
+  size?: string;
+};
 
 function Cart() {
   const session = useHastonSession();
-  const queryClient = useQueryClient();
-  const { data: remoteCart } = useQuery({
-    queryKey: ["haston", "cart"],
-    queryFn: hastonApi.cart,
-    enabled: Boolean(session),
-  });
+  const navigate = useNavigate();
+  const {
+    items: remoteItems,
+    isLoading: cartLoading,
+    error: remoteError,
+    updateQuantity,
+    removeItem,
+    isMutating,
+  } = useHastonCart();
   const [lines, setLines] = useState<Line[]>([
     { id: "1", qty: 1, size: "M", color: "Navy" },
     { id: "3", qty: 2, size: "L", color: "Olive" },
   ]);
   const [promo, setPromo] = useState("");
   const [applied, setApplied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
-  const localItems = lines.map((l) => ({ ...l, product: PRODUCTS.find((p) => p.id === l.id)! }));
-  const items = session ? remoteCart?.items || [] : localItems;
+  const localItems: CartEntry[] = lines.map((l) => ({
+    ...l,
+    product: PRODUCTS.find((p) => p.id === l.id)!,
+  }));
+  const items: CartEntry[] = session ? remoteItems : localItems;
   const subtotal = session
-    ? items.reduce((s, i) => s + i.lineTotal, 0)
-    : items.reduce((s, i) => s + i.product.price * i.qty, 0);
+    ? items.reduce((s, i) => s + Number(i.lineTotal ?? i.product.price * (i.quantity ?? 0)), 0)
+    : items.reduce((s, i) => s + i.product.price * Number(i.qty ?? 0), 0);
   const discount = applied ? Math.round(subtotal * 0.1) : 0;
   const shipping = subtotal > 180 ? 0 : 12;
   const total = subtotal - discount + shipping;
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["haston", "cart"] });
+  const loadError = remoteError ? "Unable to load your bag right now." : null;
+
+  useEffect(() => {
+    if (remoteError instanceof ApiError && remoteError.status === 401) {
+      clearSession();
+      void navigate({ to: "/login", replace: true });
+    }
+  }, [navigate, remoteError]);
 
   return (
     <>
       <PageHero eyebrow="Your bag" title="The bag" breadcrumb={[{ label: "Cart" }]} />
       <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
-        {items.length === 0 ? (
+        {session && cartLoading ? (
+          <p className="py-9 text-center text-sm text-muted-foreground">Loading your bag...</p>
+        ) : loadError ? (
+          <p role="alert" className="py-9 text-center text-sm text-destructive">
+            {loadError}
+          </p>
+        ) : items.length === 0 ? (
           <div className="grid place-items-center py-9 text-center">
             <p className="text-display text-3xl">Your bag is empty.</p>
             <LuxeButton to="/collections" className="mt-8" arrow>
@@ -71,9 +101,13 @@ function Cart() {
               <AnimatePresence initial={false}>
                 {items.map((item) => {
                   const product = item.product;
-                  const quantity = session ? item.quantity : item.qty;
-                  const variant = session ? item.variant : { color: item.color, size: item.size };
-                  const lineTotal = session ? item.lineTotal : product.price * quantity;
+                  const quantity = session ? Number(item.quantity ?? 0) : Number(item.qty ?? 0);
+                  const variant = session
+                    ? item.variant
+                    : { color: item.color ?? "Selected", size: item.size ?? "Standard" };
+                  const lineTotal = session
+                    ? Number(item.lineTotal ?? product.price * quantity)
+                    : product.price * quantity;
                   return (
                     <motion.div
                       key={item.id}
@@ -108,12 +142,12 @@ function Cart() {
                         <button
                           onClick={() =>
                             session
-                              ? hastonApi
-                                  .removeCartItem(item.id)
-                                  .then(refresh)
-                                  .catch((e) => setError(e.message))
-                              : setLines((ls) => ls.filter((l) => l.id !== item.id))
+                              ? removeItem(Number(item.id)).catch(() =>
+                                  setMutationError("Unable to remove this item from your bag."),
+                                )
+                              : setLines((ls) => ls.filter((l) => l.id !== String(item.id)))
                           }
+                          disabled={Boolean(session) && isMutating}
                           className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground transition-colors hover:text-destructive"
                         >
                           <X className="h-3 w-3" /> Remove
@@ -123,16 +157,18 @@ function Cart() {
                         <button
                           onClick={() =>
                             session
-                              ? hastonApi
-                                  .updateCartItem(item.id, Math.max(1, quantity - 1))
-                                  .then(refresh)
-                                  .catch((e) => setError(e.message))
+                              ? updateQuantity({ id: Number(item.id), quantity: Math.max(1, quantity - 1) }).catch(() =>
+                                  setMutationError("Unable to update this item."),
+                                )
                               : setLines((ls) =>
                                   ls.map((l) =>
-                                    l.id === item.id ? { ...l, qty: Math.max(1, l.qty - 1) } : l,
+                                    l.id === String(item.id)
+                                      ? { ...l, qty: Math.max(1, l.qty - 1) }
+                                      : l,
                                   ),
                                 )
                           }
+                          disabled={Boolean(session) && isMutating}
                           className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
                         >
                           <Minus className="h-3 w-3" />
@@ -141,14 +177,16 @@ function Cart() {
                         <button
                           onClick={() =>
                             session
-                              ? hastonApi
-                                  .updateCartItem(item.id, quantity + 1)
-                                  .then(refresh)
-                                  .catch((e) => setError(e.message))
+                              ? updateQuantity({ id: Number(item.id), quantity: quantity + 1 }).catch(() =>
+                                  setMutationError("Unable to update this item."),
+                                )
                               : setLines((ls) =>
-                                  ls.map((l) => (l.id === item.id ? { ...l, qty: l.qty + 1 } : l)),
+                                  ls.map((l) =>
+                                    l.id === String(item.id) ? { ...l, qty: l.qty + 1 } : l,
+                                  ),
                                 )
                           }
+                          disabled={Boolean(session) && isMutating}
                           className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
                         >
                           <Plus className="h-3 w-3" />
@@ -213,9 +251,9 @@ function Cart() {
                 <p className="mt-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
                   <ShieldCheck className="h-4 w-4" /> Secure encrypted checkout
                 </p>
-                {error && (
+                {mutationError && (
                   <p role="alert" className="mt-3 text-xs text-destructive">
-                    {error}
+                    {mutationError}
                   </p>
                 )}
               </div>

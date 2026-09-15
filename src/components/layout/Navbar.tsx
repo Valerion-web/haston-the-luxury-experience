@@ -5,9 +5,8 @@ import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
 import logoFull from "@/assets/haston-logo.png";
-import { useQuery } from "@tanstack/react-query";
-import { hastonApi } from "@/lib/haston-api";
 import { useHastonSession } from "@/hooks/use-haston-session";
+import { useHastonCart } from "@/hooks/use-haston-cart";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -31,11 +30,7 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const session = useHastonSession();
-  const { data: cart } = useQuery({
-    queryKey: ["haston", "cart"],
-    queryFn: hastonApi.cart,
-    enabled: Boolean(session),
-  });
+  const { items: cartItems } = useHastonCart();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -123,7 +118,7 @@ export function Navbar() {
           <Link to="/cart" aria-label="Cart" className="relative hover:opacity-60">
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.6} />
             <span className="absolute -right-2 -top-2 flex h-[16px] w-[16px] items-center justify-center rounded-full bg-accent text-[8px] text-accent-foreground">
-              {cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0}
+              {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
             </span>
           </Link>
         </div>
