@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { getProduct, PRODUCTS, inr } from "@/lib/haston-data";
+import { inr, type Product } from "@/lib/haston-data";
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -18,30 +18,24 @@ import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 import { hastonApi } from "@/lib/haston-api";
 import { useHastonSession } from "@/hooks/use-haston-session";
-import { useHastonProduct } from "@/hooks/use-haston-data";
+import { useHastonProduct, useHastonProducts } from "@/hooks/use-haston-data";
 import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
 import { useHastonCart } from "@/hooks/use-haston-cart";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
 
 export const Route = createFileRoute("/product/$slug")({
-  head: ({ params }) => {
-    const p = PRODUCTS.find((x) => x.slug === params.slug);
-    return {
-      meta: [
-        { title: p ? `${p.name} — HASTON` : "Product — HASTON" },
-        { name: "description", content: p?.description || "HASTON product." },
-        p ? { property: "og:image", content: p.image } : { property: "og:image", content: "" },
-      ].filter((m) => m.content !== ""),
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Product — HASTON" },
+      { name: "description", content: "HASTON product." },
+    ],
+  }),
   loader: async ({ params }) => {
     try {
       return { product: await hastonApi.productBySlug(params.slug) };
     } catch {
-      const product = getProduct(params.slug);
-      if (!product) throw notFound();
-      return { product };
+      throw notFound();
     }
   },
   component: PDP,
@@ -49,7 +43,7 @@ export const Route = createFileRoute("/product/$slug")({
 
 function PDP() {
   const { product } = Route.useLoaderData() as {
-    product: NonNullable<ReturnType<typeof getProduct>>;
+    product: Product;
   };
   const [imgIdx, setImgIdx] = useState(0);
   const [color, setColor] = useState(0);
@@ -60,29 +54,24 @@ function PDP() {
   const session = useHastonSession();
   const navigate = useNavigate();
   const { data: resolvedProduct, isLoading: resolvingProduct } = useHastonProduct(product.slug);
+  const { data: backendProducts = [] } = useHastonProducts();
   const { isWishlisted, toggle, isPending } = useHastonWishlist();
   const { addItem, isAdding } = useHastonCart();
   const backendId = product.backendId ?? resolvedProduct?.backendId;
   const wished = isWishlisted(backendId);
+  const selectedColor = product.colors[color];
   const selectedVariant = product.variants?.find(
-    (variant) => variant.color === product.colors[color]?.name && variant.size === size,
+    (variant) => variant.color === selectedColor?.name && variant.size === size,
   );
 
   const gallery = [product.image, product.hoverImage, product.image, product.hoverImage];
   const related = Array.from(
-    new Map(
-      [
-        ...PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id),
-        ...PRODUCTS.filter((p) => p.id !== product.id),
-      ].map((p) => [p.id, p]),
-    ).values(),
+    backendProducts.filter((p) => p.category === product.category && p.id !== product.id),
   ).slice(0, 5);
-  const recentlyViewed = PRODUCTS.filter((p) => p.id !== product.id)
-    .slice(-5)
-    .reverse();
-  const completeTheLook = PRODUCTS.filter(
+  const completeTheLook = backendProducts.filter(
     (p) => p.category !== product.category && p.id !== product.id,
   ).slice(0, 3);
+  const recentlyViewed = backendProducts.filter((p) => p.id !== product.id).slice(-5).reverse();
 
   const toggleProductWishlist = async () => {
     setActionError(null);
@@ -173,19 +162,21 @@ function PDP() {
             <h1 className="mt-3 text-display text-4xl leading-[1.05] md:text-3xl">
               {product.name}
             </h1>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${i < Math.round(product.rating) ? "fill-mustard text-mustard" : "text-border"}`}
-                  />
-                ))}
+            {product.rating !== undefined || product.reviews !== undefined ? (
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${i < Math.round(product.rating || 0) ? "fill-mustard text-mustard" : "text-border"}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {product.reviews !== undefined ? `${product.reviews} reviews` : "Reviews unavailable"}
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground">
-                {product.rating} · {product.reviews} reviews
-              </span>
-            </div>
+            ) : null}
             <div className="mt-6 flex items-baseline gap-3">
               <span className="text-2xl font-medium">{inr(product.price)}</span>
               {product.compareAt && (
@@ -203,7 +194,7 @@ function PDP() {
               <p className="text-eyebrow">
                 Color ·{" "}
                 <span className="normal-case tracking-normal text-foreground">
-                  {product.colors[color].name}
+                  {selectedColor?.name || "Available options"}
                 </span>
               </p>
               <div className="mt-4 flex gap-3">
@@ -353,11 +344,13 @@ function PDP() {
                   title: "Shipping & returns",
                   body: "Complimentary worldwide shipping on orders over ₹15,000. Free 30-day returns, no questions asked.",
                 },
-                {
-                  id: "reviews",
-                  title: `Reviews (${product.reviews})`,
-                  body: '"The fit is impeccable — I bought a second in navy the week after." — Marco, Milano',
-                },
+                ...(product.reviews !== undefined
+                  ? [{
+                      id: "reviews",
+                      title: `Reviews (${product.reviews})`,
+                      body: "Reviews are available for this piece.",
+                    }]
+                  : []),
               ].map((row) => (
                 <div key={row.id} className="border-b border-border">
                   <button

@@ -2,13 +2,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { Search, X, Clock, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { PRODUCTS, CATEGORIES } from "@/lib/haston-data";
+import { inr } from "@/lib/haston-data";
+import { useHastonCategories, useHastonProducts } from "@/hooks/use-haston-data";
 
 const POPULAR = ["Linen Shirt", "Overshirt", "Cashmere", "Chinos", "Polo", "Merino"];
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [q, setQ] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
+  const { data: products = [] } = useHastonProducts({ search: q.trim() || undefined });
+  const { data: categories = [] } = useHastonCategories();
 
   useEffect(() => {
     try {
@@ -27,12 +30,10 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
     const s = q.toLowerCase().trim();
     if (!s) return { products: [], cats: [] };
     return {
-      products: PRODUCTS.filter((p) =>
-        (p.name + " " + p.category + " " + p.description).toLowerCase().includes(s),
-      ).slice(0, 5),
-      cats: CATEGORIES.filter((c) => c.name.toLowerCase().includes(s)).slice(0, 4),
+      products: products.slice(0, 5),
+      cats: categories.filter((c) => c.name.toLowerCase().includes(s)).slice(0, 4),
     };
-  }, [q]);
+  }, [q, products, categories]);
 
   const commit = (term: string) => {
     if (!term.trim()) return;
@@ -144,7 +145,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                     {q ? "Product suggestions" : "Featured"}
                   </p>
                   <ul className="space-y-3">
-                    {(results.products.length ? results.products : PRODUCTS.slice(0, 4)).map((p) => (
+                    {(results.products.length ? results.products : products.slice(0, 4)).map((p) => (
                       <li key={p.id}>
                         <Link
                           to="/product/$slug"
@@ -166,7 +167,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                               {p.category}
                             </p>
                           </div>
-                          <p className="text-sm font-medium">₹{(p.price * 85).toLocaleString("en-IN")}</p>
+                          <p className="text-sm font-medium">{inr(p.price)}</p>
                         </Link>
                       </li>
                     ))}

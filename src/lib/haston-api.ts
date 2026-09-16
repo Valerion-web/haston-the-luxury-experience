@@ -99,8 +99,6 @@ export const mapProduct = (product: BackendProduct): Product => ({
   ),
   colors: (product.colors || []).map((name) => ({ name, hex: colorHex[name] || "#888888" })),
   sizes: product.sizes || [],
-  rating: 0,
-  reviews: 0,
   isNew: product.tags?.includes("new"),
   isBestseller: product.tags?.includes("bestseller"),
   description: product.description || "",
@@ -148,6 +146,13 @@ export type OrderResponse = {
   billingAddress?: string | null;
   createdAt?: string;
   items: OrderItem[];
+};
+export type CheckoutValidationResponse = {
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  total: number;
+  currency: string;
 };
 export type AdminOrderResponse = OrderResponse & {
   user?: { id: number; name?: string | null; email?: string | null; role?: string } | null;
@@ -258,6 +263,11 @@ export const hastonApi = {
       body: JSON.stringify({ status }),
     }),
   cart: () => apiRequest<BackendCartResponse>("/cart").then(mapCart),
+  validateCheckout: (couponCode?: string) =>
+    apiRequest<CheckoutValidationResponse>("/checkout/validate", {
+      method: "POST",
+      body: JSON.stringify(couponCode ? { couponCode } : {}),
+    }),
   addCartItem: (productId: number, quantity: number, variantId?: number) =>
     apiRequest<BackendCartResponse>("/cart/items", {
       method: "POST",

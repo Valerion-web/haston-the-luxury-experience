@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Truck, User } from "lucide-react";
 import { inr } from "@/lib/haston-data";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
-import { saveCheckoutDraft } from "@/lib/mock-commerce";
+import { createCheckoutIdempotencyKey, saveCheckoutDraft } from "@/lib/mock-commerce";
 import { useHastonCart } from "@/hooks/use-haston-cart";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
+import { hastonApi } from "@/lib/haston-api";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -84,9 +86,12 @@ function Checkout() {
     color: item.variant?.color || "Selected",
     lineTotal: item.lineTotal,
   }));
-  const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-  const shipping = subtotal > 180 ? 0 : 12;
-  const total = subtotal + shipping;
+  const totalsQuery = useQuery({
+    queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
+    queryFn: () => hastonApi.validateCheckout(),
+    enabled: items.length > 0,
+  });
+  const totals = totalsQuery.data;
 
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
@@ -238,10 +243,7 @@ function Checkout() {
                   setErrors(nextErrors);
                   if (Object.keys(nextErrors).length > 0) return;
                   saveCheckoutDraft({
-                    items,
-                    subtotal,
-                    shipping,
-                    total,
+                    idempotencyKey: createCheckoutIdempotencyKey(),
                     paymentMethod: "upi",
                     shippingAddress: details,
                   });
@@ -279,17 +281,17 @@ function Checkout() {
             <div className="mt-6 hairline pt-6 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span className="text-foreground">{inr(subtotal)}</span>
+                    <span className="text-foreground">{totals ? inr(totals.subtotal) : "Calculating..."}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping</span>
                 <span className="text-foreground">
-                  {shipping === 0 ? "Complimentary" : inr(shipping)}
+                    {totals ? (totals.shipping === 0 ? "Complimentary" : inr(totals.shipping)) : "Calculating..."}
                 </span>
               </div>
               <div className="mt-3 flex justify-between hairline pt-3 text-lg">
                 <span className="text-display">Total</span>
-                <span className="font-medium">{inr(total)}</span>
+                <span className="font-medium">{totals ? inr(totals.total) : "Calculating..."}</span>
               </div>
             </div>
           </div>

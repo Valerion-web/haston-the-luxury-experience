@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CATEGORIES } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { CategoryCard } from "@/components/ui-haston/CategoryCard";
 import { motion } from "framer-motion";
 import { IMG } from "@/lib/haston-data";
 import { ArrowUpRight } from "lucide-react";
+import { useHastonCategories } from "@/hooks/use-haston-data";
 
 export const Route = createFileRoute("/collections/")({
   head: () => ({
@@ -32,6 +32,8 @@ const editorial = [
 ];
 
 function CollectionsIndex() {
+  const { data: categories = [], isLoading, error } = useHastonCategories();
+
   return (
     <>
       <PageHero
@@ -79,11 +81,24 @@ function CollectionsIndex() {
         </div>
 
         <h2 className="mt-12 text-eyebrow text-muted-foreground">Shop by category</h2>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {CATEGORIES.map((c, i) => (
-            <CategoryCard key={c.slug} {...c} index={i} />
-          ))}
-        </div>
+        {isLoading ? (
+          <p className="mt-6 text-sm text-muted-foreground">Loading categories...</p>
+        ) : error ? (
+          <p role="alert" className="mt-6 text-sm text-destructive">Unable to load categories.</p>
+        ) : (
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {categories.map((category, i) => (
+              <CategoryCard
+                key={category.slug}
+                slug={category.slug}
+                name={category.name}
+                tagline={category.description || "Explore the collection"}
+                image={IMG.heroShop}
+                index={i}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </>
   );

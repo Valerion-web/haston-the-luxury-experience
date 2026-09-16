@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
-import { PRODUCTS } from "@/lib/haston-data";
+import { useState } from "react";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { Search } from "lucide-react";
+import { useHastonProducts } from "@/hooks/use-haston-data";
 
 export const Route = createFileRoute("/search")({
   head: () => ({
@@ -16,14 +16,8 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchPage() {
-  const [q, setQ] = useState("linen");
-  const results = useMemo(() => {
-    const s = q.toLowerCase().trim();
-    if (!s) return PRODUCTS;
-    return PRODUCTS.filter((p) =>
-      (p.name + " " + p.category + " " + p.description).toLowerCase().includes(s),
-    );
-  }, [q]);
+  const [q, setQ] = useState("");
+  const { data: results = [], isLoading, error } = useHastonProducts({ search: q.trim() || undefined });
 
   return (
     <>
@@ -41,9 +35,11 @@ function SearchPage() {
       </PageHero>
       <section className="mx-auto max-w-[1600px] px-6 py-10 md:px-10">
         <p className="mb-6 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
-          {results.length} results for "{q}"
+          {isLoading ? "Loading results..." : `${results.length} results for "${q}"`}
         </p>
-        {results.length ? (
+        {error ? (
+          <p role="alert" className="py-9 text-center text-sm text-destructive">Unable to search the collection.</p>
+        ) : results.length ? (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
             {results.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />

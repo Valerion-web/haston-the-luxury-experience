@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { PRODUCTS, CATEGORIES, productsByCategory, IMG, inr } from "@/lib/haston-data";
+import { IMG, inr } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { useHastonCategories, useHastonProducts } from "@/hooks/use-haston-data";
 
 export const Route = createFileRoute("/collections/$slug")({
   head: ({ params }) => ({
@@ -19,17 +20,6 @@ export const Route = createFileRoute("/collections/$slug")({
   component: CollectionPage,
 });
 
-const ALL_COLORS = [
-  { name: "Navy", hex: "#0E1A2B" },
-  { name: "Ivory", hex: "#F6F3E0" },
-  { name: "Sand", hex: "#D8C8B2" },
-  { name: "Graphite", hex: "#222222" },
-  { name: "Olive", hex: "#55684E" },
-  { name: "Terracotta", hex: "#B4553E" },
-  { name: "Denim", hex: "#4A6B8A" },
-  { name: "Forest", hex: "#2F4A32" },
-];
-const ALL_SIZES = ["S", "M", "L", "XL", "28", "30", "32", "34", "36"];
 const SORTS = [
   "Featured",
   "New arrivals",
@@ -41,24 +31,29 @@ const SORTS = [
 function CollectionPage() {
   const { slug } = Route.useParams();
   const [open, setOpen] = useState(false);
-  const [priceMax, setPriceMax] = useState(400);
+  const [priceMax, setPriceMax] = useState(0);
   const [selColors, setSelColors] = useState<string[]>([]);
   const [selSizes, setSelSizes] = useState<string[]>([]);
   const [sort, setSort] = useState(SORTS[0]);
   const [sortOpen, setSortOpen] = useState(false);
+  const { data: backendProducts = [], isLoading: productsLoading, error: productsError } = useHastonProducts();
+  const { data: categories = [], isLoading: categoriesLoading } = useHastonCategories();
 
-  const cat = CATEGORIES.find((c) => c.slug === slug);
+  const cat = categories.find((c) => c.slug === slug);
   const title = cat?.name || slug.replace(/-/g, " ");
+  const maxPrice = Math.max(...backendProducts.map((product) => product.price), 0);
+  const availableColors = Array.from(new Map(backendProducts.flatMap((product) => product.colors).map((color) => [color.name, color])).values());
+  const availableSizes = Array.from(new Set(backendProducts.flatMap((product) => product.sizes)));
 
   const base = useMemo(() => {
-    if (slug === "new-arrivals") return PRODUCTS.filter((p) => p.isNew).concat(PRODUCTS);
-    if (slug === "bestsellers") return PRODUCTS.filter((p) => p.isBestseller).concat(PRODUCTS);
-    if (cat) return productsByCategory(slug);
-    return PRODUCTS;
-  }, [slug, cat]);
+    if (slug === "new-arrivals") return backendProducts.filter((p) => p.isNew);
+    if (slug === "bestsellers") return backendProducts.filter((p) => p.isBestseller);
+    if (cat) return backendProducts.filter((p) => p.category === cat.slug);
+    return backendProducts;
+  }, [slug, cat, backendProducts]);
 
-  const products = useMemo(() => {
-    let list = base.filter((p) => p.price <= priceMax);
+  const filteredProducts = useMemo(() => {
+    let list = base.filter((p) => !priceMax || p.price <= priceMax);
     if (selColors.length)
       list = list.filter((p) => p.colors.some((c) => selColors.includes(c.name)));
     if (selSizes.length) list = list.filter((p) => p.sizes.some((s) => selSizes.includes(s)));
@@ -70,7 +65,7 @@ function CollectionPage() {
         list = [...list].sort((a, b) => b.price - a.price);
         break;
       case "Best rated":
-        list = [...list].sort((a, b) => b.rating - a.rating);
+        list = [...list].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case "New arrivals":
         list = [...list].sort((a, b) => Number(!!b.isNew) - Number(!!a.isNew));
@@ -91,7 +86,7 @@ function CollectionPage() {
         description={
           slug === "new-arrivals"
             ? "The latest pieces to join the house — linen, denim and knitwear, made for everyday elegance."
-            : cat?.tagline || "A considered edit from the HASTON archive."
+            : cat?.description || "A considered edit from the HASTON archive."
         }
 
         breadcrumb={[{ label: "Collections", to: "/collections" }, { label: title }]}
@@ -100,7 +95,7 @@ function CollectionPage() {
             ? IMG.heroNew
             : slug === "bestsellers"
               ? IMG.heroLookbook
-              : cat?.image || IMG.heroShop
+              : IMG.heroShop
         }
 
       />
@@ -114,7 +109,7 @@ function CollectionPage() {
             <SlidersHorizontal className="h-3.5 w-3.5" /> Filters
           </button>
           <p className="order-3 w-full text-[10px] uppercase tracking-[0.22em] text-muted-foreground md:order-none md:w-auto md:text-[11px] md:tracking-[0.28em]">
-            {products.length} pieces
+            {productsLoading ? "Loading..." : `${filteredProducts.length} pieces`}
           </p>
           <div className="relative shrink-0">
             <button
@@ -161,29 +156,34 @@ function CollectionPage() {
                 className="hidden overflow-hidden lg:block"
               >
                 <FilterPanel
-                  {...{
-                    priceMax,
-                    setPriceMax,
-                    selColors,
-                    selSizes,
-                    toggle,
-                    setSelColors,
-                    setSelSizes,
-                  }}
+                  priceMax={priceMax}
+                  setPriceMax={setPriceMax}
+                  maxPrice={maxPrice}
+                  availableColors={availableColors}
+                  availableSizes={availableSizes}
+                  selColors={selColors}
+                  selSizes={selSizes}
+                  toggle={toggle}
+                  setSelColors={setSelColors}
+                  setSelSizes={setSelSizes}
                 />
               </motion.aside>
             )}
           </AnimatePresence>
 
           <div className={open ? "lg:col-start-2" : "lg:col-span-2"}>
-            {products.length === 0 ? (
+            {productsError ? (
+              <p role="alert" className="py-10 text-center text-sm text-destructive">Unable to load the collection.</p>
+            ) : productsLoading || categoriesLoading ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">Loading the collection...</p>
+            ) : filteredProducts.length === 0 ? (
               <div className="grid place-items-center py-10 text-center">
                 <p className="text-display text-2xl">No pieces match these filters.</p>
                 <button
                   onClick={() => {
                     setSelColors([]);
                     setSelSizes([]);
-                    setPriceMax(400);
+                    setPriceMax(0);
                   }}
                   className="mt-6 text-[11px] uppercase tracking-[0.28em] underline"
                 >
@@ -192,7 +192,7 @@ function CollectionPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-                {products.map((p, i) => (
+                {filteredProducts.map((p, i) => (
                   <ProductCard key={p.id} product={p} index={i} />
                 ))}
               </div>
@@ -226,15 +226,16 @@ function CollectionPage() {
                 </button>
               </div>
               <FilterPanel
-                {...{
-                  priceMax,
-                  setPriceMax,
-                  selColors,
-                  selSizes,
-                  toggle,
-                  setSelColors,
-                  setSelSizes,
-                }}
+                  priceMax={priceMax}
+                  setPriceMax={setPriceMax}
+                  maxPrice={maxPrice}
+                  availableColors={availableColors}
+                  availableSizes={availableSizes}
+                  selColors={selColors}
+                  selSizes={selSizes}
+                  toggle={toggle}
+                  setSelColors={setSelColors}
+                  setSelSizes={setSelSizes}
               />
             </motion.div>
           </motion.div>
@@ -247,6 +248,9 @@ function CollectionPage() {
 interface FilterPanelProps {
   priceMax: number;
   setPriceMax: (v: number) => void;
+  maxPrice: number;
+  availableColors: { name: string; hex: string }[];
+  availableSizes: string[];
   selColors: string[];
   selSizes: string[];
   toggle: (arr: string[], v: string, set: (a: string[]) => void) => void;
@@ -262,20 +266,20 @@ function FilterPanel(p: FilterPanelProps) {
         <input
           type="range"
           min={50}
-          max={400}
-          value={p.priceMax}
+          max={p.maxPrice || 1}
+          value={p.priceMax || p.maxPrice}
           onChange={(e) => p.setPriceMax(+e.target.value)}
           className="mt-6 w-full accent-primary"
         />
         <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-          <span>{inr(50)}</span>
-          <span>Up to {inr(p.priceMax)}</span>
+          <span>{inr(0)}</span>
+          <span>Up to {inr(p.priceMax || p.maxPrice)}</span>
         </div>
       </div>
       <div>
         <p className="text-eyebrow">Color</p>
         <div className="mt-6 grid grid-cols-4 gap-3">
-          {ALL_COLORS.map((c) => (
+          {p.availableColors.map((c) => (
             <button
               key={c.name}
               onClick={() => p.toggle(p.selColors, c.name, p.setSelColors)}
@@ -289,7 +293,7 @@ function FilterPanel(p: FilterPanelProps) {
       <div>
         <p className="text-eyebrow">Size</p>
         <div className="mt-6 flex flex-wrap gap-2">
-          {ALL_SIZES.map((s) => (
+          {p.availableSizes.map((s) => (
             <button
               key={s}
               onClick={() => p.toggle(p.selSizes, s, p.setSelSizes)}

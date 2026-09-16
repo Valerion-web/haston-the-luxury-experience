@@ -12,16 +12,16 @@ import {
 } from "lucide-react";
 import { inr } from "@/lib/haston-data";
 import {
-  mockPaymentGateway,
+  createCheckoutIdempotencyKey,
   readCheckoutDraft,
-  saveConfirmedOrder,
   saveCheckoutDraft,
   type OrderDraft,
   type PaymentMethod,
 } from "@/lib/mock-commerce";
 import { hastonApi } from "@/lib/haston-api";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useHastonCart } from "@/hooks/use-haston-cart";
 
 export const Route = createFileRoute("/payment")({
   head: () => ({
@@ -53,7 +53,12 @@ function Payment() {
   const [wallet, setWallet] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const queryClient = useQueryClient();
+  const { items, isLoading: cartLoading, error: cartError } = useHastonCart();
+  const totalsQuery = useQuery({
+    queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
+    queryFn: () => hastonApi.validateCheckout(),
+    enabled: items.length > 0,
+  });
 
   useEffect(() => {
     setDraft(readCheckoutDraft());
@@ -86,25 +91,10 @@ function Payment() {
 
     setSubmitting(true);
     try {
-      saveCheckoutDraft({ ...draft, paymentMethod: method });
-      if (method !== "cod") {
-        const result = await mockPaymentGateway(method, { upi, card, bank, wallet });
-        if (!result.success)
-          throw new Error("The mock payment was declined. Check your details and try again.");
-      }
-      if (!draft.shippingAddress) {
-        throw new Error("Your shipping details are missing. Please return to checkout.");
-      }
-      const order = await hastonApi.createOrder({
-        shippingAddress: draft.shippingAddress,
-        billingAddress: draft.shippingAddress,
-      });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["haston", "cart"] }),
-        queryClient.invalidateQueries({ queryKey: ["haston", "orders"] }),
-      ]);
-      saveConfirmedOrder(order, method);
-      window.location.assign("/order-confirmation");
+      const idempotencyKey = draft.idempotencyKey || createCheckoutIdempotencyKey();
+      const nextDraft = { ...draft, idempotencyKey, paymentMethod: method };
+      saveCheckoutDraft(nextDraft);
+      throw new Error("Payment processing is not available yet. Your order has not been placed.");
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
@@ -114,6 +104,13 @@ function Payment() {
       setSubmitting(false);
     }
   };
+
+  if (cartLoading || !totalsQuery.data) {
+    return <p className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-sm text-muted-foreground">Loading your payment summary...</p>;
+  }
+  if (cartError || items.length === 0) {
+    return <p className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-sm text-destructive">Unable to load your bag. Please return to checkout.</p>;
+  }
 
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
@@ -271,10 +268,10 @@ function Payment() {
               ? "Processing securely..."
               : method === "cod"
                 ? "Place Order"
-                : `Pay ${inr(draft.total)}`}
+                : `Pay ${inr(totalsQuery.data.total)}`}
           </LuxeButton>
           <p className="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Demo checkout. No real payment will be processed.
+              Payment processing will be enabled after the secure payment integration is complete.
           </p>
         </div>
 
@@ -282,8 +279,8 @@ function Payment() {
           <div className="rounded-md border border-border bg-card p-8 soft-shadow">
             <p className="text-eyebrow">Order summary</p>
             <div className="mt-6 space-y-5">
-              {draft.items.map((item) => (
-                <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex gap-4">
+              {items.map((item) => (
+                <div key={item.id} className="flex gap-4">
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -292,22 +289,22 @@ function Payment() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm">{item.product.name}</p>
                     <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                      {item.color} · Size {item.size} · Qty {item.quantity}
+                      {item.variant?.color || "Selected"} · Size {item.variant?.size || "Standard"} · Qty {item.quantity}
                     </p>
                   </div>
-                  <p className="text-sm">{inr(item.product.price * item.quantity)}</p>
+                  <p className="text-sm">{inr(item.lineTotal)}</p>
                 </div>
               ))}
             </div>
             <div className="mt-6 space-y-2 border-t border-border pt-6 text-sm">
-              <SummaryRow label="Subtotal" value={inr(draft.subtotal)} />
+              <SummaryRow label="Subtotal" value={inr(totalsQuery.data.subtotal)} />
               <SummaryRow
                 label="Shipping"
-                value={draft.shipping === 0 ? "Complimentary" : inr(draft.shipping)}
+                value={totalsQuery.data.shipping === 0 ? "Complimentary" : inr(totalsQuery.data.shipping)}
               />
               <div className="mt-3 flex justify-between border-t border-border pt-3 text-lg">
                 <span className="text-display">Total</span>
-                <span className="font-medium">{inr(draft.total)}</span>
+                <span className="font-medium">{inr(totalsQuery.data.total)}</span>
               </div>
             </div>
           </div>

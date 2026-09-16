@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { PRODUCTS, inr, type Product } from "@/lib/haston-data";
+import { inr, type Product } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
-import { X, Plus, Minus, ShieldCheck, Tag } from "lucide-react";
+import { X, Plus, Minus, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
@@ -11,6 +11,9 @@ import { useHastonSession } from "@/hooks/use-haston-session";
 import { useHastonCart } from "@/hooks/use-haston-cart";
 import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
+import { useQuery } from "@tanstack/react-query";
+import { hastonApi } from "@/lib/haston-api";
+import { useHastonProducts } from "@/hooks/use-haston-data";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -19,7 +22,6 @@ export const Route = createFileRoute("/cart")({
   component: Cart,
 });
 
-type Line = { id: string; qty: number; size: string; color: string };
 type CartEntry = {
   id: string | number;
   product: Product;
@@ -42,25 +44,16 @@ function Cart() {
     removeItem,
     isMutating,
   } = useHastonCart();
-  const [lines, setLines] = useState<Line[]>([
-    { id: "1", qty: 1, size: "M", color: "Navy" },
-    { id: "3", qty: 2, size: "L", color: "Olive" },
-  ]);
-  const [promo, setPromo] = useState("");
-  const [applied, setApplied] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const { data: recommendations = [] } = useHastonProducts();
 
-  const localItems: CartEntry[] = lines.map((l) => ({
-    ...l,
-    product: PRODUCTS.find((p) => p.id === l.id)!,
-  }));
-  const items: CartEntry[] = session ? remoteItems : localItems;
-  const subtotal = session
-    ? items.reduce((s, i) => s + Number(i.lineTotal ?? i.product.price * (i.quantity ?? 0)), 0)
-    : items.reduce((s, i) => s + i.product.price * Number(i.qty ?? 0), 0);
-  const discount = applied ? Math.round(subtotal * 0.1) : 0;
-  const shipping = subtotal > 180 ? 0 : 12;
-  const total = subtotal - discount + shipping;
+  const items: CartEntry[] = session ? remoteItems : [];
+  const totalsQuery = useQuery({
+    queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
+    queryFn: () => hastonApi.validateCheckout(),
+    enabled: Boolean(session) && items.length > 0,
+  });
+  const totals = totalsQuery.data;
   const loadError = remoteError ? "Unable to load your bag right now." : null;
 
   useEffect(() => {
@@ -80,6 +73,13 @@ function Cart() {
           <p role="alert" className="py-9 text-center text-sm text-destructive">
             {loadError}
           </p>
+        ) : !session ? (
+          <div className="grid place-items-center py-9 text-center">
+            <p className="text-display text-3xl">Sign in to view your bag.</p>
+            <LuxeButton to="/login" className="mt-8" arrow>
+              Sign in
+            </LuxeButton>
+          </div>
         ) : items.length === 0 ? (
           <div className="grid place-items-center py-9 text-center">
             <p className="text-display text-3xl">Your bag is empty.</p>
@@ -141,11 +141,9 @@ function Cart() {
                         </p>
                         <button
                           onClick={() =>
-                            session
-                              ? removeItem(Number(item.id)).catch(() =>
-                                  setMutationError("Unable to remove this item from your bag."),
-                                )
-                              : setLines((ls) => ls.filter((l) => l.id !== String(item.id)))
+                            removeItem(Number(item.id)).catch(() =>
+                              setMutationError("Unable to remove this item from your bag."),
+                            )
                           }
                           disabled={Boolean(session) && isMutating}
                           className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground transition-colors hover:text-destructive"
@@ -156,17 +154,9 @@ function Cart() {
                       <div className="flex items-center gap-1 justify-self-center rounded-full border border-border p-1">
                         <button
                           onClick={() =>
-                            session
-                              ? updateQuantity({ id: Number(item.id), quantity: Math.max(1, quantity - 1) }).catch(() =>
-                                  setMutationError("Unable to update this item."),
-                                )
-                              : setLines((ls) =>
-                                  ls.map((l) =>
-                                    l.id === String(item.id)
-                                      ? { ...l, qty: Math.max(1, l.qty - 1) }
-                                      : l,
-                                  ),
-                                )
+                            updateQuantity({ id: Number(item.id), quantity: Math.max(1, quantity - 1) }).catch(() =>
+                              setMutationError("Unable to update this item."),
+                            )
                           }
                           disabled={Boolean(session) && isMutating}
                           className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
@@ -176,15 +166,9 @@ function Cart() {
                         <span className="w-7 text-center text-sm">{quantity}</span>
                         <button
                           onClick={() =>
-                            session
-                              ? updateQuantity({ id: Number(item.id), quantity: quantity + 1 }).catch(() =>
-                                  setMutationError("Unable to update this item."),
-                                )
-                              : setLines((ls) =>
-                                  ls.map((l) =>
-                                    l.id === String(item.id) ? { ...l, qty: l.qty + 1 } : l,
-                                  ),
-                                )
+                            updateQuantity({ id: Number(item.id), quantity: quantity + 1 }).catch(() =>
+                              setMutationError("Unable to update this item."),
+                            )
                           }
                           disabled={Boolean(session) && isMutating}
                           className="grid h-8 w-8 place-items-center rounded-full hover:bg-muted"
@@ -205,44 +189,19 @@ function Cart() {
                 <div className="mt-6 space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>{inr(subtotal)}</span>
+                    <span>{totals ? inr(totals.subtotal) : "Calculated at checkout"}</span>
                   </div>
-                  {applied && (
-                    <div className="flex justify-between text-accent">
-                      <span>Discount (WELCOME10)</span>
-                      <span>-{inr(discount)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shipping === 0 ? "Complimentary" : inr(shipping)}</span>
+                    <span>{totals ? (totals.shipping === 0 ? "Complimentary" : inr(totals.shipping)) : "Calculated at checkout"}</span>
                   </div>
                 </div>
                 <div className="mt-6 hairline pt-6">
                   <div className="flex justify-between text-lg">
                     <span className="text-display">Total</span>
-                    <span className="font-medium">{inr(total)}</span>
+                    <span className="font-medium">{totals ? inr(totals.total) : "Calculated at checkout"}</span>
                   </div>
                 </div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (promo) setApplied(true);
-                  }}
-                  className="mt-6 flex items-center gap-2 rounded-full border border-border p-1.5"
-                >
-                  <Tag className="ml-3 h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <input
-                    value={promo}
-                    onChange={(e) => setPromo(e.target.value)}
-                    placeholder="Promo code"
-                    className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none"
-                  />
-                  <button className="rounded-full bg-primary px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-primary-foreground">
-                    Apply
-                  </button>
-                </form>
 
                 <LuxeButton to="/checkout" className="mt-6 w-full" arrow>
                   Checkout securely
@@ -264,7 +223,7 @@ function Cart() {
         <div className="mt-6">
           <SectionHeader eyebrow="Complete the look" title="You may also like." />
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-            {PRODUCTS.slice(0, 4).map((p, i) => (
+            {recommendations.slice(0, 4).map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}
           </div>

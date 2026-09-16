@@ -1,10 +1,4 @@
-import { PRODUCTS } from "@/lib/haston-data";
-
-/**
- * Checkout state layer.
- * Purely client-side for now — every read/write goes through the helpers below so
- * they can be swapped for real backend/cart API calls without touching the UI.
- */
+/** Shared checkout display types for existing UI components. Commerce state belongs to the backend. */
 
 export type CheckoutLine = {
   id: string;
@@ -46,75 +40,6 @@ export type OrderTotals = {
   subtotal: number;
   shipping: number;
   total: number;
-};
-
-const KEY_LINES = "haston.checkout.lines";
-const KEY_DETAILS = "haston.checkout.details";
-const KEY_ORDER = "haston.checkout.order";
-
-/** Fallback bag contents so the flow is testable without a persisted cart. */
-const DEFAULT_LINES: CheckoutLine[] = [
-  { id: "1", qty: 1, size: "M", color: "Navy" },
-  { id: "3", qty: 2, size: "L", color: "Olive" },
-];
-
-const read = <T>(key: string): T | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.sessionStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : null;
-  } catch {
-    return null;
-  }
-};
-
-const write = (key: string, value: unknown) => {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* storage unavailable — non fatal */
-  }
-};
-
-export const setCheckoutLines = (lines: CheckoutLine[]) => write(KEY_LINES, lines);
-
-export const getCheckoutLines = (): CheckoutLine[] => read<CheckoutLine[]>(KEY_LINES) ?? DEFAULT_LINES;
-
-export const getCheckoutItems = (): CheckoutItem[] =>
-  getCheckoutLines()
-    .map((l) => {
-      const p = PRODUCTS.find((x) => x.id === l.id);
-      if (!p) return null;
-      return {
-        ...l,
-        name: p.name,
-        slug: p.slug,
-        image: p.image,
-        price: p.price,
-      } satisfies CheckoutItem;
-    })
-    .filter((x): x is CheckoutItem => x !== null);
-
-export const SHIPPING_FREE_ABOVE = 180;
-export const SHIPPING_FLAT = 12;
-
-export const getTotals = (items: CheckoutItem[]): OrderTotals => {
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = subtotal > SHIPPING_FREE_ABOVE || subtotal === 0 ? 0 : SHIPPING_FLAT;
-  return { subtotal, shipping, total: subtotal + shipping };
-};
-
-export const saveDetails = (d: CheckoutDetails) => write(KEY_DETAILS, d);
-export const getDetails = (): CheckoutDetails | null => read<CheckoutDetails>(KEY_DETAILS);
-
-export const saveOrder = (o: PlacedOrder) => write(KEY_ORDER, o);
-export const getOrder = (): PlacedOrder | null => read<PlacedOrder>(KEY_ORDER);
-
-export const clearCheckout = () => {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(KEY_LINES);
-  window.sessionStorage.removeItem(KEY_DETAILS);
 };
 
 /* ---------------------------------- validation --------------------------------- */

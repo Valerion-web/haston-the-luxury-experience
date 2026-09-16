@@ -1,9 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Check, Package } from "lucide-react";
 import { inr } from "@/lib/haston-data";
-import { readConfirmedOrder, type CreatedOrder } from "@/lib/mock-commerce";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
+import { useQuery } from "@tanstack/react-query";
+import { hastonApi } from "@/lib/haston-api";
+import { useHastonSession } from "@/hooks/use-haston-session";
+import { ApiError } from "@/lib/api-client";
+import { clearSession } from "@/lib/haston-session";
 
 export const Route = createFileRoute("/order-confirmation")({
   head: () => ({
@@ -16,33 +20,48 @@ export const Route = createFileRoute("/order-confirmation")({
 });
 
 function OrderConfirmation() {
-  const [order, setOrder] = useState<CreatedOrder | null>(null);
-  useEffect(() => setOrder(readConfirmedOrder()), []);
+  const session = useHastonSession();
+  const navigate = useNavigate();
+  const orderId = Number(new URLSearchParams(window.location.search).get("orderId"));
+  const validOrderId = Number.isInteger(orderId) && orderId > 0;
+  const { data: order, isLoading, error } = useQuery({
+    queryKey: ["haston", "order", orderId],
+    queryFn: () => hastonApi.order(orderId),
+    enabled: Boolean(session) && validOrderId,
+  });
 
-  if (!order) {
+  useEffect(() => {
+    if (!session) {
+      void navigate({ to: "/login", replace: true });
+    }
+  }, [navigate, session]);
+
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 401) {
+      clearSession();
+      void navigate({ to: "/login", replace: true });
+    }
+  }, [error, navigate]);
+
+  if (!session) return null;
+  if (isLoading) {
+    return <p className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-sm text-muted-foreground">Loading your order...</p>;
+  }
+  if (!validOrderId || error || !order) {
     return (
       <section className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-center">
         <div>
-          <p className="text-eyebrow text-muted-foreground">No confirmation found</p>
-          <h1 className="mt-4 text-display text-4xl">Nothing to show yet.</h1>
-          <LuxeButton to="/collections" className="mt-8" arrow>
-            Continue shopping
+          <p className="text-eyebrow text-muted-foreground">Order unavailable</p>
+          <h1 className="mt-4 text-display text-4xl">We could not load this order.</h1>
+          <LuxeButton to="/orders" className="mt-8" arrow>
+            View your orders
           </LuxeButton>
         </div>
       </section>
     );
   }
 
-  const method =
-    order.paymentMethod === "cod"
-      ? "Cash on Delivery"
-      : order.paymentMethod === "netbanking"
-        ? "Net Banking"
-        : order.paymentMethod === "upi"
-          ? "UPI"
-          : order.paymentMethod === "wallet"
-            ? "Wallet"
-            : "Credit / Debit Card";
+  const method = "Payment details unavailable";
   return (
     <section className="mx-auto max-w-3xl px-6 py-14 md:py-20">
       <div className="text-center">
@@ -63,7 +82,7 @@ function OrderConfirmation() {
               <p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
                 Order number
               </p>
-              <p className="mt-1 text-display text-xl">{order.order.id}</p>
+              <p className="mt-1 text-display text-xl">{order.id}</p>
             </div>
           </div>
           <div className="text-right">
@@ -72,7 +91,7 @@ function OrderConfirmation() {
           </div>
         </div>
         <div className="divide-y divide-border">
-          {order.order.items.map((item) => (
+          {order.items.map((item) => (
             <div key={item.id} className="flex gap-4 py-5">
               <img
                 src={item.product.image || undefined}
@@ -94,7 +113,7 @@ function OrderConfirmation() {
           <div className="flex justify-between text-muted-foreground">
             <span>Subtotal</span>
             <span className="text-foreground">
-              {inr(order.order.items.reduce((sum, item) => sum + item.price * item.quantity, 0))}
+              {inr(order.items.reduce((sum, item) => sum + item.price * item.quantity, 0))}
             </span>
           </div>
           <div className="flex justify-between text-muted-foreground">
@@ -103,15 +122,15 @@ function OrderConfirmation() {
               {inr(
                 Math.max(
                   0,
-                  order.order.totalPrice -
-                    order.order.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                  order.totalPrice -
+                    order.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
                 ),
               )}
             </span>
           </div>
           <div className="flex justify-between pt-3 text-lg">
             <span className="text-display">Total</span>
-            <span className="font-medium">{inr(order.order.totalPrice)}</span>
+            <span className="font-medium">{inr(order.totalPrice)}</span>
           </div>
         </div>
       </div>

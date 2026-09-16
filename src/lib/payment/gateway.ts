@@ -4,9 +4,8 @@ import type { CheckoutDetails, CheckoutItem, OrderTotals, PaymentMethodId } from
  * Modular payment layer.
  *
  * `PaymentGateway` is the single seam between the UI and a provider.
- * To go live, implement this interface with Razorpay / Stripe (open their SDK,
- * create the order on your backend, resolve with the provider ids) and export it
- * as `paymentGateway` instead of `mockGateway`. No UI change required.
+ * Provider execution belongs in the backend. This interface remains for future
+ * integration work, but it must never report a client-side payment as successful.
  */
 
 export type PaymentRequest = {
@@ -29,29 +28,15 @@ export type PaymentGateway = {
   pay: (req: PaymentRequest) => Promise<PaymentResult>;
 };
 
-const rand = (n: number) =>
-  Array.from({ length: n }, () => Math.floor(Math.random() * 36).toString(36))
-    .join("")
-    .toUpperCase();
-
-/** Mock provider — no real money movement, no gateway SDK. */
-export const mockGateway: PaymentGateway = {
-  id: "mock",
-  pay: async ({ method }) =>
-    new Promise((resolve) => {
-      setTimeout(
-        () =>
-          resolve({
-            status: "succeeded",
-            paymentId: `pay_mock_${rand(10)}`,
-            orderId: `HV-${Date.now().toString().slice(-6)}${method === "cod" ? "-C" : ""}`,
-          }),
-        2200,
-      );
-    }),
+export const paymentGateway: PaymentGateway = {
+  id: "unavailable",
+  pay: async () => ({
+    status: "failed",
+    paymentId: "",
+    orderId: "",
+    message: "Payment processing is not available yet.",
+  }),
 };
-
-export const paymentGateway: PaymentGateway = mockGateway;
 
 export const PAYMENT_METHODS: {
   id: PaymentMethodId;

@@ -2,11 +2,12 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
-import { CATEGORIES } from "@/lib/haston-data";
+import { IMG } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
 import logoFull from "@/assets/haston-logo.png";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { useHastonCart } from "@/hooks/use-haston-cart";
+import { useHastonCategories } from "@/hooks/use-haston-data";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
@@ -31,6 +32,7 @@ export function Navbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const session = useHastonSession();
   const { items: cartItems } = useHastonCart();
+  const { data: categories = [] } = useHastonCategories();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -159,7 +161,7 @@ export function Navbar() {
                 ))}
               </div>
               <div className="grid grid-cols-4 gap-3">
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <Link
                     key={c.slug}
                     to="/collections/$slug"
@@ -168,7 +170,7 @@ export function Navbar() {
                   >
                     <div className="aspect-square overflow-hidden">
                       <img
-                        src={c.image}
+                        src={IMG.heroShop}
                         alt={c.name}
                         loading="lazy"
                         decoding="async"
@@ -178,7 +180,7 @@ export function Navbar() {
                     <div className="mt-2">
                       <p className="text-display text-[10px]">{c.name}</p>
                       <p className="text-[7.5px] uppercase tracking-[0.2em] text-muted-foreground">
-                        {c.tagline}
+                        {c.description || "Explore the collection"}
                       </p>
                     </div>
                   </Link>
