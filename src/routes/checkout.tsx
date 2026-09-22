@@ -244,7 +244,7 @@ function Checkout() {
                   if (Object.keys(nextErrors).length > 0) return;
                   saveCheckoutDraft({
                     idempotencyKey: createCheckoutIdempotencyKey(),
-                    paymentMethod: "upi",
+                    paymentMethod: "razorpay",
                     shippingAddress: details,
                   });
                   window.location.assign("/payment");

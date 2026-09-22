@@ -1,27 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  Check,
-  ChevronDown,
-  CreditCard,
-  Lock,
-  ShieldCheck,
-  Smartphone,
-  Wallet,
-} from "lucide-react";
-import { inr } from "@/lib/haston-data";
-import {
-  createCheckoutIdempotencyKey,
-  readCheckoutDraft,
-  saveCheckoutDraft,
-  type OrderDraft,
-  type PaymentMethod,
-} from "@/lib/mock-commerce";
-import { hastonApi } from "@/lib/haston-api";
-import { LuxeButton } from "@/components/ui-haston/LuxeButton";
+import { Lock, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { inr } from "@/lib/haston-data";
+import { readCheckoutDraft, saveCheckoutDraft, type OrderDraft } from "@/lib/mock-commerce";
+import { hastonApi, type RazorpayOrderResponse } from "@/lib/haston-api";
+import { ApiError } from "@/lib/api-client";
+import { loadRazorpayCheckout } from "@/lib/payment/razorpay-loader";
 import { useHastonCart } from "@/hooks/use-haston-cart";
+import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 
 export const Route = createFileRoute("/payment")({
   head: () => ({
@@ -33,26 +20,14 @@ export const Route = createFileRoute("/payment")({
   component: Payment,
 });
 
-const METHODS: { key: PaymentMethod; label: string; detail: string }[] = [
-  { key: "upi", label: "UPI", detail: "Pay with any UPI app" },
-  { key: "card", label: "Credit / Debit Card", detail: "Visa, Mastercard, RuPay" },
-  { key: "netbanking", label: "Net Banking", detail: "All major banks" },
-  { key: "wallet", label: "Wallet", detail: "Use your preferred wallet" },
-  { key: "cod", label: "Cash on Delivery", detail: "Pay when your order arrives" },
-];
-
-const inputClass =
-  "mt-2 block w-full rounded-md border border-border bg-transparent px-4 py-3 text-sm focus:border-primary focus:outline-none";
+const RAZORPAY_PUBLIC_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
+type PaymentState = "idle" | "creating" | "opening" | "verifying" | "failed";
 
 function Payment() {
   const [draft, setDraft] = useState<OrderDraft | null>(null);
-  const [method, setMethod] = useState<PaymentMethod>("upi");
-  const [upi, setUpi] = useState("");
-  const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
-  const [bank, setBank] = useState("");
-  const [wallet, setWallet] = useState("");
+  const [paymentOrder, setPaymentOrder] = useState<RazorpayOrderResponse | null>(null);
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [paymentState, setPaymentState] = useState<PaymentState>("idle");
   const { items, isLoading: cartLoading, error: cartError } = useHastonCart();
   const totalsQuery = useQuery({
     queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
@@ -60,50 +35,20 @@ function Payment() {
     enabled: items.length > 0,
   });
 
-  useEffect(() => {
-    setDraft(readCheckoutDraft());
-  }, []);
+  useEffect(() => setDraft(readCheckoutDraft()), []);
 
   if (!draft) {
     return (
       <section className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-center">
         <div>
           <p className="text-eyebrow text-muted-foreground">Payment unavailable</p>
-          <h1 className="mt-4 text-display text-4xl">Your bag is empty.</h1>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Return to checkout to begin a new order.
-          </p>
-          <LuxeButton to="/cart" className="mt-8" arrow>
-            Return to bag
-          </LuxeButton>
+          <h1 className="mt-4 text-display text-4xl">Your checkout has expired.</h1>
+          <p className="mt-4 text-sm text-muted-foreground">Return to checkout to begin a new order.</p>
+          <LuxeButton to="/cart" className="mt-8" arrow>Return to bag</LuxeButton>
         </div>
       </section>
     );
   }
-
-  const submit = async () => {
-    setError("");
-    const validation = validate(method, { upi, card, bank, wallet });
-    if (validation) {
-      setError(validation);
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const idempotencyKey = draft.idempotencyKey || createCheckoutIdempotencyKey();
-      const nextDraft = { ...draft, idempotencyKey, paymentMethod: method };
-      saveCheckoutDraft(nextDraft);
-      throw new Error("Payment processing is not available yet. Your order has not been placed.");
-    } catch (submissionError) {
-      setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "We could not complete your order.",
-      );
-      setSubmitting(false);
-    }
-  };
 
   if (cartLoading || !totalsQuery.data) {
     return <p className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-sm text-muted-foreground">Loading your payment summary...</p>;
@@ -112,200 +57,139 @@ function Payment() {
     return <p className="mx-auto grid min-h-[70vh] max-w-2xl place-items-center px-6 py-16 text-sm text-destructive">Unable to load your bag. Please return to checkout.</p>;
   }
 
+  const submitting = ["creating", "opening", "verifying"].includes(paymentState);
+  const displayTotal = paymentOrder
+    ? formatBackendAmount(paymentOrder.amount, paymentOrder.currency)
+    : inr(totalsQuery.data.total);
+
+  const submit = async () => {
+    setError("");
+    if (!RAZORPAY_PUBLIC_KEY) {
+      setPaymentState("failed");
+      setError("Secure payment is not configured yet. Please try again later.");
+      return;
+    }
+    if (!draft.idempotencyKey) {
+      setPaymentState("failed");
+      setError("This checkout has expired. Please restart checkout.");
+      return;
+    }
+
+    setPaymentState("creating");
+    try {
+      const order = await hastonApi.razorpayOrder({ idempotencyKey: draft.idempotencyKey });
+      const nextDraft: OrderDraft = {
+        ...draft,
+        paymentMethod: "razorpay",
+        paymentId: order.paymentId,
+        razorpayOrderId: order.razorpayOrderId,
+      };
+      saveCheckoutDraft(nextDraft);
+      setDraft(nextDraft);
+      setPaymentOrder(order);
+
+      const Razorpay = await loadRazorpayCheckout();
+      setPaymentState("opening");
+      let paymentOutcome: "failed" | "success" | null = null;
+      const checkout = new Razorpay({
+        key: RAZORPAY_PUBLIC_KEY,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.razorpayOrderId,
+        name: "HASTON",
+        description: "HASTON order payment",
+        handler: async (response) => {
+          if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+            setPaymentState("failed");
+            setError("Payment could not be verified. Please try again.");
+            return;
+          }
+          paymentOutcome = "success";
+          setPaymentState("verifying");
+          try {
+            const result = await hastonApi.razorpayVerify({
+              paymentId: order.paymentId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              shippingAddress: draft.shippingAddress || {},
+              billingAddress: draft.shippingAddress || {},
+            });
+            if (result.success && result.paymentStatus === "AUTHORIZED") {
+              window.location.assign(`/order-confirmation?orderId=${result.orderId}`);
+              return;
+            }
+            setPaymentState("failed");
+            setError("Payment verification did not complete.");
+          } catch (verificationError) {
+            setPaymentState("failed");
+            setError(getPaymentError(verificationError));
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            if (paymentOutcome !== null) return;
+            setPaymentState("failed");
+            setError("Payment was cancelled. You can try again when you are ready.");
+          },
+        },
+        theme: { color: "#0E1A2B" },
+      });
+      checkout.on("payment.failed", () => {
+        paymentOutcome = "failed";
+        setPaymentState("failed");
+        setError("Payment failed. You can try again when you are ready.");
+      });
+      checkout.open();
+    } catch (submissionError) {
+      setPaymentState("failed");
+      setError(getPaymentError(submissionError));
+    }
+  };
+
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
       <div className="flex items-center justify-between border-b border-border pb-6">
-        <Link to="/" className="text-display text-xl tracking-[0.3em]">
-          HASTON
-        </Link>
-        <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-          <Lock className="h-3.5 w-3.5" /> Secure checkout
-        </p>
+        <Link to="/" className="text-display text-xl tracking-[0.3em]">HASTON</Link>
+        <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground"><Lock className="h-3.5 w-3.5" /> Secure checkout</p>
       </div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_420px]">
         <div>
           <p className="text-eyebrow text-muted-foreground">Step 3 of 3</p>
           <h1 className="mt-3 text-display text-4xl">Complete your order.</h1>
-          <div className="mt-8 space-y-3">
-            {METHODS.map((item) => (
-              <label
-                key={item.key}
-                className={`flex cursor-pointer items-center gap-4 rounded-md border p-5 transition-colors ${method === item.key ? "border-primary bg-muted/30" : "border-border hover:border-primary/60"}`}
-              >
-                <input
-                  type="radio"
-                  name="payment-method"
-                  value={item.key}
-                  checked={method === item.key}
-                  onChange={() => {
-                    setMethod(item.key);
-                    setError("");
-                  }}
-                  className="accent-primary"
-                />
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-secondary">
-                  {item.key === "upi" && <Smartphone className="h-4 w-4" />}
-                  {item.key === "card" && <CreditCard className="h-4 w-4" />}
-                  {item.key === "netbanking" && <span className="text-xs">₹</span>}
-                  {item.key === "wallet" && <Wallet className="h-4 w-4" />}
-                  {item.key === "cod" && <ShieldCheck className="h-4 w-4" />}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>
-                </div>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${method === item.key ? "rotate-180" : ""}`}
-                />
-              </label>
-            ))}
+          <div className="mt-8 rounded-md border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary"><ShieldCheck className="h-5 w-5" /></div>
+              <div>
+                <p className="text-sm font-medium">Pay securely with Razorpay</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Complete your payment in Razorpay Checkout. Your payment credentials are handled by Razorpay and are never entered or stored by HASTON.</p>
+              </div>
+            </div>
+            <div className="mt-6 border-t border-border pt-5 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground">Payment amount</span><span className="font-medium">{displayTotal}</span></div>
+              <div className="mt-2 flex justify-between"><span className="text-muted-foreground">Currency</span><span>{paymentOrder?.currency || totalsQuery.data.currency}</span></div>
+              {draft.shippingAddress && <div className="mt-4 border-t border-border pt-4"><p className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Shipping to</p><p className="mt-2 text-sm">{draft.shippingAddress.firstName} {draft.shippingAddress.lastName}</p><p className="mt-1 text-sm text-muted-foreground">{draft.shippingAddress.address}, {draft.shippingAddress.city}, {draft.shippingAddress.postalCode}, {draft.shippingAddress.country}</p></div>}
+            </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={method}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-6 rounded-md border border-border p-6"
-            >
-              {method === "upi" && (
-                <Field label="UPI ID" placeholder="name@bank" value={upi} onChange={setUpi} />
-              )}
-              {method === "card" && (
-                <div className="space-y-4">
-                  <Field
-                    label="Card number"
-                    placeholder="1234 5678 9012 3456"
-                    value={card.number}
-                    onChange={(value) => setCard({ ...card, number: value })}
-                  />
-                  <Field
-                    label="Name on card"
-                    value={card.name}
-                    onChange={(value) => setCard({ ...card, name: value })}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field
-                      label="Expiry date"
-                      placeholder="MM / YY"
-                      value={card.expiry}
-                      onChange={(value) => setCard({ ...card, expiry: value })}
-                    />
-                    <Field
-                      label="CVV"
-                      placeholder="123"
-                      type="password"
-                      value={card.cvv}
-                      onChange={(value) => setCard({ ...card, cvv: value })}
-                    />
-                  </div>
-                  <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    <Lock className="h-3.5 w-3.5" /> Card details are used only for this mock
-                    session.
-                  </p>
-                </div>
-              )}
-              {method === "netbanking" && (
-                <SelectField
-                  label="Select your bank"
-                  value={bank}
-                  onChange={setBank}
-                  options={[
-                    "HDFC Bank",
-                    "ICICI Bank",
-                    "State Bank of India",
-                    "Axis Bank",
-                    "Kotak Mahindra Bank",
-                  ]}
-                />
-              )}
-              {method === "wallet" && (
-                <SelectField
-                  label="Select your wallet"
-                  value={wallet}
-                  onChange={setWallet}
-                  options={["PhonePe", "Paytm", "Amazon Pay", "Mobikwik"]}
-                />
-              )}
-              {method === "cod" && (
-                <div>
-                  <p className="text-sm font-medium">Pay in cash when your order arrives.</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    A nominal handling charge may apply at delivery. Please keep the exact amount
-                    ready for our delivery partner.
-                  </p>
-                  <label className="mt-5 flex items-center gap-3 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={wallet === "confirmed"}
-                      onChange={(event) => setWallet(event.target.checked ? "confirmed" : "")}
-                      className="accent-primary"
-                    />{" "}
-                    I confirm this cash-on-delivery order.
-                  </label>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {error && (
-            <p
-              role="alert"
-              className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-            >
-              {error}
-            </p>
-          )}
-          <LuxeButton
-            onClick={submit}
-            disabled={submitting}
-            className="mt-6 w-full sm:w-auto"
-            arrow
-          >
-            {submitting
-              ? "Processing securely..."
-              : method === "cod"
-                ? "Place Order"
-                : `Pay ${inr(totalsQuery.data.total)}`}
+          {error && <p role="alert" className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p>}
+          <LuxeButton onClick={submit} disabled={submitting} className="mt-6 w-full sm:w-auto" arrow>
+            {paymentState === "creating" ? "Preparing secure payment..." : paymentState === "opening" ? "Opening Razorpay..." : paymentState === "verifying" ? "Verifying securely..." : `Pay ${displayTotal}`}
           </LuxeButton>
-          <p className="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              Payment processing will be enabled after the secure payment integration is complete.
-          </p>
+          <p className="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{paymentState === "failed" ? "Your order has not been placed. You can retry this payment attempt." : "Payment is completed only after secure backend verification."}</p>
         </div>
 
         <aside className="md:sticky md:top-16 md:self-start">
           <div className="rounded-md border border-border bg-card p-8 soft-shadow">
             <p className="text-eyebrow">Order summary</p>
             <div className="mt-6 space-y-5">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4">
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="h-24 w-20 shrink-0 rounded object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm">{item.product.name}</p>
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                      {item.variant?.color || "Selected"} · Size {item.variant?.size || "Standard"} · Qty {item.quantity}
-                    </p>
-                  </div>
-                  <p className="text-sm">{inr(item.lineTotal)}</p>
-                </div>
-              ))}
+              {items.map((item) => <div key={item.id} className="flex gap-4"><img src={item.product.image} alt={item.product.name} className="h-24 w-20 shrink-0 rounded object-cover" /><div className="min-w-0 flex-1"><p className="text-sm">{item.product.name}</p><p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{item.variant?.color || "Selected"} · Size {item.variant?.size || "Standard"} · Qty {item.quantity}</p></div><p className="text-sm">{inr(item.lineTotal)}</p></div>)}
             </div>
             <div className="mt-6 space-y-2 border-t border-border pt-6 text-sm">
               <SummaryRow label="Subtotal" value={inr(totalsQuery.data.subtotal)} />
-              <SummaryRow
-                label="Shipping"
-                value={totalsQuery.data.shipping === 0 ? "Complimentary" : inr(totalsQuery.data.shipping)}
-              />
-              <div className="mt-3 flex justify-between border-t border-border pt-3 text-lg">
-                <span className="text-display">Total</span>
-                <span className="font-medium">{inr(totalsQuery.data.total)}</span>
-              </div>
+              <SummaryRow label="Shipping" value={totalsQuery.data.shipping === 0 ? "Complimentary" : inr(totalsQuery.data.shipping)} />
+              <div className="mt-3 flex justify-between border-t border-border pt-3 text-lg"><span className="text-display">Total</span><span className="font-medium">{displayTotal}</span></div>
             </div>
           </div>
         </aside>
@@ -314,92 +198,18 @@ function Payment() {
   );
 }
 
-function Field({
-  label,
-  placeholder,
-  value,
-  onChange,
-  type = "text",
-}: {
-  label: string;
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{label}</span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className={inputClass}
-      />
-    </label>
-  );
+function formatBackendAmount(amount: number, currency: string) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 2 }).format(amount / 100);
 }
 
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: string[];
-}) {
-  return (
-    <label className="block">
-      <span className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={inputClass}
-      >
-        <option value="">Choose an option</option>
-        {options.map((option) => (
-          <option key={option}>{option}</option>
-        ))}
-      </select>
-    </label>
-  );
+function getPaymentError(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.status === 409) return error.message.includes("Cart total no longer matches") ? "Your cart amount changed. Please restart checkout before trying again." : "This payment attempt cannot continue. Please restart checkout and try again.";
+    if (error.status === 401) return "Your session expired. Please sign in and try again.";
+  }
+  return "We could not complete payment. Please try again.";
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between text-muted-foreground">
-      <span>{label}</span>
-      <span className="text-foreground">{value}</span>
-    </div>
-  );
-}
-
-function validate(
-  method: PaymentMethod,
-  values: {
-    upi: string;
-    card: { number: string; name: string; expiry: string; cvv: string };
-    bank: string;
-    wallet: string;
-  },
-) {
-  if (method === "upi" && !/^[\w.-]+@[\w.-]+$/.test(values.upi.trim()))
-    return "Enter a valid UPI ID, such as name@bank.";
-  if (method === "card") {
-    if (!/^\d{12,19}$/.test(values.card.number.replace(/\s/g, "")))
-      return "Enter a valid card number.";
-    if (!values.card.name.trim()) return "Enter the name on your card.";
-    if (!/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/.test(values.card.expiry.trim()))
-      return "Enter expiry as MM / YY.";
-    if (!/^\d{3,4}$/.test(values.card.cvv)) return "Enter a valid CVV.";
-  }
-  if (method === "netbanking" && !values.bank) return "Select your bank.";
-  if (method === "wallet" && !values.wallet) return "Select your wallet.";
-  if (method === "cod" && values.wallet !== "confirmed")
-    return "Confirm the cash-on-delivery order to continue.";
-  return "";
+  return <div className="flex justify-between text-muted-foreground"><span>{label}</span><span className="text-foreground">{value}</span></div>;
 }

@@ -57,7 +57,6 @@ export type WishlistResponse = {
   items: WishlistItem[];
 };
 export type AuthResponse = {
-  token: string;
   user: import("@/lib/haston-session").SessionUser;
 };
 const colorHex: Record<string, string> = {
@@ -142,6 +141,10 @@ export type OrderResponse = {
   status: string;
   totalPrice: number;
   currency: string;
+  payments?: Array<{
+    provider: string;
+    status: string;
+  }>;
   shippingAddress?: string | null;
   billingAddress?: string | null;
   createdAt?: string;
@@ -153,6 +156,18 @@ export type CheckoutValidationResponse = {
   shipping: number;
   total: number;
   currency: string;
+};
+export type RazorpayOrderResponse = {
+  paymentId: number;
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  receipt: string;
+};
+export type RazorpayVerifyResponse = {
+  success: true;
+  orderId: number;
+  paymentStatus: "AUTHORIZED";
 };
 export type AdminOrderResponse = OrderResponse & {
   user?: { id: number; name?: string | null; email?: string | null; role?: string } | null;
@@ -267,6 +282,24 @@ export const hastonApi = {
     apiRequest<CheckoutValidationResponse>("/checkout/validate", {
       method: "POST",
       body: JSON.stringify(couponCode ? { couponCode } : {}),
+    }),
+  razorpayOrder: (body: { idempotencyKey: string; couponCode?: string }) =>
+    apiRequest<RazorpayOrderResponse>("/payments/razorpay/order", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  razorpayVerify: (body: {
+    paymentId: number;
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+    couponCode?: string;
+    shippingAddress: Record<string, string>;
+    billingAddress: Record<string, string>;
+  }) =>
+    apiRequest<RazorpayVerifyResponse>("/payments/razorpay/verify", {
+      method: "POST",
+      body: JSON.stringify(body),
     }),
   addCartItem: (productId: number, quantity: number, variantId?: number) =>
     apiRequest<BackendCartResponse>("/cart/items", {

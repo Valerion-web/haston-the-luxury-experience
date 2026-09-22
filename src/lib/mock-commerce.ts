@@ -1,9 +1,11 @@
-export type PaymentMethod = "upi" | "card" | "netbanking" | "wallet" | "cod";
+export type PaymentMethod = "razorpay";
 
 export type OrderDraft = {
   idempotencyKey: string;
   paymentMethod: PaymentMethod;
   shippingAddress?: Record<string, string>;
+  paymentId?: number;
+  razorpayOrderId?: string;
 };
 
 const DRAFT_KEY = "haston_checkout_draft";
