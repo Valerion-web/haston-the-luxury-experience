@@ -21,10 +21,12 @@ export function AdminLayout({ children }: { children?: ReactNode }) {
 
   useEffect(() => {
     if (!session) void navigate({ to: "/login", replace: true });
-    else if (session.role !== "ADMIN") void navigate({ to: "/account", replace: true });
+    else if (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN") {
+      void navigate({ to: "/account", replace: true });
+    }
   }, [navigate, session]);
 
-  if (!session || session.role !== "ADMIN") return null;
+  if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) return null;
 
   const signOut = () => {
     clearSession();
