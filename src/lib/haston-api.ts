@@ -59,6 +59,46 @@ export type WishlistResponse = {
 export type AuthResponse = {
   user: import("@/lib/haston-session").SessionUser;
 };
+export type AdminDashboardData = {
+  period: string;
+  revenue: number;
+  orders: number;
+  averageOrderValue: number;
+  revenueChangePct: number | null;
+  ordersChangePct: number | null;
+  averageOrderValueChangePct: number | null;
+};
+export type AdminProduct = {
+  id: number;
+  name: string;
+  slug: string;
+  sku: string | null;
+  shortDescription: string | null;
+  fullDescription: string | null;
+  description: string | null;
+  brand: string | null;
+  price: number;
+  discountPercent: number;
+  tax: number;
+  countInStock: number;
+  lowStockAlert: number;
+  availability: string;
+  warehouse: string | null;
+  images: string[];
+  collection: string | null;
+  tags: string[];
+  size: string | null;
+  color: string | null;
+  material: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  keywords: string[];
+  status: string;
+  category: { id: number; name: string } | null;
+  categoryId: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
 const colorHex: Record<string, string> = {
   Navy: "#0E1A2B",
   Ivory: "#F6F3E0",
@@ -313,4 +353,30 @@ export const hastonApi = {
     }).then(mapCart),
   removeCartItem: (id: number) =>
     apiRequest<BackendCartResponse>(`/cart/items/${id}`, { method: "DELETE" }).then(mapCart),
+  adminDashboard: (period: string = "today") =>
+    apiRequest<AdminDashboardData>(`/admin/dashboard?period=${period}`),
+  adminProducts: () => apiRequest<AdminProduct[]>("/admin/products"),
+  adminProductById: (id: number) =>
+    apiRequest<AdminProduct>(`/admin/products/${id}`),
+  createAdminProduct: (data: Partial<AdminProduct>) =>
+    apiRequest<AdminProduct>("/admin/products", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateAdminProduct: (id: number, data: Partial<AdminProduct>) =>
+    apiRequest<AdminProduct>(`/admin/products/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteAdminProduct: (id: number) =>
+    apiRequest<{ message: string }>(`/admin/products/${id}`, { method: "DELETE" }),
+  adminInventory: (lowStockThreshold?: number) => {
+    const query = lowStockThreshold ? `?lowStockThreshold=${lowStockThreshold}` : "";
+    return apiRequest<AdminProduct[]>(`/admin/inventory${query}`);
+  },
+  updateAdminInventory: (id: number, countInStock: number) =>
+    apiRequest<AdminProduct>(`/admin/inventory/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ countInStock }),
+    }),
 };

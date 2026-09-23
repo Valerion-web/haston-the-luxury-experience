@@ -3,14 +3,20 @@ import { RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { hastonApi } from "@/lib/haston-api";
 
-export function AdminOrdersView() {
+export function AdminOrdersView({ limit }: { limit?: number } = {}) {
   const {
     data: orders = [],
     isLoading,
     error,
     refetch,
     isFetching,
-  } = useQuery({ queryKey: ["haston", "admin-orders"], queryFn: hastonApi.adminOrders });
+  } = useQuery({
+    queryKey: ["haston", "admin-orders"],
+    queryFn: hastonApi.adminOrders,
+  });
+
+  const displayOrders = limit ? orders.slice(0, limit) : orders;
+
   return (
     <section>
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -26,17 +32,19 @@ export function AdminOrdersView() {
           <RefreshCw className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} /> Refresh
         </button>
       </div>
+
       {isLoading && <p className="mt-8 text-sm text-muted-foreground">Loading orders...</p>}
       {error && (
         <p role="alert" className="mt-8 text-sm text-destructive">
           {error instanceof Error ? error.message : "Unable to load orders."}
         </p>
       )}
-      {!isLoading && !error && orders.length === 0 && (
+      {!isLoading && !error && displayOrders.length === 0 && (
         <p className="mt-8 text-sm text-muted-foreground">No orders have been placed yet.</p>
       )}
+
       <div className="mt-8 space-y-4">
-        {orders.map((order) => (
+        {displayOrders.map((order) => (
           <Link
             key={order.id}
             to="/admin/orders/$id"

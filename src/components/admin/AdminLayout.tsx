@@ -7,6 +7,11 @@ import { clearSession } from "@/lib/haston-session";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { AdminOrdersView } from "@/components/admin/AdminOrdersView";
 import { AdminOrderDetailsView } from "@/components/admin/AdminOrderDetailsView";
+import { ShoppingCart, Boxes } from "lucide-react";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AdminProductsView } from "@/components/admin/AdminProductsView";
+import { AdminInventoryView } from "@/components/admin/AdminInventoryView";
+import { AdminProductDetailsView } from "@/components/admin/AdminProductDetailsView";
 
 export function AdminLayout({ children }: { children?: ReactNode }) {
   const session = useHastonSession();
@@ -54,6 +59,18 @@ export function AdminLayout({ children }: { children?: ReactNode }) {
                 <Package className="h-4 w-4" /> Orders
               </Link>
             </nav>
+            <Link
+              to="/admin/products"
+              className="flex items-center gap-3 rounded px-3 py-3 text-[10px] uppercase tracking-[0.22em] transition-colors hover:bg-muted data-[status=active]:bg-primary data-[status=active]:text-primary-foreground"
+            >
+              <ShoppingCart className="h-4 w-4" /> Products
+            </Link>
+            <Link
+              to="/admin/inventory"
+              className="flex items-center gap-3 rounded px-3 py-3 text-[10px] uppercase tracking-[0.22em] transition-colors hover:bg-muted data-[status=active]:bg-primary data-[status=active]:text-primary-foreground"
+            >
+              <Boxes className="h-4 w-4" /> Inventory
+            </Link>
             <button
               onClick={signOut}
               className="mt-8 flex w-full items-center gap-3 rounded px-3 py-3 text-left text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -64,7 +81,19 @@ export function AdminLayout({ children }: { children?: ReactNode }) {
         </aside>
         <main className="min-w-0 flex-1">
           {children ||
-            (pathname.startsWith("/admin/orders/") ? (
+            (pathname === "/admin" || pathname === "/admin/" ? (
+              <AdminDashboard />
+            ) : pathname === "/admin/products" ? (
+              <AdminProductsView />
+            ) : pathname.startsWith("/admin/products/") ? (
+              <AdminProductDetailsView
+                productId={
+                  pathname.endsWith("/new") ? undefined : Number(pathname.split("/").pop())
+                }
+              />
+            ) : pathname === "/admin/inventory" ? (
+              <AdminInventoryView />
+            ) : pathname.startsWith("/admin/orders/") ? (
               <AdminOrderDetailsView orderId={Number(pathname.split("/").pop())} />
             ) : pathname === "/admin/orders" ? (
               <AdminOrdersView />
