@@ -35,6 +35,7 @@ import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShippingRouteImport } from './routes/shipping'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SustainabilityRouteImport } from './routes/sustainability'
@@ -182,6 +183,11 @@ const ShippingRoute = ShippingRouteImport.update({
   path: '/shipping',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SizeGuideRoute = SizeGuideRouteImport.update({
   id: '/size-guide',
   path: '/size-guide',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/sustainability': typeof SustainabilityRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/sustainability': typeof SustainabilityRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
+  '/shop': typeof ShopRoute
   '/size-guide': typeof SizeGuideRoute
   '/support': typeof SupportRoute
   '/sustainability': typeof SustainabilityRoute
@@ -425,6 +434,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/shop'
     | '/size-guide'
     | '/support'
     | '/sustainability'
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/shop'
     | '/size-guide'
     | '/support'
     | '/sustainability'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/shipping'
+    | '/shop'
     | '/size-guide'
     | '/support'
     | '/sustainability'
@@ -558,6 +570,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   ShippingRoute: typeof ShippingRoute
+  ShopRoute: typeof ShopRoute
   SizeGuideRoute: typeof SizeGuideRoute
   SupportRoute: typeof SupportRoute
   SustainabilityRoute: typeof SustainabilityRoute
@@ -755,6 +768,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShippingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/size-guide': {
       id: '/size-guide'
       path: '/size-guide'
@@ -935,6 +955,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   ShippingRoute: ShippingRoute,
+  ShopRoute: ShopRoute,
   SizeGuideRoute: SizeGuideRoute,
   SupportRoute: SupportRoute,
   SustainabilityRoute: SustainabilityRoute,

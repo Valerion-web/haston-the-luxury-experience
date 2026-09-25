@@ -11,7 +11,7 @@ import { useHastonCategories } from "@/hooks/use-haston-data";
 
 const navLinks = [
   { label: "New", to: "/collections/new-arrivals" },
-  { label: "Shop", to: "/collections", mega: true },
+  { label: "Shop", to: "/shop", mega: true },
   { label: "Lookbook", to: "/lookbook" },
   { label: "Journal", to: "/journal" },
   { label: "About", to: "/about" },
