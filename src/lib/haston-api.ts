@@ -59,6 +59,7 @@ export type WishlistResponse = {
 export type AuthResponse = {
   user: import("@/lib/haston-session").SessionUser;
 };
+export type GoogleNonceResponse = { nonce: string };
 export type AdminDashboardData = {
   period: string;
   revenue: number;
@@ -261,6 +262,12 @@ export const hastonApi = {
     apiRequest<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+    }),
+  googleNonce: () => apiRequest<GoogleNonceResponse>("/auth/google/nonce"),
+  googleLogin: (credential: string) =>
+    apiRequest<AuthResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
     }),
   register: (name: string, email: string, password: string) =>
     apiRequest<AuthResponse>("/auth/register", {

@@ -1,11 +1,89 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Phone } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { IMG } from "@/lib/haston-data";
+import { ApiError } from "@/lib/api-client";
 import { hastonApi } from "@/lib/haston-api";
 import { saveSession } from "@/lib/haston-session";
+
+type GoogleCredentialResponse = { credential?: string };
+type GoogleIdentityApi = {
+  initialize: (options: {
+    client_id: string;
+    nonce: string;
+    auto_select: false;
+    callback: (response: GoogleCredentialResponse) => void;
+  }) => void;
+  renderButton: (
+    parent: HTMLElement,
+    options: {
+      theme: "outline";
+      size: "large";
+      text: "continue_with";
+      shape: "rect";
+      logo_alignment: "left";
+      width: number;
+    },
+  ) => void;
+};
+
+declare global {
+  interface Window {
+    google?: { accounts?: { id?: GoogleIdentityApi } };
+  }
+}
+
+const GOOGLE_GIS_URL = "https://accounts.google.com/gsi/client";
+let googleGisPromise: Promise<GoogleIdentityApi> | null = null;
+
+function loadGoogleIdentityServices() {
+  if (window.google?.accounts?.id) return Promise.resolve(window.google.accounts.id);
+  if (googleGisPromise) return googleGisPromise;
+
+  googleGisPromise = new Promise<GoogleIdentityApi>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = GOOGLE_GIS_URL;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      const googleId = window.google?.accounts?.id;
+      if (googleId) resolve(googleId);
+      else {
+        googleGisPromise = null;
+        script.remove();
+        reject(new Error("Google Identity Services did not initialize."));
+      }
+    };
+    script.onerror = () => {
+      googleGisPromise = null;
+      script.remove();
+      reject(new Error("Google Identity Services could not be loaded."));
+    };
+    document.head.append(script);
+  });
+
+  return googleGisPromise;
+}
+
+const googleAuthErrorMessage = (error: unknown) => {
+  if (error instanceof ApiError) {
+    if (error.status === 409) {
+      return "An account already exists for this email. Sign in with email and password first.";
+    }
+    if (error.status === 400) {
+      return "Google could not verify this sign-in. Please try again or use email and password.";
+    }
+    if (error.status === 401 || error.status === 403) {
+      return "This account cannot sign in to this HASTON store. Use another account or contact support.";
+    }
+  }
+  if (error instanceof TypeError) {
+    return "Could not connect to HASTON. Check your connection and try again.";
+  }
+  return "Google sign-in could not be completed. Please try again.";
+};
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -20,6 +98,7 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -32,6 +111,14 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleInitializationAttempt, setGoogleInitializationAttempt] = useState(0);
+  const [googleInitializing, setGoogleInitializing] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState("");
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+  const googleRequestInFlight = useRef(false);
+  const googleCredentialHandler = useRef<(credential: string) => void>(() => undefined);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,6 +169,122 @@ function Login() {
     setEmailError("");
     setPhoneError("");
   };
+
+  googleCredentialHandler.current = (credential) => {
+    if (googleRequestInFlight.current) return;
+    googleRequestInFlight.current = true;
+    setGoogleSubmitting(true);
+    setGoogleError("");
+
+    void (async () => {
+      try {
+        const response = await hastonApi.googleLogin(credential);
+        saveSession(response.user);
+        await navigate({ to: "/account", replace: true });
+      } catch (error) {
+        setGoogleError(googleAuthErrorMessage(error));
+        googleRequestInFlight.current = false;
+        setGoogleSubmitting(false);
+        setGoogleInitializationAttempt((attempt) => attempt + 1);
+      }
+    })();
+  };
+
+  useEffect(() => {
+    let active = true;
+    let resizeObserver: ResizeObserver | null = null;
+    let resizeHandler: (() => void) | null = null;
+
+    const initializeGoogle = async () => {
+      setGoogleInitializing(true);
+      setGoogleReady(false);
+      if (!googleClientId) {
+        setGoogleError(
+          "Google sign-in is unavailable. Configure VITE_GOOGLE_CLIENT_ID, then restart the dev server or rebuild the app.",
+        );
+        setGoogleInitializing(false);
+        googleRequestInFlight.current = false;
+        setGoogleSubmitting(false);
+        return;
+      }
+
+      let failedAt: "nonce" | "script" | "initialize" = "nonce";
+      try {
+        const { nonce } = await hastonApi.googleNonce();
+        if (!nonce) throw new Error("The Google sign-in nonce was missing.");
+
+        failedAt = "script";
+        const googleId = await loadGoogleIdentityServices();
+        if (!active) return;
+
+        failedAt = "initialize";
+        googleId.initialize({
+          client_id: googleClientId,
+          nonce,
+          auto_select: false,
+          callback: (response) => {
+            if (typeof response.credential !== "string" || !response.credential) {
+              setGoogleError("Google did not return a sign-in credential. Please try again.");
+              setGoogleInitializationAttempt((attempt) => attempt + 1);
+              return;
+            }
+            googleCredentialHandler.current(response.credential);
+          },
+        });
+
+        const buttonContainer = googleButtonRef.current;
+        if (!buttonContainer) throw new Error("The Google sign-in button is unavailable.");
+
+        const renderGoogleButton = () => {
+          if (!active || googleRequestInFlight.current) return;
+          const width = Math.floor(buttonContainer.getBoundingClientRect().width);
+          if (width < 1) return;
+          buttonContainer.replaceChildren();
+          googleId.renderButton(buttonContainer, {
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "rect",
+            logo_alignment: "left",
+            width,
+          });
+        };
+
+        renderGoogleButton();
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver(renderGoogleButton);
+          resizeObserver.observe(buttonContainer);
+        } else {
+          resizeHandler = renderGoogleButton;
+          window.addEventListener("resize", resizeHandler);
+        }
+
+        setGoogleReady(true);
+        googleRequestInFlight.current = false;
+        setGoogleSubmitting(false);
+      } catch {
+        if (!active) return;
+        setGoogleError(
+          failedAt === "nonce"
+            ? "Could not prepare Google sign-in. Check your connection and try again."
+            : failedAt === "script"
+              ? "Google sign-in could not be loaded. Check your connection and try again."
+              : "Google sign-in could not be initialized. Please try again.",
+        );
+        googleRequestInFlight.current = false;
+        setGoogleSubmitting(false);
+      } finally {
+        if (active) setGoogleInitializing(false);
+      }
+    };
+
+    void initializeGoogle();
+    return () => {
+      active = false;
+      resizeObserver?.disconnect();
+      if (resizeHandler) window.removeEventListener("resize", resizeHandler);
+    };
+  }, [googleClientId, googleInitializationAttempt]);
 
   return (
     <div className="grid grid-cols-1 md:min-h-[calc(100svh-120px)] md:grid-cols-2">
@@ -205,18 +408,47 @@ function Login() {
               <Divider />
 
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setError(
-                      "Google sign-in is not configured for this storefront. Email sign-in is available.",
-                    )
-                  }
-                  className="flex h-12 items-center justify-center gap-3 border border-border px-3 text-[10px] uppercase tracking-[0.16em] transition-colors hover:border-primary/50 hover:bg-white/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none sm:text-[10px]"
-                >
-                  <GoogleMark />
-                  Continue with Google
-                </button>
+                <div className="min-w-0">
+                  <div className="relative h-12 w-full">
+                    <div
+                      ref={googleButtonRef}
+                      aria-label="Sign in with Google"
+                      aria-busy={googleInitializing || googleSubmitting}
+                      aria-disabled={!googleReady || googleSubmitting}
+                      inert={!googleReady || googleSubmitting}
+                      className={`absolute inset-0 flex h-12 w-full items-center overflow-hidden transition-opacity motion-reduce:transition-none ${googleReady && !googleSubmitting ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                    />
+                    {(!googleReady || googleSubmitting) && (
+                      <button
+                        type="button"
+                        disabled={googleInitializing || googleSubmitting || !googleClientId}
+                        onClick={() => {
+                          setGoogleError("");
+                          setGoogleInitializationAttempt((attempt) => attempt + 1);
+                        }}
+                        aria-busy={googleInitializing || googleSubmitting}
+                        className="absolute inset-0 flex h-12 w-full items-center justify-center border border-border px-3 text-center text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70 motion-reduce:transition-none"
+                      >
+                        {googleSubmitting
+                          ? "Signing in with Google"
+                          : googleInitializing
+                            ? "Preparing Google sign-in"
+                            : googleClientId
+                              ? "Retry Google sign-in"
+                              : "Continue with Google"}
+                      </button>
+                    )}
+                  </div>
+                  {googleError && (
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="mt-2 text-xs leading-relaxed text-destructive"
+                    >
+                      {googleError}
+                    </p>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => switchMode("phone")}
@@ -329,26 +561,6 @@ function StatusMessage({ children }: { children: string }) {
     <p role="status" aria-live="polite" className="mt-4 text-sm leading-relaxed text-destructive">
       {children}
     </p>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 48 48" className="h-[17px] w-[17px] shrink-0">
-      <path
-        fill="#4285F4"
-        d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.9 6-15Z"
-      />
-      <path
-        fill="#34A853"
-        d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.9 1.3-4.1 2.1-6.8 2.1-5.2 0-9.6-3.5-11.2-8.2H5.9v5.2A20 20 0 0 0 24 44Z"
-      />
-      <path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.8v-5.2H5.9a20 20 0 0 0 0 18.2l6.9-5.2Z" />
-      <path
-        fill="#EA4335"
-        d="M24 11.9c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 5.9 29.5 4 24 4A20 20 0 0 0 5.9 14.9l6.9 5.2c1.6-4.7 6-8.2 11.2-8.2Z"
-      />
-    </svg>
   );
 }
 
