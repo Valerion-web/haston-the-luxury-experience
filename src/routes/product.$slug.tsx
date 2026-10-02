@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { inr, type Product } from "@/lib/haston-data";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  Check,
   Heart,
   ShoppingBag,
   Truck,
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function PDP() {
+  const reduceMotion = useReducedMotion();
   const { product } = Route.useLoaderData() as {
     product: Product;
   };
@@ -256,7 +258,7 @@ function PDP() {
               </button>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="relative mt-6 flex flex-col gap-3">
               <LuxeButton
                 variant="solid"
                 className="w-full"
@@ -303,10 +305,45 @@ function PDP() {
                 <ShoppingBag className="mr-2 h-4 w-4 inline" /> Add to bag —{" "}
                 {inr(product.price * qty)}
               </LuxeButton>
+              {actionError === "Added to your bag" && (
+                <motion.div
+                  role="status"
+                  initial={reduceMotion ? false : { opacity: 0, y: 8, scale: 0.97 }}
+                  animate={
+                    reduceMotion
+                      ? { opacity: [1, 1, 0] }
+                      : { opacity: [0, 1, 1, 0], y: [8, 0, 0, -4], scale: [0.97, 1, 1, 0.98] }
+                  }
+                  transition={
+                    reduceMotion
+                      ? { duration: 2, times: [0, 0.82, 1] }
+                      : { duration: 2.1, times: [0, 0.12, 0.8, 1], ease: "easeOut" }
+                  }
+                  onAnimationComplete={() =>
+                    setActionError((message) =>
+                      message === "Added to your bag" ? null : message,
+                    )
+                  }
+                  className="pointer-events-none absolute -top-14 left-0 right-0 z-20 flex justify-center"
+                >
+                  <span className="relative flex max-w-[calc(100vw-2.5rem)] items-center gap-3 overflow-hidden rounded-lg border border-sand/60 bg-navy/95 px-4 py-3 text-white shadow-luxe backdrop-blur-xl">
+                    <span className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-sand to-transparent" />
+                    <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-sand/50 bg-white/10 text-sand shadow-inner">
+                      <ShoppingBag className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                      <span className="absolute -right-0.5 -top-0.5 grid h-3.5 w-3.5 place-items-center rounded-full bg-sand text-navy">
+                        <Check className="h-2.5 w-2.5" strokeWidth={2.5} aria-hidden="true" />
+                      </span>
+                    </span>
+                    <span className="whitespace-nowrap font-display text-[11px] uppercase tracking-[0.12em]">
+                      Added to Bag
+                    </span>
+                  </span>
+                </motion.div>
+              )}
               <LuxeButton variant="outline" className="w-full">
                 Buy it now
               </LuxeButton>
-              {actionError && (
+              {actionError && actionError !== "Added to your bag" && (
                 <p role="status" className="mt-3 text-xs text-destructive">
                   {actionError}
                 </p>
