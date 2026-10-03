@@ -94,6 +94,56 @@ function PDP() {
     }
   };
 
+  const buyNow = async () => {
+    setActionError(null);
+    if (!session) {
+      setActionError("Please sign in to add items to your bag.");
+      return;
+    }
+    const requiresSize = product.sizes.length > 0;
+    const requiresColor = product.colors.length > 0;
+    if (requiresSize && !size) {
+      setActionError("Please select a size before adding this piece to your bag.");
+      return;
+    }
+    if (requiresColor && !selectedColor) {
+      setActionError("Please select a color before adding this piece to your bag.");
+      return;
+    }
+    if (backendId === undefined) {
+      setActionError("This piece is not currently available to add to your bag.");
+      return;
+    }
+
+    const buyNowVariant = product.variants?.find(
+      (variant) =>
+        (!requiresColor || variant.color === selectedColor?.name) &&
+        (!requiresSize || variant.size === size),
+    );
+    if ((requiresColor || requiresSize) && !buyNowVariant) {
+      setActionError("This color and size combination is unavailable.");
+      return;
+    }
+
+    try {
+      await addItem({
+        productId: backendId,
+        quantity: 1,
+        variantId: buyNowVariant?.id,
+      });
+      await navigate({ to: "/checkout" });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        clearSession();
+        setActionError("Please sign in to add items to your bag.");
+        return;
+      }
+      setActionError(
+        error instanceof Error ? error.message : "Unable to add this piece to your bag",
+      );
+    }
+  };
+
   return (
     <>
       <section className="mx-auto max-w-[1600px] px-5 py-6 md:px-8 md:py-8">
@@ -340,7 +390,12 @@ function PDP() {
                   </span>
                 </motion.div>
               )}
-              <LuxeButton variant="outline" className="w-full">
+              <LuxeButton
+                variant="outline"
+                className="w-full"
+                onClick={buyNow}
+                disabled={isAdding}
+              >
                 Buy it now
               </LuxeButton>
               {actionError && actionError !== "Added to your bag" && (
