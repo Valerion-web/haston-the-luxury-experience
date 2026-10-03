@@ -13,6 +13,7 @@ export type BackendProduct = {
   hoverImage?: string | null;
   sizes?: string[];
   colors?: string[];
+  colorOptions?: Array<{ name: string; code: string }>;
   category?: { id: number; name: string; slug?: string } | null;
   tags?: string[];
   variants?: Array<{
@@ -137,7 +138,9 @@ export const mapProduct = (product: BackendProduct): Product => ({
           : undefined) ||
       product.image,
   ),
-  colors: (product.colors || []).map((name) => ({ name, hex: colorHex[name] || "#888888" })),
+  colors: product.colorOptions
+    ? product.colorOptions.map(({ name, code }) => ({ name, hex: code }))
+    : (product.colors || []).map((name) => ({ name, hex: colorHex[name] || "#888888" })),
   sizes: product.sizes || [],
   isNew: product.tags?.includes("new"),
   isBestseller: product.tags?.includes("bestseller"),
