@@ -33,6 +33,11 @@ const editorial = [
 
 function CollectionsIndex() {
   const { data: categories = [], isLoading, error } = useHastonCategories();
+  const overviewCategories = categories.filter(
+    (category) =>
+      category.parentId === null &&
+      categories.some((child) => child.parentId === category.id),
+  );
 
   return (
     <>
@@ -87,7 +92,7 @@ function CollectionsIndex() {
           <p role="alert" className="mt-6 text-sm text-destructive">Unable to load categories.</p>
         ) : (
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {categories.map((category, i) => (
+            {overviewCategories.map((category, i) => (
               <CategoryCard
                 key={category.slug}
                 slug={category.slug}

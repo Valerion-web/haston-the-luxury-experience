@@ -5,6 +5,11 @@ import { useHastonCategories } from "@/hooks/use-haston-data";
 
 export function ShopByCategory() {
   const { data: categories = [], isLoading, error } = useHastonCategories();
+  const overviewCategories = categories.filter(
+    (category) =>
+      category.parentId === null &&
+      categories.some((child) => child.parentId === category.id),
+  );
 
   return (
     <section className="mx-auto max-w-[1600px] px-6 py-9 md:px-10 md:py-10">
@@ -19,7 +24,7 @@ export function ShopByCategory() {
         <p role="alert" className="mt-8 text-sm text-destructive">Unable to load categories.</p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.map((category, i) => (
+          {overviewCategories.map((category, i) => (
             <CategoryCard
               key={category.slug}
               slug={category.slug}
