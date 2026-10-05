@@ -33,6 +33,11 @@ export function Navbar() {
       children: categories.filter((child) => child.parentId === category.id),
     }))
     .filter((column) => column.children.length > 0);
+  const megaCardCategories = categories.filter(
+    (category) =>
+      category.parentId === null &&
+      categories.some((child) => child.parentId === category.id),
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -162,7 +167,7 @@ export function Navbar() {
                 ))}
               </div>
               <div className="grid grid-cols-4 gap-3">
-                {categories.map((c) => (
+                {megaCardCategories.map((c) => (
                   <Link
                     key={c.slug}
                     to="/collections/$slug"
