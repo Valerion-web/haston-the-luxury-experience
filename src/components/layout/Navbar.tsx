@@ -17,13 +17,6 @@ const navLinks = [
   { label: "About", to: "/about" },
 ];
 
-const MEGA_COLUMNS: { title: string; items: string[] }[] = [
-  { title: "Tops", items: ["Shirts", "T-Shirts", "Polos", "Overshirts", "Knitwear"] },
-  { title: "Bottoms", items: ["Trousers", "Chinos", "Jeans", "Cargo", "Shorts"] },
-  { title: "Outerwear", items: ["Jackets", "Overshirts", "Coats", "Vests"] },
-  { title: "Accessories", items: ["Belts", "Bags", "Caps", "Socks", "Scarves"] },
-];
-
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,6 +26,13 @@ export function Navbar() {
   const session = useHastonSession();
   const { items: cartItems } = useHastonCart();
   const { data: categories = [] } = useHastonCategories();
+  const megaColumns = categories
+    .filter((category) => category.parentId === null)
+    .map((category) => ({
+      category,
+      children: categories.filter((child) => child.parentId === category.id),
+    }))
+    .filter((column) => column.children.length > 0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -140,19 +140,20 @@ export function Navbar() {
           >
             <div className="mx-auto grid max-w-[1600px] grid-cols-[1.2fr_2fr] gap-8 px-8 py-8">
               <div className="grid grid-cols-4 gap-5">
-                {MEGA_COLUMNS.map((col) => (
-                  <div key={col.title}>
+                {megaColumns.map(({ category, children }) => (
+                  <div key={category.id}>
                     <p className="mb-3 text-[8px] uppercase tracking-[0.22em] text-gold">
-                      {col.title}
+                      {category.name}
                     </p>
                     <ul className="space-y-2">
-                      {col.items.map((it) => (
-                        <li key={it}>
+                      {children.map((child) => (
+                        <li key={child.id}>
                           <Link
-                            to="/collections"
+                            to="/collections/$slug"
+                            params={{ slug: child.slug }}
                             className="text-[10px] text-foreground/70 transition-colors hover:text-foreground"
                           >
-                            {it}
+                            {child.name}
                           </Link>
                         </li>
                       ))}

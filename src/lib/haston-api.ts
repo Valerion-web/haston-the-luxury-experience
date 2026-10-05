@@ -29,6 +29,7 @@ export type BackendCategory = {
   id: number;
   slug: string;
   name: string;
+  parentId?: number | null;
   description?: string | null;
   productCount?: number;
 };
