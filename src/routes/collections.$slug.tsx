@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { useHastonCategories, useHastonProducts } from "@/hooks/use-haston-data";
+import { resolveBackendAssetUrl } from "@/lib/api-client";
 
 export const Route = createFileRoute("/collections/$slug")({
   head: ({ params }) => ({
@@ -115,7 +116,7 @@ function CollectionPage() {
                 slug={child.slug}
                 name={child.name}
                 tagline={child.description || "Explore the collection"}
-                image={IMG.heroShop}
+                image={resolveBackendAssetUrl(child.image) || IMG.heroShop}
                 index={i}
               />
             ))}
