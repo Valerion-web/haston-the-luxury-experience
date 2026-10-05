@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { IMG, inr } from "@/lib/haston-data";
 import { PageHero } from "@/components/ui-haston/PageHero";
+import { CategoryCard } from "@/components/ui-haston/CategoryCard";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
@@ -40,6 +41,10 @@ function CollectionPage() {
   const { data: categories = [], isLoading: categoriesLoading } = useHastonCategories();
 
   const cat = categories.find((c) => c.slug === slug);
+  const childCategories =
+    cat && cat.parentId === null
+      ? categories.filter((child) => child.parentId === cat.id)
+      : [];
   const title = cat?.name || slug.replace(/-/g, " ");
   const maxPrice = Math.max(...backendProducts.map((product) => product.price), 0);
   const availableColors = Array.from(new Map(backendProducts.flatMap((product) => product.colors).map((color) => [color.name, color])).values());
@@ -99,6 +104,24 @@ function CollectionPage() {
         }
 
       />
+
+      {childCategories.length > 0 && (
+        <section className="mx-auto max-w-[1600px] px-6 pt-6 md:px-10">
+          <h2 className="text-eyebrow text-muted-foreground">Subcategories</h2>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {childCategories.map((child, i) => (
+              <CategoryCard
+                key={child.slug}
+                slug={child.slug}
+                name={child.name}
+                tagline={child.description || "Explore the collection"}
+                image={IMG.heroShop}
+                index={i}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-[1600px] px-6 py-8 md:px-10">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-8 hairline">
