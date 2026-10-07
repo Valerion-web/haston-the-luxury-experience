@@ -101,7 +101,9 @@ function CollectionPage() {
             ? IMG.heroNew
             : slug === "bestsellers"
               ? IMG.heroLookbook
-              : IMG.heroShop
+              : resolveBackendAssetUrl(cat?.coverImage) ||
+                resolveBackendAssetUrl(cat?.image) ||
+                IMG.heroShop
         }
 
       />

@@ -2,6 +2,7 @@ import { CategoryCard } from "@/components/ui-haston/CategoryCard";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 import { IMG } from "@/lib/haston-data";
 import { useHastonCategories } from "@/hooks/use-haston-data";
+import { resolveBackendAssetUrl } from "@/lib/api-client";
 
 export function ShopByCategory() {
   const { data: categories = [], isLoading, error } = useHastonCategories();
@@ -30,7 +31,7 @@ export function ShopByCategory() {
               slug={category.slug}
               name={category.name}
               tagline={category.description || "Explore the collection"}
-              image={IMG.heroShop}
+              image={resolveBackendAssetUrl(category.image) || IMG.heroShop}
               index={i}
             />
           ))}

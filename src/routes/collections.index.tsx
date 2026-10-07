@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { IMG } from "@/lib/haston-data";
 import { ArrowUpRight } from "lucide-react";
 import { useHastonCategories } from "@/hooks/use-haston-data";
+import { resolveBackendAssetUrl } from "@/lib/api-client";
 
 export const Route = createFileRoute("/collections/")({
   head: () => ({
@@ -98,7 +99,7 @@ function CollectionsIndex() {
                 slug={category.slug}
                 name={category.name}
                 tagline={category.description || "Explore the collection"}
-                image={IMG.heroShop}
+                image={resolveBackendAssetUrl(category.image) || IMG.heroShop}
                 index={i}
               />
             ))}
