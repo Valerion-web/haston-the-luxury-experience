@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
+import { resolveBackendAssetUrl } from "@/lib/api-client";
 import { IMG } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
 import logoFull from "@/assets/haston-logo.png";
@@ -176,7 +177,7 @@ export function Navbar() {
                   >
                     <div className="aspect-square overflow-hidden">
                       <img
-                        src={IMG.heroShop}
+                        src={resolveBackendAssetUrl(c.image) || IMG.heroShop}
                         alt={c.name}
                         loading="lazy"
                         decoding="async"
