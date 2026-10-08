@@ -335,7 +335,11 @@ export const hastonApi = {
       method: "POST",
       body: JSON.stringify(couponCode ? { couponCode } : {}),
     }),
-  razorpayOrder: (body: { idempotencyKey: string; couponCode?: string }) =>
+  razorpayOrder: (body: {
+    idempotencyKey: string;
+    paymentAttemptKey: string;
+    couponCode?: string;
+  }) =>
     apiRequest<RazorpayOrderResponse>("/payments/razorpay/order", {
       method: "POST",
       body: JSON.stringify(body),

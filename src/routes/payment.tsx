@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 import { Lock, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { inr } from "@/lib/haston-data";
-import { readCheckoutDraft, saveCheckoutDraft, type OrderDraft } from "@/lib/mock-commerce";
+import {
+  createPaymentAttemptKey,
+  readCheckoutDraft,
+  saveCheckoutDraft,
+  type OrderDraft,
+} from "@/lib/mock-commerce";
 import { hastonApi, type RazorpayOrderResponse } from "@/lib/haston-api";
 import { ApiError } from "@/lib/api-client";
 import { loadRazorpayCheckout } from "@/lib/payment/razorpay-loader";
@@ -77,9 +82,22 @@ function Payment() {
 
     setPaymentState("creating");
     try {
-      const order = await hastonApi.razorpayOrder({ idempotencyKey: draft.idempotencyKey });
+      const paymentAttemptKey =
+        draft.paymentAttemptKey || createPaymentAttemptKey(draft.idempotencyKey);
+      const attemptDraft: OrderDraft = draft.paymentAttemptKey
+        ? draft
+        : { ...draft, paymentAttemptKey };
+      if (!draft.paymentAttemptKey) {
+        saveCheckoutDraft(attemptDraft);
+        setDraft(attemptDraft);
+      }
+
+      const order = await hastonApi.razorpayOrder({
+        idempotencyKey: draft.idempotencyKey,
+        paymentAttemptKey,
+      });
       const nextDraft: OrderDraft = {
-        ...draft,
+        ...attemptDraft,
         paymentMethod: "razorpay",
         paymentId: order.paymentId,
         razorpayOrderId: order.razorpayOrderId,
