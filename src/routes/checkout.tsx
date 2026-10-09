@@ -11,6 +11,8 @@ import { ApiError } from "@/lib/api-client";
 import { clearSession } from "@/lib/haston-session";
 import { hastonApi } from "@/lib/haston-api";
 import { useQuery } from "@tanstack/react-query";
+import { CouponSuggestions } from "@/components/checkout/CouponSuggestions";
+import { consumeCheckoutCouponSuggestion } from "@/lib/mock-commerce";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -42,6 +44,74 @@ function Checkout() {
     country: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof details, string>>>({});
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+  const [couponValidationAttempt, setCouponValidationAttempt] = useState(0);
+  const items = cartItems.map((item) => ({
+    id: String(item.id),
+    product: item.product,
+    quantity: item.quantity,
+    size: item.variant?.size || "Standard",
+    color: item.variant?.color || "Selected",
+    lineTotal: item.lineTotal,
+  }));
+  const cartKey = cartItems
+    .map((item) =>
+      JSON.stringify([
+        item.id,
+        item.product.backendId ?? item.product.id,
+        item.product.category,
+        item.variant?.id ?? null,
+        item.quantity,
+        item.unitPrice,
+        item.lineTotal,
+      ]),
+    )
+    .sort()
+    .join(",");
+  const checkoutEnabled = Boolean(session) && !isLoading && !error && items.length > 0;
+  const totalsQuery = useQuery({
+    queryKey: ["haston", "checkout-validation", cartKey],
+    queryFn: () => hastonApi.validateCheckout(),
+    enabled: checkoutEnabled,
+    refetchOnMount: "always",
+  });
+  const couponTotalsQuery = useQuery({
+    queryKey: ["haston", "checkout-validation", cartKey, "coupon", appliedCouponCode, couponValidationAttempt],
+    queryFn: () => hastonApi.validateCheckout(appliedCouponCode || undefined),
+    enabled: checkoutEnabled && Boolean(appliedCouponCode),
+    refetchOnMount: "always",
+  });
+  const baseTotals =
+    totalsQuery.isSuccess && !totalsQuery.isFetching ? totalsQuery.data : undefined;
+  const couponTotals =
+    couponTotalsQuery.isSuccess && !couponTotalsQuery.isFetching
+      ? couponTotalsQuery.data
+      : undefined;
+  const totals = appliedCouponCode ? couponTotals || baseTotals : baseTotals;
+  const isApplyingCoupon = Boolean(appliedCouponCode) && couponTotalsQuery.isFetching;
+  const isSameCouponPending =
+    isApplyingCoupon &&
+    couponInput.trim().toUpperCase() === appliedCouponCode?.trim().toUpperCase();
+  const couponInputNeedsApply =
+    Boolean(couponInput.trim()) &&
+    couponInput.trim().toUpperCase() !== appliedCouponCode?.trim().toUpperCase();
+  const couponNeedsValidation = Boolean(appliedCouponCode) && !couponTotals;
+  const cannotContinueToPayment = couponInputNeedsApply || couponNeedsValidation;
+  const couponErrorMessage =
+    couponTotalsQuery.error instanceof ApiError &&
+    [400, 404, 422].includes(couponTotalsQuery.error.status)
+      ? "That coupon code is invalid or unavailable."
+      : "We couldn't validate this code. Please check your connection and try again.";
+
+  const applyCouponCode = (couponCode: string) => {
+    const trimmedCode = couponCode.trim();
+    if (!trimmedCode) return;
+    setCouponInput(trimmedCode);
+    setAppliedCouponCode(trimmedCode);
+    setCouponValidationAttempt((attempt) => attempt + 1);
+  };
+
   useEffect(() => {
     if (!session) {
       void navigate({ to: "/login", replace: true });
@@ -56,6 +126,14 @@ function Checkout() {
       void navigate({ to: "/login", replace: true });
     }
   }, [error, navigate]);
+
+  useEffect(() => {
+    const suggestedCode = consumeCheckoutCouponSuggestion();
+    if (!suggestedCode) return;
+    setCouponInput(suggestedCode);
+    setAppliedCouponCode(suggestedCode);
+    setCouponValidationAttempt((attempt) => attempt + 1);
+  }, []);
 
   if (!session) return null;
   if (isLoading) {
@@ -77,21 +155,6 @@ function Checkout() {
       </section>
     );
   }
-
-  const items = cartItems.map((item) => ({
-    id: String(item.id),
-    product: item.product,
-    quantity: item.quantity,
-    size: item.variant?.size || "Standard",
-    color: item.variant?.color || "Selected",
-    lineTotal: item.lineTotal,
-  }));
-  const totalsQuery = useQuery({
-    queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
-    queryFn: () => hastonApi.validateCheckout(),
-    enabled: items.length > 0,
-  });
-  const totals = totalsQuery.data;
 
   return (
     <section className="mx-auto min-h-[80vh] max-w-[1600px] px-6 py-10 md:px-10">
@@ -241,14 +304,18 @@ function Checkout() {
                 onClick={() => {
                   const nextErrors = validateDetails(details);
                   setErrors(nextErrors);
-                  if (Object.keys(nextErrors).length > 0) return;
+                  if (Object.keys(nextErrors).length > 0 || cannotContinueToPayment) return;
                   saveCheckoutDraft({
                     idempotencyKey: createCheckoutIdempotencyKey(),
                     paymentMethod: "razorpay",
                     shippingAddress: details,
+                    ...(couponTotals && appliedCouponCode
+                      ? { couponCode: appliedCouponCode.trim() }
+                      : {}),
                   });
                   window.location.assign("/payment");
                 }}
+                disabled={cannotContinueToPayment}
                 arrow
               >
                 Continue to payment
@@ -278,10 +345,86 @@ function Checkout() {
                 </div>
               ))}
             </div>
+            <div className="mt-6 border-y border-border py-5">
+              <p className="text-eyebrow">Coupon code</p>
+              <form
+                className="mt-3 flex flex-wrap gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  applyCouponCode(couponInput);
+                }}
+              >
+                <input
+                  aria-label="Coupon code"
+                  autoComplete="off"
+                  value={couponInput}
+                  onChange={(event) => setCouponInput(event.target.value)}
+                  placeholder="Enter code"
+                  className="min-w-0 flex-1 rounded-md border border-border bg-transparent px-3 py-2 text-sm uppercase placeholder:normal-case focus:border-primary focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!couponInput.trim() || isSameCouponPending}
+                  className="rounded-md border border-primary px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSameCouponPending ? "Checking..." : "Apply"}
+                </button>
+                {appliedCouponCode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedCouponCode(null);
+                      setCouponInput("");
+                      void totalsQuery.refetch();
+                    }}
+                    className="px-2 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Remove
+                  </button>
+                )}
+              </form>
+              {isApplyingCoupon && (
+                <p role="status" className="mt-3 text-xs text-muted-foreground">
+                  Checking coupon...
+                </p>
+              )}
+              {!isApplyingCoupon && appliedCouponCode && couponTotals && (
+                <p role="status" className="mt-3 text-xs text-emerald-700">
+                  Coupon {appliedCouponCode} applied.
+                </p>
+              )}
+              {!isApplyingCoupon && appliedCouponCode && couponTotalsQuery.isError && (
+                <p role="alert" className="mt-3 text-xs text-destructive">
+                  {couponErrorMessage}
+                </p>
+              )}
+              {couponInputNeedsApply && (
+                <p role="status" className="mt-3 text-xs text-muted-foreground">
+                  Apply this code or clear it before continuing.
+                </p>
+              )}
+            </div>
+            <CouponSuggestions
+              cartKey={cartKey}
+              userId={session.id}
+              appliedCode={couponTotals ? appliedCouponCode : null}
+              applyingCode={isApplyingCoupon ? appliedCouponCode : null}
+              onApply={applyCouponCode}
+            />
             <div className="mt-6 hairline pt-6 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
                     <span className="text-foreground">{totals ? inr(totals.subtotal) : "Calculating..."}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Discount</span>
+                <span className="text-foreground">
+                  {totals
+                    ? totals.discount > 0
+                      ? `-${inr(totals.discount)}`
+                      : inr(totals.discount)
+                    : "Calculating..."}
+                </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping</span>

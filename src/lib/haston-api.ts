@@ -203,6 +203,17 @@ export type CheckoutValidationResponse = {
   total: number;
   currency: string;
 };
+export type CouponSuggestion = {
+  code: string;
+  discountType: string;
+  value: number;
+  maxDiscount?: number | null;
+  minOrderValue: number | null;
+  allowFreeShipping: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  message: string;
+};
 export type RazorpayOrderResponse = {
   paymentId: number;
   razorpayOrderId: string;
@@ -330,6 +341,7 @@ export const hastonApi = {
       body: JSON.stringify({ status }),
     }),
   cart: () => apiRequest<BackendCartResponse>("/cart").then(mapCart),
+  couponSuggestions: () => apiRequest<CouponSuggestion[]>("/coupons/suggestions"),
   validateCheckout: (couponCode?: string) =>
     apiRequest<CheckoutValidationResponse>("/checkout/validate", {
       method: "POST",

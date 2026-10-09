@@ -14,6 +14,8 @@ import { clearSession } from "@/lib/haston-session";
 import { useQuery } from "@tanstack/react-query";
 import { hastonApi } from "@/lib/haston-api";
 import { useHastonProducts } from "@/hooks/use-haston-data";
+import { CouponSuggestions } from "@/components/checkout/CouponSuggestions";
+import { saveCheckoutCouponSuggestion } from "@/lib/mock-commerce";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -27,8 +29,9 @@ type CartEntry = {
   product: Product;
   quantity?: number;
   qty?: number;
+  unitPrice?: number;
   lineTotal?: number;
-  variant?: { color?: string | null; size?: string | null } | null;
+  variant?: { id?: number; color?: string | null; size?: string | null } | null;
   color?: string;
   size?: string;
 };
@@ -48,10 +51,25 @@ function Cart() {
   const { data: recommendations = [] } = useHastonProducts();
 
   const items: CartEntry[] = session ? remoteItems : [];
+  const cartKey = items
+    .map((item) =>
+      JSON.stringify([
+        item.id,
+        item.product.backendId ?? item.product.id,
+        item.product.category,
+        item.variant?.id ?? null,
+        Number(item.quantity ?? item.qty ?? 0),
+        item.unitPrice ?? null,
+        item.lineTotal ?? null,
+      ]),
+    )
+    .sort()
+    .join(",");
   const totalsQuery = useQuery({
-    queryKey: ["haston", "checkout-validation", items.map((item) => `${item.id}:${item.quantity}`).join(",")],
+    queryKey: ["haston", "checkout-validation", cartKey],
     queryFn: () => hastonApi.validateCheckout(),
     enabled: Boolean(session) && items.length > 0,
+    refetchOnMount: "always",
   });
   const totals = totalsQuery.data;
   const loadError = remoteError ? "Unable to load your bag right now." : null;
@@ -202,6 +220,15 @@ function Cart() {
                     <span className="font-medium">{totals ? inr(totals.total) : "Calculated at checkout"}</span>
                   </div>
                 </div>
+
+                <CouponSuggestions
+                  cartKey={cartKey}
+                  userId={session.id}
+                  onApply={(couponCode) => {
+                    saveCheckoutCouponSuggestion(couponCode);
+                    void navigate({ to: "/checkout" });
+                  }}
+                />
 
                 <LuxeButton to="/checkout" className="mt-6 w-full" arrow>
                   Checkout securely
