@@ -8,7 +8,7 @@ type PhoneAuthResponse = {
 
 export const phoneAuthApi = {
   sendLoginOtp: (phone: string) =>
-    apiRequest<PhoneOtpResponse>("/auth/phone/send-otp", {
+    apiRequest<PhoneOtpResponse>("/auth/phone/login/send", {
       method: "POST",
       body: JSON.stringify({ phone }),
     }),
@@ -18,7 +18,7 @@ export const phoneAuthApi = {
       body: JSON.stringify({ phone, otp }),
     }),
   sendRegistrationOtp: (phone: string) =>
-    apiRequest<PhoneOtpResponse>("/auth/phone/send-otp", {
+    apiRequest<PhoneOtpResponse>("/auth/phone/register/send", {
       method: "POST",
       body: JSON.stringify({ phone }),
     }),
