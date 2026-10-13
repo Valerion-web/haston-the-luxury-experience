@@ -13,7 +13,7 @@ export const phoneAuthApi = {
       body: JSON.stringify({ phone }),
     }),
   verifyLoginOtp: (phone: string, otp: string) =>
-    apiRequest<PhoneAuthResponse>("/auth/phone/login", {
+    apiRequest<PhoneAuthResponse>("/auth/phone/login/verify", {
       method: "POST",
       body: JSON.stringify({ phone, otp }),
     }),
