@@ -6,6 +6,7 @@ import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 import { IMG } from "@/lib/haston-data";
 import { ApiError } from "@/lib/api-client";
 import { hastonApi } from "@/lib/haston-api";
+import { phoneAuthApi } from "@/lib/phone-auth-api";
 import { saveSession } from "@/lib/haston-session";
 
 type GoogleCredentialResponse = { credential?: string };
@@ -37,6 +38,60 @@ declare global {
 
 const GOOGLE_GIS_URL = "https://accounts.google.com/gsi/client";
 let googleGisPromise: Promise<GoogleIdentityApi> | null = null;
+const PHONE_RULES: Record<string, { pattern: RegExp }> = {
+  "+91": { pattern: /^[6-9]\d{9}$/ },
+  "+1": { pattern: /^[2-9]\d{9}$/ },
+  "+44": { pattern: /^7\d{9}$/ },
+  "+61": { pattern: /^4\d{8}$/ },
+};
+
+const getPhoneE164 = (countryCode: string, value: string) => {
+  const rule = PHONE_RULES[countryCode];
+  if (!rule) return null;
+  let nationalNumber = value.replace(/\D/g, "");
+  if (countryCode !== "+1" && nationalNumber.startsWith("0")) {
+    nationalNumber = nationalNumber.slice(1);
+  }
+  return rule.pattern.test(nationalNumber) ? `${countryCode}${nationalNumber}` : null;
+};
+
+const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "register") => {
+  if (error instanceof ApiError) {
+    if (error.status === 429)
+      return "Too many OTP requests or attempts. Please wait before trying again.";
+    if (action === "send" && error.status === 400) {
+      return "Enter a valid mobile number for the selected country.";
+    }
+    if (action === "send" && error.status === 503) {
+      return "We couldn't send a verification code right now. Please try again later.";
+    }
+    if (error.status === 401) {
+      const responseMessage =
+        error.message !== `Request failed with status ${error.status}`
+          ? error.message
+          : typeof error.details === "string"
+            ? error.details.trim()
+            : "";
+      return (
+        responseMessage ||
+        "That code couldn't be verified. It may be incorrect or expired. Check it or request a new one."
+      );
+    }
+    if (action === "register" && error.status === 409) {
+      return "We couldn't create an account with these details. Check them or switch to sign in.";
+    }
+    if (error.status >= 500)
+      return "HASTON couldn't complete that request. Please try again shortly.";
+  }
+  if (error instanceof TypeError) {
+    return "Could not connect to HASTON. Check your connection and try again.";
+  }
+  return action === "send"
+    ? "We couldn't send a verification code. Please try again."
+    : action === "register"
+      ? "We couldn't create your account. Check your details and try again."
+      : "We couldn't complete sign-in. Check the code and try again.";
+};
 
 function loadGoogleIdentityServices() {
   if (window.google?.accounts?.id) return Promise.resolve(window.google.accounts.id);
@@ -103,6 +158,20 @@ function Login() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
+  const [phoneStage, setPhoneStage] = useState<"number" | "otp">("number");
+  const [phoneIntent, setPhoneIntent] = useState<"login" | "register">("login");
+  const [requestedPhone, setRequestedPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [phoneName, setPhoneName] = useState("");
+  const [phoneEmail, setPhoneEmail] = useState("");
+  const [phonePassword, setPhonePassword] = useState("");
+  const [phoneRegistrationErrors, setPhoneRegistrationErrors] = useState<
+    Partial<Record<"name" | "email" | "password", string>>
+  >({});
+  const [otpError, setOtpError] = useState("");
+  const [phoneNotice, setPhoneNotice] = useState("");
+  const [phoneBusy, setPhoneBusy] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [mode, setMode] = useState<"email" | "phone">("email");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -118,6 +187,7 @@ function Login() {
   const [googleError, setGoogleError] = useState("");
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const googleRequestInFlight = useRef(false);
+  const phoneRequestInFlight = useRef(false);
   const googleCredentialHandler = useRef<(credential: string) => void>(() => undefined);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -149,18 +219,108 @@ function Login() {
     }
   };
 
-  const submitPhone = (event: FormEvent<HTMLFormElement>) => {
+  const requestPhoneOtp = async (
+    phoneNumber: string,
+    isResend = false,
+    intent: "login" | "register" = phoneIntent,
+  ) => {
+    if (phoneRequestInFlight.current || (isResend && resendCooldown > 0)) return;
+    phoneRequestInFlight.current = true;
+    setPhoneBusy(true);
+    setError("");
+    setPhoneNotice("");
+
+    try {
+      await (intent === "login"
+        ? phoneAuthApi.sendLoginOtp(phoneNumber)
+        : phoneAuthApi.sendRegistrationOtp(phoneNumber));
+      setRequestedPhone(phoneNumber);
+      setPhoneStage("otp");
+      setPhoneIntent(intent);
+      setOtp("");
+      setOtpError("");
+      setPhoneNotice("A verification code has been sent to your mobile number.");
+      setResendCooldown(30);
+    } catch (requestError) {
+      setError(phoneAuthErrorMessage(requestError, "send"));
+    } finally {
+      phoneRequestInFlight.current = false;
+      setPhoneBusy(false);
+    }
+  };
+
+  const switchPhoneIntent = (intent: "login" | "register") => {
+    if (intent === phoneIntent) return;
+    if (intent === "login") setPhoneRegistrationErrors({});
+    void requestPhoneOtp(requestedPhone, false, intent);
+  };
+
+  const submitPhone = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    const digits = phone.replace(/\D/g, "");
-    if (digits.length < 7 || digits.length > 15) {
-      setPhoneError("Enter a valid phone number.");
+    setPhoneNotice("");
+
+    if (phoneStage === "number") {
+      const digits = phone.replace(/\D/g, "");
+      if (!digits) {
+        setPhoneError("Enter your mobile number.");
+        return;
+      }
+      const phoneNumber = getPhoneE164(countryCode, phone);
+      if (!phoneNumber) {
+        setPhoneError("Enter a valid mobile number for the selected country.");
+        return;
+      }
+      setPhoneError("");
+      await requestPhoneOtp(phoneNumber);
       return;
     }
-    setPhoneError("");
-    setError(
-      "Phone verification is not available yet. This storefront has no phone OTP request or verification service configured.",
-    );
+
+    const submittedOtp = otp.trim();
+    if (!/^\d{4,8}$/.test(submittedOtp)) {
+      setOtpError("Enter the verification code sent to your phone.");
+      return;
+    }
+    setOtpError("");
+
+    const registrationErrors: Partial<Record<"name" | "email" | "password", string>> = {};
+    if (phoneIntent === "register") {
+      if (!phoneName.trim()) registrationErrors.name = "Enter your name.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(phoneEmail.trim())) {
+        registrationErrors.email = "Enter a valid email address.";
+      }
+      if (phonePassword.length < 8) {
+        registrationErrors.password = "Password must be at least 8 characters.";
+      }
+      setPhoneRegistrationErrors(registrationErrors);
+      if (Object.keys(registrationErrors).length > 0) return;
+    }
+
+    if (phoneRequestInFlight.current) return;
+    phoneRequestInFlight.current = true;
+    setPhoneBusy(true);
+    try {
+      const response =
+        phoneIntent === "login"
+          ? await phoneAuthApi.verifyLoginOtp(requestedPhone, submittedOtp)
+          : await phoneAuthApi.verifyRegistrationOtp({
+              phone: requestedPhone,
+              otp: submittedOtp,
+              name: phoneName.trim(),
+              email: phoneEmail.trim(),
+              password: phonePassword,
+            });
+      saveSession(response.user);
+      setPhoneNotice(
+        phoneIntent === "login" ? "Signed in successfully." : "Your account is ready.",
+      );
+      await navigate({ to: "/account", replace: true });
+    } catch (verificationError) {
+      setError(phoneAuthErrorMessage(verificationError, phoneIntent));
+    } finally {
+      phoneRequestInFlight.current = false;
+      setPhoneBusy(false);
+    }
   };
 
   const switchMode = (nextMode: "email" | "phone") => {
@@ -169,6 +329,14 @@ function Login() {
     setEmailError("");
     setPhoneError("");
   };
+
+  useEffect(() => {
+    if (resendCooldown === 0) return;
+    const timer = window.setTimeout(() => {
+      setResendCooldown((remaining) => Math.max(0, remaining - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
 
   googleCredentialHandler.current = (credential) => {
     if (googleRequestInFlight.current) return;
@@ -486,58 +654,233 @@ function Login() {
                 Back to email sign-in
               </button>
               <p className="text-eyebrow text-muted-foreground">Private access</p>
-              <h1 className="mt-4 text-display text-3xl sm:text-4xl">Sign in with your phone.</h1>
+              <h1 className="mt-4 text-display text-3xl sm:text-4xl">
+                {phoneStage === "number"
+                  ? "Sign in with your phone."
+                  : phoneIntent === "login"
+                    ? "Verify your phone."
+                    : "Create your account."}
+              </h1>
               <p className="mt-4 text-sm text-muted-foreground">
-                We'll send a verification code to your mobile number.
+                {phoneStage === "number"
+                  ? "We'll send a verification code to your mobile number."
+                  : `Enter the code sent to ${requestedPhone}.`}
               </p>
 
-              <form onSubmit={submitPhone} noValidate>
-                <div className="mt-8">
-                  <label htmlFor="login-phone" className="text-eyebrow text-muted-foreground">
-                    Mobile number
-                  </label>
-                  <div className="mt-2 flex items-stretch border-b border-border transition-colors focus-within:border-primary">
-                    <select
-                      aria-label="Country calling code"
-                      value={countryCode}
-                      onChange={(event) => setCountryCode(event.target.value)}
-                      className="max-w-[125px] bg-transparent py-3 pr-2 text-sm text-primary focus:outline-none"
-                    >
-                      <option value="+91">India (+91)</option>
-                      <option value="+1">United States (+1)</option>
-                      <option value="+44">United Kingdom (+44)</option>
-                      <option value="+61">Australia (+61)</option>
-                    </select>
-                    <input
-                      id="login-phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel-national"
-                      value={phone}
-                      onChange={(event) => {
-                        setPhone(event.target.value);
+              {phoneStage === "number" ? (
+                <form onSubmit={submitPhone} noValidate>
+                  <div className="mt-8">
+                    <label htmlFor="login-phone" className="text-eyebrow text-muted-foreground">
+                      Mobile number
+                    </label>
+                    <div className="mt-2 flex items-stretch border-b border-border transition-colors focus-within:border-primary">
+                      <select
+                        aria-label="Country calling code"
+                        value={countryCode}
+                        onChange={(event) => {
+                          setCountryCode(event.target.value);
+                          setPhoneError("");
+                          setError("");
+                        }}
+                        className="max-w-[125px] bg-transparent py-3 pr-2 text-sm text-primary focus:outline-none"
+                      >
+                        <option value="+91">India (+91)</option>
+                        <option value="+1">United States (+1)</option>
+                        <option value="+44">United Kingdom (+44)</option>
+                        <option value="+61">Australia (+61)</option>
+                      </select>
+                      <input
+                        id="login-phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel-national"
+                        value={phone}
+                        onChange={(event) => {
+                          setPhone(event.target.value);
+                          setPhoneError("");
+                          setError("");
+                        }}
+                        aria-invalid={Boolean(phoneError)}
+                        aria-describedby={phoneError ? "login-phone-error" : undefined}
+                        placeholder="Phone number"
+                        className="min-w-0 flex-1 bg-transparent px-2 py-3 text-sm text-primary outline-none placeholder:text-muted-foreground/70"
+                      />
+                    </div>
+                    {phoneError && (
+                      <p id="login-phone-error" className="mt-2 text-xs text-destructive">
+                        {phoneError}
+                      </p>
+                    )}
+                  </div>
+
+                  {error && <StatusMessage>{error}</StatusMessage>}
+
+                  <LuxeButton
+                    className="mt-8 w-full"
+                    arrow
+                    type="submit"
+                    disabled={phoneBusy || resendCooldown > 0}
+                  >
+                    {phoneBusy
+                      ? "Sending code"
+                      : resendCooldown > 0
+                        ? `Please wait ${resendCooldown}s`
+                        : "Send OTP"}
+                  </LuxeButton>
+                </form>
+              ) : (
+                <form onSubmit={submitPhone} noValidate>
+                  <div className="mt-6 flex items-center justify-between gap-3 text-xs">
+                    <span className="text-muted-foreground">Code sent to {requestedPhone}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhoneStage("number");
+                        setRequestedPhone("");
+                        setOtp("");
+                        setOtpError("");
                         setPhoneError("");
                         setError("");
+                        setPhoneNotice("");
                       }}
-                      aria-invalid={Boolean(phoneError)}
-                      aria-describedby={phoneError ? "login-phone-error" : undefined}
-                      placeholder="Phone number"
-                      className="min-w-0 flex-1 bg-transparent px-2 py-3 text-sm text-primary outline-none placeholder:text-muted-foreground/70"
-                    />
+                      className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
+                    >
+                      Change number
+                    </button>
                   </div>
-                  {phoneError && (
-                    <p id="login-phone-error" className="mt-2 text-xs text-destructive">
-                      {phoneError}
+
+                  <div className="mt-6 flex">
+                    <button
+                      type="button"
+                      aria-pressed={phoneIntent === "login"}
+                      disabled={phoneBusy}
+                      onClick={() => switchPhoneIntent("login")}
+                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "login" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={phoneIntent === "register"}
+                      disabled={phoneBusy}
+                      onClick={() => switchPhoneIntent("register")}
+                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "register" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
+                    >
+                      Create account
+                    </button>
+                  </div>
+
+                  {phoneIntent === "register" && (
+                    <div className="mt-6 space-y-5">
+                      <Input
+                        id="phone-register-name"
+                        label="Full name"
+                        type="text"
+                        autoComplete="name"
+                        value={phoneName}
+                        error={phoneRegistrationErrors.name || ""}
+                        onChange={(value) => {
+                          setPhoneName(value);
+                          setPhoneRegistrationErrors((current) => ({
+                            ...current,
+                            name: undefined,
+                          }));
+                          setError("");
+                        }}
+                      />
+                      <Input
+                        id="phone-register-email"
+                        label="Email"
+                        type="email"
+                        autoComplete="email"
+                        value={phoneEmail}
+                        error={phoneRegistrationErrors.email || ""}
+                        onChange={(value) => {
+                          setPhoneEmail(value);
+                          setPhoneRegistrationErrors((current) => ({
+                            ...current,
+                            email: undefined,
+                          }));
+                          setError("");
+                        }}
+                      />
+                      <Input
+                        id="phone-register-password"
+                        label="Password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={phonePassword}
+                        error={phoneRegistrationErrors.password || ""}
+                        onChange={(value) => {
+                          setPhonePassword(value);
+                          setPhoneRegistrationErrors((current) => ({
+                            ...current,
+                            password: undefined,
+                          }));
+                          setError("");
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-6">
+                    <label htmlFor="phone-login-otp" className="text-eyebrow text-muted-foreground">
+                      Verification code
+                    </label>
+                    <input
+                      id="phone-login-otp"
+                      name="otp"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={8}
+                      value={otp}
+                      onChange={(event) => {
+                        setOtp(event.target.value.replace(/\D/g, "").slice(0, 8));
+                        setOtpError("");
+                        setError("");
+                        setPhoneNotice("");
+                      }}
+                      aria-invalid={Boolean(otpError)}
+                      aria-describedby={otpError ? "phone-login-otp-error" : undefined}
+                      placeholder="Enter code"
+                      className="mt-2 block w-full border-b border-border bg-transparent px-1 py-3 text-sm text-primary outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary"
+                    />
+                    {otpError && (
+                      <p id="phone-login-otp-error" className="mt-2 text-xs text-destructive">
+                        {otpError}
+                      </p>
+                    )}
+                  </div>
+
+                  {phoneNotice && (
+                    <p role="status" aria-live="polite" className="mt-4 text-xs text-primary">
+                      {phoneNotice}
                     </p>
                   )}
-                </div>
+                  {error && <StatusMessage>{error}</StatusMessage>}
 
-                {error && <StatusMessage>{error}</StatusMessage>}
-
-                <LuxeButton className="mt-8 w-full" arrow type="submit">
-                  Send OTP
-                </LuxeButton>
-              </form>
+                  <div className="mt-6 flex items-center justify-between gap-4">
+                    <button
+                      type="button"
+                      disabled={phoneBusy || resendCooldown > 0}
+                      onClick={() => void requestPhoneOtp(requestedPhone, true)}
+                      className="text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4 disabled:cursor-not-allowed disabled:text-muted-foreground"
+                    >
+                      {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
+                    </button>
+                    <LuxeButton type="submit" arrow disabled={phoneBusy}>
+                      {phoneBusy
+                        ? phoneIntent === "login"
+                          ? "Verifying"
+                          : "Creating account"
+                        : phoneIntent === "login"
+                          ? "Verify & sign in"
+                          : "Verify & create account"}
+                    </LuxeButton>
+                  </div>
+                </form>
+              )}
             </motion.div>
           )}
         </motion.div>
