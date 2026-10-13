@@ -56,9 +56,18 @@ const getPhoneE164 = (countryCode: string, value: string) => {
 };
 
 const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "register") => {
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return "HASTON didn't confirm the OTP request in time. Wait a moment before trying again.";
+  }
   if (error instanceof ApiError) {
-    if (error.status === 429)
-      return "Too many OTP requests or attempts. Please wait before trying again.";
+    const responseMessage =
+      error.message !== `Request failed with status ${error.status}` ? error.message.trim() : "";
+    if (error.status === 429) {
+      return (
+        responseMessage || "Too many OTP requests or attempts. Please wait before trying again."
+      );
+    }
+    if (action === "send" && responseMessage) return responseMessage;
     if (action === "send" && error.status === 400) {
       return "Enter a valid mobile number for the selected country.";
     }
@@ -66,14 +75,10 @@ const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "regis
       return "We couldn't send a verification code right now. Please try again later.";
     }
     if (error.status === 401) {
-      const responseMessage =
-        error.message !== `Request failed with status ${error.status}`
-          ? error.message
-          : typeof error.details === "string"
-            ? error.details.trim()
-            : "";
+      const unauthorizedMessage =
+        responseMessage || (typeof error.details === "string" ? error.details.trim() : "");
       return (
-        responseMessage ||
+        unauthorizedMessage ||
         "That code couldn't be verified. It may be incorrect or expired. Check it or request a new one."
       );
     }
@@ -231,15 +236,21 @@ function Login() {
     setPhoneNotice("");
 
     try {
-      await (intent === "login"
+      const response = await (intent === "login"
         ? phoneAuthApi.sendLoginOtp(phoneNumber)
         : phoneAuthApi.sendRegistrationOtp(phoneNumber));
+      if (!response || typeof response.message !== "string" || !response.message.trim()) {
+        setError(
+          "HASTON didn't confirm the OTP request. Please wait a moment before trying again.",
+        );
+        return;
+      }
       setRequestedPhone(phoneNumber);
       setPhoneStage("otp");
       setPhoneIntent(intent);
       setOtp("");
       setOtpError("");
-      setPhoneNotice("A verification code has been sent to your mobile number.");
+      setPhoneNotice(response.message.trim());
       setResendCooldown(30);
     } catch (requestError) {
       setError(phoneAuthErrorMessage(requestError, "send"));
@@ -252,7 +263,9 @@ function Login() {
   const switchPhoneIntent = (intent: "login" | "register") => {
     if (intent === phoneIntent) return;
     if (intent === "login") setPhoneRegistrationErrors({});
-    void requestPhoneOtp(requestedPhone, false, intent);
+    setPhoneIntent(intent);
+    setPhoneError("");
+    setError("");
   };
 
   const submitPhone = async (event: FormEvent<HTMLFormElement>) => {
@@ -669,6 +682,27 @@ function Login() {
 
               {phoneStage === "number" ? (
                 <form onSubmit={submitPhone} noValidate>
+                  <div className="mt-8 flex items-center">
+                    <button
+                      type="button"
+                      aria-pressed={phoneIntent === "login"}
+                      disabled={phoneBusy}
+                      onClick={() => switchPhoneIntent("login")}
+                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "login" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={phoneIntent === "register"}
+                      disabled={phoneBusy}
+                      onClick={() => switchPhoneIntent("register")}
+                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "register" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
+                    >
+                      Create account
+                    </button>
+                  </div>
+
                   <div className="mt-8">
                     <label htmlFor="login-phone" className="text-eyebrow text-muted-foreground">
                       Mobile number
@@ -746,27 +780,6 @@ function Login() {
                       className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
                     >
                       Change number
-                    </button>
-                  </div>
-
-                  <div className="mt-6 flex">
-                    <button
-                      type="button"
-                      aria-pressed={phoneIntent === "login"}
-                      disabled={phoneBusy}
-                      onClick={() => switchPhoneIntent("login")}
-                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "login" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={phoneIntent === "register"}
-                      disabled={phoneBusy}
-                      onClick={() => switchPhoneIntent("register")}
-                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "register" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
-                    >
-                      Create account
                     </button>
                   </div>
 
