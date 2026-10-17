@@ -20,7 +20,7 @@ export function FeaturedCollection() {
       <div className="relative mx-auto grid max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 md:grid-cols-[1fr_1fr] md:px-10 md:py-24">
         <div>
           <Reveal>
-            <p className="text-eyebrow opacity-70">The autumn edit</p>
+            <p className="text-eyebrow opacity-70">THE ART OF MENSWEAR</p>
           </Reveal>
           <h2 className="mt-6 text-display text-3xl leading-[1.02] md:text-4xl">
             <SplitHeading text="Considered layers for" />

@@ -7,7 +7,6 @@ import {
   Truck,
   RotateCcw,
   Lock,
-  CreditCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import logoMark from "@/assets/haston-mark.png";
@@ -51,8 +50,8 @@ const columns = [
 ];
 
 const badges = [
-  { icon: Truck, label: "Free Shipping ₹999+" },
-  { icon: RotateCcw, label: "7-Day Returns" },
+  { icon: Truck, label: "COMPLIMENTARY SHIPPING" },
+  { icon: RotateCcw, label: "5-DAY RETURNS" },
   { icon: ShieldCheck, label: "Secure Payments" },
   { icon: Lock, label: "SSL Encrypted" },
 ];
@@ -153,11 +152,9 @@ export function Footer() {
           </div>
         </div>
         <div className="relative mt-6 flex flex-col gap-3 border-t border-primary-foreground/10 pt-5 text-[8px] uppercase tracking-[0.18em] opacity-60 md:flex-row md:items-center md:justify-between">
-          <p>GSTIN 27AABCH1234R1ZX · CIN U18101MH2022PTC000001</p>
-          <p className="flex items-center gap-2">
-            <CreditCard className="h-3.5 w-3.5" /> Razorpay · Visa · Mastercard · RuPay · UPI · COD
-          </p>
-          <p>Delhivery · Blue Dart · DTDC</p>
+          <p>HASTON · REFINED MENSWEAR</p>
+          <p>QUIET CONFIDENCE · CONSIDERED DETAILS · EVERYDAY ELEGANCE</p>
+          <p>DISCOVER NEW ARRIVALS · EXPLORE THE COLLECTION</p>
         </div>
       </div>
     </footer>

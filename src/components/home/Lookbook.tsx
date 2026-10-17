@@ -4,10 +4,10 @@ import { IMG } from "@/lib/haston-data";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
 
 const shots = [
-  { src: IMG.lb1, tag: "Portofino, Italy", title: "The overshirt" },
-  { src: IMG.lb2, tag: "Studio 04", title: "Cashmere study" },
-  { src: IMG.lb3, tag: "Milan atelier", title: "Detail 07" },
-  { src: IMG.hero, tag: "Casa Valerion", title: "Ivory light" },
+  { src: IMG.lb1, tag: "THE CITY EDIT", title: "Modern Layers" },
+  { src: IMG.lb2, tag: "THE TEXTURE EDIT", title: "Soft Structure" },
+  { src: IMG.lb3, tag: "THE DETAILS EDIT", title: "Refined Essentials" },
+  { src: IMG.hero, tag: "THE NEUTRAL EDIT", title: "Effortless Tones" },
   { src: IMG.collectionBanner, tag: "Vol. 07", title: "The autumn edit" },
 ];
 
@@ -21,7 +21,7 @@ export function Lookbook() {
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
         <SectionHeader
           eyebrow="Lookbook"
-          title="Vol. 07 — a study in stillness."
+          title="Modern menswear, quietly refined."
           link={{ to: "/lookbook", label: "View the full edit" }}
         />
       </div>

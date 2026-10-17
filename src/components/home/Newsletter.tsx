@@ -1,12 +1,8 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
 import { Reveal, SplitHeading } from "@/components/ui-haston/Reveal";
+import { LuxeButton } from "@/components/ui-haston/LuxeButton";
 
 export function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [done, setDone] = useState(false);
-
   return (
     <section className="relative overflow-hidden bg-primary py-9 text-primary-foreground md:py-10">
       <div
@@ -25,60 +21,26 @@ export function Newsletter() {
 
       <div className="relative mx-auto max-w-3xl px-6 text-center">
         <Reveal>
-          <p className="text-eyebrow opacity-70">The house dispatch</p>
+          <p className="text-eyebrow opacity-70">THE HASTON EDIT</p>
         </Reveal>
         <h2 className="mt-6 text-display text-4xl leading-[1.05] md:text-3xl">
-          <SplitHeading text="Letters from" />
+          <SplitHeading text="Wear what" />
           <span className="mt-2 block italic">
-            <SplitHeading text="the atelier." />
+            <SplitHeading text="defines you." />
           </span>
         </h2>
         <Reveal delay={0.2}>
           <p className="mx-auto mt-6 max-w-md text-base leading-relaxed opacity-75">
-            First looks, private previews, and quiet stories from the workshop — twice a month, in
-            considered prose.
+            Discover refined essentials, modern silhouettes, and pieces that make everyday dressing
+            feel exceptional.
           </p>
         </Reveal>
 
         <Reveal delay={0.3}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setDone(true);
-            }}
-            className="relative mx-auto mt-6 flex max-w-lg items-center gap-2 rounded-full glass-dark p-2 focus-within:ring-2 focus-within:ring-ivory/40"
-          >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              disabled={done}
-              className="flex-1 bg-transparent px-6 py-3 text-sm text-primary-foreground placeholder:opacity-50 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="group grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ivory text-navy transition-all hover:scale-105 active:scale-95"
-              aria-label="Subscribe"
-            >
-              {done ? (
-                <Check className="h-4 w-4" />
-              ) : (
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              )}
-            </button>
-          </form>
+          <LuxeButton to="/shop" variant="ivory" arrow className="mt-6">
+            Explore the collection
+          </LuxeButton>
         </Reveal>
-        {done && (
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 text-[11px] uppercase tracking-[0.28em] opacity-70"
-          >
-            Welcome to the house.
-          </motion.p>
-        )}
       </div>
     </section>
   );

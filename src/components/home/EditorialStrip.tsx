@@ -3,14 +3,15 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { IMG } from "@/lib/haston-data";
 import { SectionHeader } from "@/components/ui-haston/SectionHeader";
+import indexTravel from "@/assets/index-travel.jpg";
 
 const tiles = [
-  { img: IMG.lb1, label: "Linen Hours", meta: "Editorial 01", span: "" },
-  { img: IMG.catShirts, label: "The Shirt Study", meta: "Fabric", span: "" },
-  { img: IMG.catTrousers, label: "Office Ease", meta: "Tailoring", span: "" },
-  { img: IMG.lb2, label: "Weekend Denim", meta: "Lifestyle", span: "" },
-  { img: IMG.catOuter, label: "Layers", meta: "Outerwear", span: "" },
-  { img: IMG.lb3, label: "Travel Light", meta: "Journey", span: "" },
+  { img: IMG.fabricLinen, label: "Linen, Naturally", meta: "THE ART OF LINEN", span: "" },
+  { img: IMG.aboutCraft, label: "Details That Matter", meta: "THE FINER DETAILS", span: "" },
+  { img: IMG.aboutHeroEditorial, label: "The Everyday Uniform", meta: "EVERYDAY STYLE", span: "" },
+  { img: IMG.fabricKnit, label: "Comfort in Texture", meta: "TEXTURE & COMFORT", span: "" },
+  { img: IMG.aboutPhilosophy, label: "The Art of Layering", meta: "THE LAYERING EDIT", span: "" },
+  { img: indexTravel, label: "Made for the Journey", meta: "STYLE IN MOTION", span: "" },
 ];
 
 export function EditorialStrip() {
@@ -24,8 +25,8 @@ export function EditorialStrip() {
         <SectionHeader
           eyebrow="Editorial"
           title="The HASTON Index"
-          description="A moving picture of the house — fabric studies, city light, and the wardrobe in motion."
-          link={{ to: "/lookbook", label: "See lookbook" }}
+          description="Stories on considered menswear, enduring fabrics, thoughtful details, and the pieces that define everyday style."
+          link={{ to: "/journal/", label: "Explore journal" }}
         />
         <motion.div
           style={{ y }}
@@ -40,7 +41,7 @@ export function EditorialStrip() {
               transition={{ duration: 0.8, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
               className={`group relative overflow-hidden rounded-sm ${t.span}`}
             >
-              <Link to="/lookbook" className="block h-full">
+              <Link to="/journal/" className="block h-full">
                 <div className="aspect-square w-full">
                   <img
                     src={t.img}

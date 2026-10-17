@@ -6,32 +6,32 @@ const items = [
   {
     icon: Feather,
     title: "Featherweight fabrics",
-    body: "Cashmere, linen and long-staple cotton sourced from single mills we've partnered with for years.",
+    body: "Lightweight, breathable comfort designed for everyday wear.",
   },
   {
     icon: Scissors,
     title: "Considered cuts",
-    body: "Silhouettes drafted in-house, tuned across ten fittings before a single meter is cut.",
+    body: "Clean lines and balanced proportions for a sharp, effortless look.",
   },
   {
     icon: Hand,
     title: "Small-batch making",
-    body: "Every piece leaves a European workshop by name — never a nameless factory floor.",
+    body: "Thoughtful details and refined finishes bring a considered touch to every piece.",
   },
   {
     icon: Sprout,
     title: "Naturally sourced",
-    body: "Over 60% of our materials are natural fibers, traced back to origin.",
+    body: "Natural textures and versatile tones that make getting dressed feel effortless.",
   },
   {
     icon: Award,
     title: "Lifetime alterations",
-    body: "Free tailoring for the life of the garment. In-store, worldwide.",
+    body: "Refine the fit over time so your favourite pieces keep feeling right.",
   },
   {
     icon: Compass,
     title: "Independent house",
-    body: "House of Valerion remains family-owned. Slower decisions, quieter design.",
+    body: "A distinct point of view: refined menswear, versatile staples, and no unnecessary noise.",
   },
 ];
 

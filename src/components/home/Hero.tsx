@@ -16,7 +16,7 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    eyebrow: "Summer Collection — Vol. 08",
+    eyebrow: "TIMELESS MENSWEAR · HASTON",
     title: ["Comfort", "that defines", "everyday."],
     copy: "Premium fabrics, thoughtful design, and unhurried silhouettes for men who dress with intention.",
     image: IMG.hero,
@@ -258,8 +258,8 @@ export function Hero() {
             className="absolute -left-4 top-16 hidden animate-float glass-panel rounded-md px-5 py-4 text-navy md:block"
             style={{ animationDelay: "-2s" }}
           >
-            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">{slide.spec.label}</p>
-            <p className="mt-1 text-display text-lg">{slide.spec.value}</p>
+            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">MODERN MENSWEAR</p>
+            <p className="mt-1 text-display text-lg">Style, Refined</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -267,8 +267,8 @@ export function Hero() {
             transition={{ duration: 1, delay: 0.8 }}
             className="absolute -right-4 bottom-16 hidden animate-float glass-panel rounded-md px-5 py-4 text-navy md:block"
           >
-            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">Season</p>
-            <p className="mt-1 text-display text-lg">AW · Vol. 07</p>
+            <p className="text-[9px] uppercase tracking-[0.32em] opacity-60">HASTON ESSENTIALS</p>
+            <p className="mt-1 text-display text-lg">Quiet Confidence</p>
           </motion.div>
         </motion.div>
       </div>
