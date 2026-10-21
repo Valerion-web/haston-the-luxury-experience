@@ -31,22 +31,10 @@ const sendOtp = async (path: string, phone: string) => {
 };
 
 export const phoneAuthApi = {
-  sendLoginOtp: (phone: string) => sendOtp("/auth/phone/login/send", phone),
+  sendLoginOtp: (phone: string) => sendOtp("/auth/phone/send-otp", phone),
   verifyLoginOtp: (phone: string, otp: string) =>
-    apiRequest<PhoneAuthResponse>("/auth/phone/login/verify", {
+    apiRequest<PhoneAuthResponse>("/auth/phone/login", {
       method: "POST",
       body: JSON.stringify({ phone, otp }),
-    }),
-  sendRegistrationOtp: (phone: string) => sendOtp("/auth/phone/register/send", phone),
-  verifyRegistrationOtp: (details: {
-    phone: string;
-    otp: string;
-    email: string;
-    password: string;
-    name: string;
-  }) =>
-    apiRequest<PhoneAuthResponse>("/auth/phone/register/verify", {
-      method: "POST",
-      body: JSON.stringify(details),
     }),
 };

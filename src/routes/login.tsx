@@ -55,7 +55,7 @@ const getPhoneE164 = (countryCode: string, value: string) => {
   return rule.pattern.test(nationalNumber) ? `${countryCode}${nationalNumber}` : null;
 };
 
-const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "register") => {
+const phoneAuthErrorMessage = (error: unknown, action: "send" | "login") => {
   if (error instanceof DOMException && error.name === "TimeoutError") {
     return "HASTON didn't confirm the OTP request in time. Wait a moment before trying again.";
   }
@@ -75,15 +75,15 @@ const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "regis
       return "We couldn't send a verification code right now. Please try again later.";
     }
     if (error.status === 401) {
+      if (action === "login") {
+        return "That code couldn't be verified. It may be incorrect or expired. Check it or request a new one.";
+      }
       const unauthorizedMessage =
         responseMessage || (typeof error.details === "string" ? error.details.trim() : "");
       return (
         unauthorizedMessage ||
         "That code couldn't be verified. It may be incorrect or expired. Check it or request a new one."
       );
-    }
-    if (action === "register" && error.status === 409) {
-      return "We couldn't create an account with these details. Check them or switch to sign in.";
     }
     if (error.status >= 500)
       return "HASTON couldn't complete that request. Please try again shortly.";
@@ -93,10 +93,16 @@ const phoneAuthErrorMessage = (error: unknown, action: "send" | "login" | "regis
   }
   return action === "send"
     ? "We couldn't send a verification code. Please try again."
-    : action === "register"
-      ? "We couldn't create your account. Check your details and try again."
-      : "We couldn't complete sign-in. Check the code and try again.";
+    : "We couldn't complete sign-in. Check the code and try again.";
 };
+
+const isPhoneAccountNotFoundError = (error: unknown) =>
+  error instanceof ApiError &&
+  error.status === 401 &&
+  typeof error.details === "object" &&
+  error.details !== null &&
+  "code" in error.details &&
+  error.details.code === "PHONE_ACCOUNT_NOT_FOUND";
 
 function loadGoogleIdentityServices() {
   if (window.google?.accounts?.id) return Promise.resolve(window.google.accounts.id);
@@ -164,17 +170,11 @@ function Login() {
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phoneStage, setPhoneStage] = useState<"number" | "otp">("number");
-  const [phoneIntent, setPhoneIntent] = useState<"login" | "register">("login");
   const [requestedPhone, setRequestedPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [phoneName, setPhoneName] = useState("");
-  const [phoneEmail, setPhoneEmail] = useState("");
-  const [phonePassword, setPhonePassword] = useState("");
-  const [phoneRegistrationErrors, setPhoneRegistrationErrors] = useState<
-    Partial<Record<"name" | "email" | "password", string>>
-  >({});
   const [otpError, setOtpError] = useState("");
   const [phoneNotice, setPhoneNotice] = useState("");
+  const [phoneAccountNotFound, setPhoneAccountNotFound] = useState(false);
   const [phoneBusy, setPhoneBusy] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [mode, setMode] = useState<"email" | "phone">("email");
@@ -224,21 +224,16 @@ function Login() {
     }
   };
 
-  const requestPhoneOtp = async (
-    phoneNumber: string,
-    isResend = false,
-    intent: "login" | "register" = phoneIntent,
-  ) => {
+  const requestPhoneOtp = async (phoneNumber: string, isResend = false) => {
     if (phoneRequestInFlight.current || (isResend && resendCooldown > 0)) return;
     phoneRequestInFlight.current = true;
     setPhoneBusy(true);
     setError("");
     setPhoneNotice("");
+    setPhoneAccountNotFound(false);
 
     try {
-      const response = await (intent === "login"
-        ? phoneAuthApi.sendLoginOtp(phoneNumber)
-        : phoneAuthApi.sendRegistrationOtp(phoneNumber));
+      const response = await phoneAuthApi.sendLoginOtp(phoneNumber);
       if (!response || typeof response.message !== "string" || !response.message.trim()) {
         setError(
           "HASTON didn't confirm the OTP request. Please wait a moment before trying again.",
@@ -247,7 +242,6 @@ function Login() {
       }
       setRequestedPhone(phoneNumber);
       setPhoneStage("otp");
-      setPhoneIntent(intent);
       setOtp("");
       setOtpError("");
       setPhoneNotice(response.message.trim());
@@ -258,14 +252,6 @@ function Login() {
       phoneRequestInFlight.current = false;
       setPhoneBusy(false);
     }
-  };
-
-  const switchPhoneIntent = (intent: "login" | "register") => {
-    if (intent === phoneIntent) return;
-    if (intent === "login") setPhoneRegistrationErrors({});
-    setPhoneIntent(intent);
-    setPhoneError("");
-    setError("");
   };
 
   const submitPhone = async (event: FormEvent<HTMLFormElement>) => {
@@ -296,40 +282,22 @@ function Login() {
     }
     setOtpError("");
 
-    const registrationErrors: Partial<Record<"name" | "email" | "password", string>> = {};
-    if (phoneIntent === "register") {
-      if (!phoneName.trim()) registrationErrors.name = "Enter your name.";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(phoneEmail.trim())) {
-        registrationErrors.email = "Enter a valid email address.";
-      }
-      if (phonePassword.length < 8) {
-        registrationErrors.password = "Password must be at least 8 characters.";
-      }
-      setPhoneRegistrationErrors(registrationErrors);
-      if (Object.keys(registrationErrors).length > 0) return;
-    }
-
     if (phoneRequestInFlight.current) return;
     phoneRequestInFlight.current = true;
     setPhoneBusy(true);
     try {
-      const response =
-        phoneIntent === "login"
-          ? await phoneAuthApi.verifyLoginOtp(requestedPhone, submittedOtp)
-          : await phoneAuthApi.verifyRegistrationOtp({
-              phone: requestedPhone,
-              otp: submittedOtp,
-              name: phoneName.trim(),
-              email: phoneEmail.trim(),
-              password: phonePassword,
-            });
+      const response = await phoneAuthApi.verifyLoginOtp(requestedPhone, submittedOtp);
       saveSession(response.user);
-      setPhoneNotice(
-        phoneIntent === "login" ? "Signed in successfully." : "Your account is ready.",
-      );
+      setPhoneNotice("Signed in successfully.");
       await navigate({ to: "/account", replace: true });
     } catch (verificationError) {
-      setError(phoneAuthErrorMessage(verificationError, phoneIntent));
+      if (isPhoneAccountNotFoundError(verificationError)) {
+        setPhoneAccountNotFound(true);
+        setError("No account is linked to this phone number.");
+      } else {
+        setPhoneAccountNotFound(false);
+        setError(phoneAuthErrorMessage(verificationError, "login"));
+      }
     } finally {
       phoneRequestInFlight.current = false;
       setPhoneBusy(false);
@@ -668,11 +636,7 @@ function Login() {
               </button>
               <p className="text-eyebrow text-muted-foreground">Private access</p>
               <h1 className="mt-4 text-display text-3xl sm:text-4xl">
-                {phoneStage === "number"
-                  ? "Sign in with your phone."
-                  : phoneIntent === "login"
-                    ? "Verify your phone."
-                    : "Create your account."}
+                {phoneStage === "number" ? "Sign in with your phone." : "Verify your phone."}
               </h1>
               <p className="mt-4 text-sm text-muted-foreground">
                 {phoneStage === "number"
@@ -682,27 +646,6 @@ function Login() {
 
               {phoneStage === "number" ? (
                 <form onSubmit={submitPhone} noValidate>
-                  <div className="mt-8 flex items-center">
-                    <button
-                      type="button"
-                      aria-pressed={phoneIntent === "login"}
-                      disabled={phoneBusy}
-                      onClick={() => switchPhoneIntent("login")}
-                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "login" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={phoneIntent === "register"}
-                      disabled={phoneBusy}
-                      onClick={() => switchPhoneIntent("register")}
-                      className={`flex-1 border-b-2 px-3 py-3 text-[10px] uppercase tracking-[0.18em] transition-colors ${phoneIntent === "register" ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary"}`}
-                    >
-                      Create account
-                    </button>
-                  </div>
-
                   <div className="mt-8">
                     <label htmlFor="login-phone" className="text-eyebrow text-muted-foreground">
                       Mobile number
@@ -776,65 +719,13 @@ function Login() {
                         setPhoneError("");
                         setError("");
                         setPhoneNotice("");
+                        setPhoneAccountNotFound(false);
                       }}
                       className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
                     >
                       Change number
                     </button>
                   </div>
-
-                  {phoneIntent === "register" && (
-                    <div className="mt-6 space-y-5">
-                      <Input
-                        id="phone-register-name"
-                        label="Full name"
-                        type="text"
-                        autoComplete="name"
-                        value={phoneName}
-                        error={phoneRegistrationErrors.name || ""}
-                        onChange={(value) => {
-                          setPhoneName(value);
-                          setPhoneRegistrationErrors((current) => ({
-                            ...current,
-                            name: undefined,
-                          }));
-                          setError("");
-                        }}
-                      />
-                      <Input
-                        id="phone-register-email"
-                        label="Email"
-                        type="email"
-                        autoComplete="email"
-                        value={phoneEmail}
-                        error={phoneRegistrationErrors.email || ""}
-                        onChange={(value) => {
-                          setPhoneEmail(value);
-                          setPhoneRegistrationErrors((current) => ({
-                            ...current,
-                            email: undefined,
-                          }));
-                          setError("");
-                        }}
-                      />
-                      <Input
-                        id="phone-register-password"
-                        label="Password"
-                        type="password"
-                        autoComplete="new-password"
-                        value={phonePassword}
-                        error={phoneRegistrationErrors.password || ""}
-                        onChange={(value) => {
-                          setPhonePassword(value);
-                          setPhoneRegistrationErrors((current) => ({
-                            ...current,
-                            password: undefined,
-                          }));
-                          setError("");
-                        }}
-                      />
-                    </div>
-                  )}
 
                   <div className="mt-6">
                     <label htmlFor="phone-login-otp" className="text-eyebrow text-muted-foreground">
@@ -853,6 +744,7 @@ function Login() {
                         setOtpError("");
                         setError("");
                         setPhoneNotice("");
+                        setPhoneAccountNotFound(false);
                       }}
                       aria-invalid={Boolean(otpError)}
                       aria-describedby={otpError ? "phone-login-otp-error" : undefined}
@@ -872,6 +764,14 @@ function Login() {
                     </p>
                   )}
                   {error && <StatusMessage>{error}</StatusMessage>}
+                  {phoneAccountNotFound && (
+                    <Link
+                      to="/register"
+                      className="mt-3 inline-block text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
+                    >
+                      Create Account
+                    </Link>
+                  )}
 
                   <div className="mt-6 flex items-center justify-between gap-4">
                     <button
@@ -883,13 +783,7 @@ function Login() {
                       {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
                     </button>
                     <LuxeButton type="submit" arrow disabled={phoneBusy}>
-                      {phoneBusy
-                        ? phoneIntent === "login"
-                          ? "Verifying"
-                          : "Creating account"
-                        : phoneIntent === "login"
-                          ? "Verify & sign in"
-                          : "Verify & create account"}
+                      {phoneBusy ? "Verifying" : "Verify & Sign In"}
                     </LuxeButton>
                   </div>
                 </form>
