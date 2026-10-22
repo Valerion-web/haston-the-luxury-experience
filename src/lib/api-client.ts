@@ -5,6 +5,7 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://api.haston.i
 const STORE_SLUG = "haston";
 const API_ORIGIN = API_BASE_URL.replace(/\/api$/, "");
 const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+let csrfBootstrap: Promise<void> | null = null;
 
 const getCsrfToken = () => {
   const csrfCookie = document.cookie
@@ -19,6 +20,35 @@ const getCsrfToken = () => {
   } catch {
     return value;
   }
+};
+
+const ensureCsrfToken = async () => {
+  if (getCsrfToken()) return;
+  if (!csrfBootstrap) {
+    csrfBootstrap = (async () => {
+      const response = await fetch(`${API_BASE_URL}/auth/csrf`, {
+        headers: { Accept: "application/json", "X-Store-Slug": STORE_SLUG },
+        credentials: "include",
+      });
+      const contentType = response.headers.get("content-type") || "";
+      const payload = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+      if (!response.ok) {
+        const message =
+          typeof payload === "object" && payload && "message" in payload
+            ? String(payload.message)
+            : `Request failed with status ${response.status}`;
+        throw new ApiError(message, response.status, payload);
+      }
+      if (!getCsrfToken()) {
+        throw new ApiError("Unable to initialize CSRF protection.", response.status, payload);
+      }
+    })().finally(() => {
+      csrfBootstrap = null;
+    });
+  }
+  await csrfBootstrap;
 };
 
 export const resolveBackendAssetUrl = (value: string | null | undefined) => {
@@ -42,9 +72,14 @@ export const apiRequest = async <T>(path: string, init: RequestInit = {}): Promi
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  if (STATE_CHANGING_METHODS.has((init.method || "GET").toUpperCase()) && !headers.has("X-CSRF-Token")) {
+  const isStateChanging = STATE_CHANGING_METHODS.has((init.method || "GET").toUpperCase());
+  if (isStateChanging && !headers.has("X-CSRF-Token") && !getCsrfToken()) {
+    await ensureCsrfToken();
+  }
+  if (isStateChanging && !headers.has("X-CSRF-Token")) {
     const csrfToken = getCsrfToken();
-    if (csrfToken) headers.set("X-CSRF-Token", csrfToken);
+    if (!csrfToken) throw new ApiError("Unable to initialize CSRF protection.", 0);
+    headers.set("X-CSRF-Token", csrfToken);
   }
   headers.set("X-Store-Slug", STORE_SLUG);
   const response = await fetch(`${API_BASE_URL}${path}`, {

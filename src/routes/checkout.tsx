@@ -117,7 +117,7 @@ function Checkout() {
       void navigate({ to: "/login", replace: true });
       return;
     }
-    setDetails((current) => ({ ...current, email: current.email || session.email }));
+    setDetails((current) => ({ ...current, email: current.email || session.email || "" }));
   }, [navigate, session]);
 
   useEffect(() => {

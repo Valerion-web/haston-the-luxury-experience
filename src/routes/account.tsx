@@ -74,7 +74,7 @@ function Account() {
     return null;
   }
 
-  const displayName = session.name || session.email;
+  const displayName = session.name || session.email || "HASTON member";
   const initials = displayName.charAt(0).toUpperCase();
 
   return (

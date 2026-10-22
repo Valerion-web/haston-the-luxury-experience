@@ -1,6 +1,6 @@
 export type SessionUser = {
   id: number;
-  email: string;
+  email: string | null;
   name: string;
   role: string;
   createdAt?: string;

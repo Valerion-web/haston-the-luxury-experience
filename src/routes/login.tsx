@@ -96,14 +96,6 @@ const phoneAuthErrorMessage = (error: unknown, action: "send" | "login") => {
     : "We couldn't complete sign-in. Check the code and try again.";
 };
 
-const isPhoneAccountNotFoundError = (error: unknown) =>
-  error instanceof ApiError &&
-  error.status === 401 &&
-  typeof error.details === "object" &&
-  error.details !== null &&
-  "code" in error.details &&
-  error.details.code === "PHONE_ACCOUNT_NOT_FOUND";
-
 function loadGoogleIdentityServices() {
   if (window.google?.accounts?.id) return Promise.resolve(window.google.accounts.id);
   if (googleGisPromise) return googleGisPromise;
@@ -174,7 +166,6 @@ function Login() {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
   const [phoneNotice, setPhoneNotice] = useState("");
-  const [phoneAccountNotFound, setPhoneAccountNotFound] = useState(false);
   const [phoneBusy, setPhoneBusy] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [mode, setMode] = useState<"email" | "phone">("email");
@@ -230,8 +221,6 @@ function Login() {
     setPhoneBusy(true);
     setError("");
     setPhoneNotice("");
-    setPhoneAccountNotFound(false);
-
     try {
       const response = await phoneAuthApi.sendLoginOtp(phoneNumber);
       if (!response || typeof response.message !== "string" || !response.message.trim()) {
@@ -291,13 +280,7 @@ function Login() {
       setPhoneNotice("Signed in successfully.");
       await navigate({ to: "/account", replace: true });
     } catch (verificationError) {
-      if (isPhoneAccountNotFoundError(verificationError)) {
-        setPhoneAccountNotFound(true);
-        setError("No account is linked to this phone number.");
-      } else {
-        setPhoneAccountNotFound(false);
-        setError(phoneAuthErrorMessage(verificationError, "login"));
-      }
+      setError(phoneAuthErrorMessage(verificationError, "login"));
     } finally {
       phoneRequestInFlight.current = false;
       setPhoneBusy(false);
@@ -636,11 +619,11 @@ function Login() {
               </button>
               <p className="text-eyebrow text-muted-foreground">Private access</p>
               <h1 className="mt-4 text-display text-3xl sm:text-4xl">
-                {phoneStage === "number" ? "Sign in with your phone." : "Verify your phone."}
+                {phoneStage === "number" ? "Continue with your phone." : "Verify your phone."}
               </h1>
               <p className="mt-4 text-sm text-muted-foreground">
                 {phoneStage === "number"
-                  ? "We'll send a verification code to your mobile number."
+                  ? "We'll sign you in or create your account after verifying your number."
                   : `Enter the code sent to ${requestedPhone}.`}
               </p>
 
@@ -719,7 +702,6 @@ function Login() {
                         setPhoneError("");
                         setError("");
                         setPhoneNotice("");
-                        setPhoneAccountNotFound(false);
                       }}
                       className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
                     >
@@ -744,7 +726,6 @@ function Login() {
                         setOtpError("");
                         setError("");
                         setPhoneNotice("");
-                        setPhoneAccountNotFound(false);
                       }}
                       aria-invalid={Boolean(otpError)}
                       aria-describedby={otpError ? "phone-login-otp-error" : undefined}
@@ -764,15 +745,6 @@ function Login() {
                     </p>
                   )}
                   {error && <StatusMessage>{error}</StatusMessage>}
-                  {phoneAccountNotFound && (
-                    <Link
-                      to="/register"
-                      className="mt-3 inline-block text-[10px] uppercase tracking-[0.16em] text-primary underline underline-offset-4"
-                    >
-                      Create Account
-                    </Link>
-                  )}
-
                   <div className="mt-6 flex items-center justify-between gap-4">
                     <button
                       type="button"

@@ -5,6 +5,13 @@ type PhoneAuthResponse = {
   user: import("@/lib/haston-session").SessionUser;
   message: string;
 };
+export type PhoneRegistrationDetails = {
+  phone: string;
+  otp: string;
+  email: string;
+  password: string;
+  name: string;
+};
 
 const OTP_REQUEST_TIMEOUT_MS = 15_000;
 
@@ -31,10 +38,16 @@ const sendOtp = async (path: string, phone: string) => {
 };
 
 export const phoneAuthApi = {
-  sendLoginOtp: (phone: string) => sendOtp("/auth/phone/send-otp", phone),
+  sendLoginOtp: (phone: string) => sendOtp("/auth/phone/login/send", phone),
   verifyLoginOtp: (phone: string, otp: string) =>
-    apiRequest<PhoneAuthResponse>("/auth/phone/login", {
+    apiRequest<PhoneAuthResponse>("/auth/phone/login/verify", {
       method: "POST",
       body: JSON.stringify({ phone, otp }),
+    }),
+  sendRegistrationOtp: (phone: string) => sendOtp("/auth/phone/register/send", phone),
+  verifyRegistrationOtp: (details: PhoneRegistrationDetails) =>
+    apiRequest<PhoneAuthResponse>("/auth/phone/register/verify", {
+      method: "POST",
+      body: JSON.stringify(details),
     }),
 };
