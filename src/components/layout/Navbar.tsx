@@ -206,40 +206,57 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[60] bg-background p-6 lg:hidden"
+            className="fixed left-0 top-0 z-[100] isolate h-dvh w-screen overflow-y-auto overscroll-contain bg-[#F8FAFC] p-6 text-[#0A1931] shadow-[12px_0_40px_-18px_rgba(10,25,49,0.35)] lg:hidden"
           >
             <div className="mb-8 flex items-center justify-between">
               <img src={logoFull} alt="HASTON" className="h-10 w-auto object-contain" />
               <button onClick={() => setMenuOpen(false)} aria-label="Close">
-                <X className="h-5 w-5" strokeWidth={1.4} />
+                <X className="h-5 w-5 text-[#0A1931]" strokeWidth={1.4} />
               </button>
             </div>
             <nav className="flex flex-col gap-4">
-              {navLinks.map((l) => (
+              {navLinks.map((l) => {
+                const active = pathname === l.to || pathname.startsWith(`${l.to}/`);
+                return (
+                  <Link
+                    key={l.label}
+                    to={l.to}
+                    onClick={() => setMenuOpen(false)}
+                    className={`text-display text-base uppercase tracking-[0.14em] transition-colors hover:text-[#6B5B3E] ${
+                      active ? "text-[#0A1931]" : "text-[#0A1931]/80"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                );
+              })}
+              <div className="mt-6 border-t border-[#0A1931]/15 pt-6 text-[9px] uppercase tracking-[0.2em] text-[#0A1931]/75">
                 <Link
-                  key={l.label}
-                  to={l.to}
+                  to="/account"
                   onClick={() => setMenuOpen(false)}
-                  className="text-display text-base uppercase tracking-[0.14em]"
+                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
                 >
-                  {l.label}
-                </Link>
-              ))}
-              <div className="mt-6 hairline pt-6 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                <Link to="/account" onClick={() => setMenuOpen(false)} className="block py-1.5">
                   Account
                 </Link>
-                <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="block py-1.5">
+                <Link
+                  to="/wishlist"
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
+                >
                   Wishlist
                 </Link>
                 <Link
                   to="/order-tracking"
                   onClick={() => setMenuOpen(false)}
-                  className="block py-1.5"
+                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
                 >
                   Track Order
                 </Link>
-                <Link to="/support" onClick={() => setMenuOpen(false)} className="block py-1.5">
+                <Link
+                  to="/support"
+                  onClick={() => setMenuOpen(false)}
+                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
+                >
                   Support
                 </Link>
               </div>
