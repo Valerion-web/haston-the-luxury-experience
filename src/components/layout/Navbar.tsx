@@ -1,7 +1,17 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
+import {
+  Search,
+  Heart,
+  User,
+  ShoppingBag,
+  Menu,
+  X,
+  ArrowUpRight,
+  Headphones,
+  PackageSearch,
+} from "lucide-react";
 import { resolveBackendAssetUrl } from "@/lib/api-client";
 import { IMG } from "@/lib/haston-data";
 import { SearchOverlay } from "./SearchOverlay";
@@ -206,59 +216,89 @@ export function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-0 top-0 z-[100] isolate h-dvh w-screen overflow-y-auto overscroll-contain bg-[#F8FAFC] p-6 text-[#0A1931] shadow-[12px_0_40px_-18px_rgba(10,25,49,0.35)] lg:hidden"
+            className="fixed left-0 top-0 z-[100] isolate flex h-dvh w-screen flex-col overflow-hidden bg-[#F8FAFC] px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-[#0A1931] shadow-[12px_0_40px_-18px_rgba(10,25,49,0.35)] sm:px-6 lg:hidden"
           >
-            <div className="mb-8 flex items-center justify-between">
-              <img src={logoFull} alt="HASTON" className="h-10 w-auto object-contain" />
-              <button onClick={() => setMenuOpen(false)} aria-label="Close">
-                <X className="h-5 w-5 text-[#0A1931]" strokeWidth={1.4} />
+            <div className="flex shrink-0 items-center justify-between border-b border-[#0A1931]/10 pb-4">
+              <img src={logoFull} alt="HASTON" className="h-9 w-auto object-contain sm:h-10" />
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                className="grid size-[48px] place-items-center rounded-full border border-[#0A1931]/15 text-[#0A1931] transition-colors hover:border-[#D4AF37]/60 hover:bg-[#0A1931]/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4AF37]"
+              >
+                <X className="h-5 w-5" strokeWidth={1.5} />
               </button>
             </div>
-            <nav className="flex flex-col gap-4">
-              {navLinks.map((l) => {
-                const active = pathname === l.to || pathname.startsWith(`${l.to}/`);
-                return (
-                  <Link
-                    key={l.label}
-                    to={l.to}
-                    onClick={() => setMenuOpen(false)}
-                    className={`text-display text-base uppercase tracking-[0.14em] transition-colors hover:text-[#6B5B3E] ${
-                      active ? "text-[#0A1931]" : "text-[#0A1931]/80"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                );
-              })}
-              <div className="mt-6 border-t border-[#0A1931]/15 pt-6 text-[9px] uppercase tracking-[0.2em] text-[#0A1931]/75">
-                <Link
-                  to="/account"
-                  onClick={() => setMenuOpen(false)}
-                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
-                >
-                  Account
-                </Link>
-                <Link
-                  to="/wishlist"
-                  onClick={() => setMenuOpen(false)}
-                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
-                >
-                  Wishlist
-                </Link>
-                <Link
-                  to="/order-tracking"
-                  onClick={() => setMenuOpen(false)}
-                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
-                >
-                  Track Order
-                </Link>
-                <Link
-                  to="/support"
-                  onClick={() => setMenuOpen(false)}
-                  className="block py-2 text-[#0A1931] transition-colors hover:text-[#6B5B3E]"
-                >
-                  Support
-                </Link>
+            <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-5">
+              <p className="px-4 pb-2 text-[9px] uppercase tracking-[0.24em] text-slate-500">
+                Discover HASTON
+              </p>
+              <div className="flex flex-col gap-1">
+                {navLinks.map((l, index) => {
+                  const active = pathname === l.to || pathname.startsWith(`${l.to}/`);
+                  return (
+                    <Link
+                      key={l.label}
+                      to={l.to}
+                      onClick={() => setMenuOpen(false)}
+                      aria-current={active ? "page" : undefined}
+                      className={`group flex min-h-[52px] items-center justify-between rounded-sm border-l-2 px-4 py-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#D4AF37] ${
+                        active
+                          ? "border-[#D4AF37] bg-[#0A1931]/[0.05] text-[#0A1931]"
+                          : "border-transparent text-[#0A1931]/80 hover:border-[#D4AF37]/70 hover:bg-[#0A1931]/[0.04] hover:text-[#0A1931]"
+                      }`}
+                    >
+                      <span className="flex items-center gap-4">
+                        <span className="w-4 text-[9px] tabular-nums tracking-[0.12em] text-[#D4AF37]">
+                          0{index + 1}
+                        </span>
+                        <span className="text-display text-[17px] uppercase tracking-[0.13em] sm:text-lg">
+                          {l.label}
+                        </span>
+                      </span>
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="h-4 w-4 text-[#D4AF37] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                        strokeWidth={1.5}
+                      />
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="mt-6 border-t border-[#0A1931]/10 pt-5">
+                <p className="px-1 pb-3 text-[9px] uppercase tracking-[0.24em] text-slate-500">
+                  Your HASTON
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Account", to: "/account", Icon: User },
+                    { label: "Wishlist", to: "/wishlist", Icon: Heart },
+                    { label: "Track Order", to: "/order-tracking", Icon: PackageSearch },
+                    { label: "Support", to: "/support", Icon: Headphones },
+                  ].map(({ label, to, Icon }) => {
+                    const active = pathname === to || pathname.startsWith(`${to}/`);
+                    return (
+                      <Link
+                        key={label}
+                        to={to}
+                        onClick={() => setMenuOpen(false)}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex min-h-[48px] items-center gap-2.5 rounded-sm border px-3 py-2 text-[9px] font-medium uppercase tracking-[0.1em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#D4AF37] sm:gap-3 sm:px-3.5 sm:text-[10px] ${
+                          active
+                            ? "border-[#D4AF37]/50 bg-[#0A1931]/[0.05] text-[#0A1931]"
+                            : "border-[#0A1931]/10 text-[#0A1931]/75 hover:border-[#D4AF37]/50 hover:bg-[#0A1931]/[0.04] hover:text-[#0A1931]"
+                        }`}
+                      >
+                        <Icon
+                          aria-hidden="true"
+                          className="h-4 w-4 shrink-0 text-[#D4AF37]"
+                          strokeWidth={1.5}
+                        />
+                        <span>{label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </nav>
           </motion.div>
