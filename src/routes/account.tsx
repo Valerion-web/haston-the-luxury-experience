@@ -12,15 +12,18 @@ import {
   Award,
   LogOut,
   ChevronRight,
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
 } from "lucide-react";
 import { inr } from "@/lib/haston-data";
 import { ProductCard } from "@/components/ui-haston/ProductCard";
-import { hastonApi } from "@/lib/haston-api";
+import { hastonApi, type SavedAddress, type SavedAddressInput } from "@/lib/haston-api";
 import { clearSession } from "@/lib/haston-session";
 import { useHastonSession } from "@/hooks/use-haston-session";
 import { useHastonWishlist } from "@/hooks/use-haston-wishlist";
-import { useQueryClient } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -64,7 +67,7 @@ function Account() {
       queryClient.removeQueries({
         predicate: ({ queryKey }) =>
           queryKey[0] === "haston" &&
-          ["account", "cart", "profile", "orders", "wishlist", "session"].includes(String(queryKey[1])),
+          ["account", "addresses", "cart", "profile", "orders", "wishlist", "session"].includes(String(queryKey[1])),
       });
       await navigate({ to: "/login", replace: true });
     }
@@ -281,28 +284,361 @@ function WishlistTab() {
 }
 
 function Addresses({ name }: { name: string }) {
+  const session = useHastonSession();
+  const queryClient = useQueryClient();
+  const queryKey = ["haston", "addresses", session?.id] as const;
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+  const [form, setForm] = useState<SavedAddressInput>(() => emptyAddress(name));
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof SavedAddressInput, string>>>({});
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const {
+    data: addresses = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: hastonApi.addresses,
+    enabled: Boolean(session),
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: ({ id, address }: { id: number | null; address: SavedAddressInput }) =>
+      id === null ? hastonApi.createAddress(address) : hastonApi.updateAddress(id, address),
+    onSuccess: async (_address, { id }) => {
+      setIsFormOpen(false);
+      setEditingAddressId(null);
+      setFieldErrors({});
+      setFeedback({
+        type: "success",
+        message: id === null ? "Address added successfully." : "Address updated successfully.",
+      });
+      await queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (mutationError) => {
+      setFeedback({
+        type: "error",
+        message: mutationError instanceof Error ? mutationError.message : "Unable to save this address.",
+      });
+    },
+  });
+
+  const defaultMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await hastonApi.setDefaultAddress(id);
+      const persistedAddresses = await hastonApi.addresses();
+      const defaultAddresses = persistedAddresses.filter((address) => address.isDefault);
+      if (defaultAddresses.length !== 1 || defaultAddresses[0].id !== id) {
+        throw new Error("The server did not confirm this address as the only default.");
+      }
+      return persistedAddresses;
+    },
+    onSuccess: (persistedAddresses) => {
+      queryClient.setQueryData<SavedAddress[]>(queryKey, persistedAddresses);
+      setFeedback({ type: "success", message: "Default address updated." });
+    },
+    onError: async (mutationError) => {
+      setFeedback({
+        type: "error",
+        message: mutationError instanceof Error ? mutationError.message : "Unable to update the default address.",
+      });
+      await queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => hastonApi.deleteAddress(id),
+    onSuccess: async (_result, id) => {
+      queryClient.setQueryData<SavedAddress[]>(queryKey, (current) =>
+        current?.filter((address) => address.id !== id),
+      );
+      setFeedback({ type: "success", message: "Address deleted successfully." });
+      await queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (mutationError) => {
+      setFeedback({
+        type: "error",
+        message: mutationError instanceof Error ? mutationError.message : "Unable to delete this address.",
+      });
+    },
+  });
+
+  const isMutating = saveMutation.isPending || defaultMutation.isPending || deleteMutation.isPending;
+
+  const startNewAddress = () => {
+    setEditingAddressId(null);
+    setForm(emptyAddress(name));
+    setFieldErrors({});
+    setFeedback(null);
+    setIsFormOpen(true);
+  };
+
+  const startEditingAddress = (address: SavedAddress) => {
+    setEditingAddressId(address.id);
+    setForm({
+      label: address.label,
+      name: address.name || name,
+      line1: address.line1,
+      line2: address.line2 || "",
+      city: address.city,
+      state: address.state,
+      postalCode: address.postalCode,
+      country: address.country,
+      phone: address.phone || "",
+    });
+    setFieldErrors({});
+    setFeedback(null);
+    setIsFormOpen(true);
+  };
+
+  const cancelForm = () => {
+    setIsFormOpen(false);
+    setEditingAddressId(null);
+    setFieldErrors({});
+    setFeedback(null);
+  };
+
+  const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isMutating) return;
+    const errors = validateSavedAddress(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setFeedback(null);
+    saveMutation.mutate({
+      id: editingAddressId,
+      address: {
+        label: form.label.trim(),
+        name: form.name.trim(),
+        line1: form.line1.trim(),
+        line2: form.line2?.trim() || null,
+        city: form.city.trim(),
+        state: form.state.trim(),
+        postalCode: form.postalCode.trim(),
+        country: form.country.trim(),
+        phone: form.phone?.trim() || null,
+      },
+    });
+  };
+
+  const handleDelete = (address: SavedAddress) => {
+    if (isMutating || !window.confirm(`Delete ${address.label}? This cannot be undone.`)) return;
+    setFeedback(null);
+    deleteMutation.mutate(address.id);
+  };
+
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {["Home — Milano", "Studio — London"].map((t, i) => (
-        <div key={i} className="rounded-md border border-border bg-card p-6 soft-shadow">
-          <p className="text-eyebrow text-muted-foreground">{t}</p>
-          <p className="mt-4 text-sm leading-relaxed">
-            {name}
-            <br />
-            Via della Spiga 27
-            <br />
-            20121 Milano, Italy
-            <br />
-            +39 02 7600 1234
-          </p>
-          <div className="mt-4 flex gap-3 text-[10px] uppercase tracking-[0.28em]">
-            <button className="underline">Edit</button>
-            <button className="text-muted-foreground">Set default</button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-display text-2xl">Saved addresses</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Manage where your HASTON orders arrive.</p>
         </div>
-      ))}
+        <button
+          type="button"
+          onClick={startNewAddress}
+          disabled={isMutating}
+          className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2.5 text-[10px] uppercase tracking-[0.22em] transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add address
+        </button>
+      </div>
+
+      {feedback && (
+        <p
+          role={feedback.type === "error" ? "alert" : "status"}
+          className={`text-sm ${feedback.type === "error" ? "text-destructive" : "text-accent"}`}
+        >
+          {feedback.message}
+        </p>
+      )}
+
+      {isLoading ? (
+        <p role="status" className="text-sm text-muted-foreground">Loading saved addresses...</p>
+      ) : error ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-5">
+          <p role="alert" className="text-sm text-destructive">Unable to load saved addresses.</p>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="text-[10px] uppercase tracking-[0.22em] underline underline-offset-4"
+          >
+            Retry
+          </button>
+        </div>
+      ) : addresses.length === 0 ? (
+        <div className="rounded-md border border-border bg-card p-6">
+          <p className="text-sm text-muted-foreground">You have no saved addresses yet.</p>
+          <button
+            type="button"
+            onClick={startNewAddress}
+            disabled={isMutating}
+            className="mt-4 text-[10px] uppercase tracking-[0.22em] underline underline-offset-4 disabled:opacity-50"
+          >
+            Add your first address
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {addresses.map((address) => (
+            <article key={address.id} className="rounded-md border border-border bg-card p-6 soft-shadow">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-eyebrow text-muted-foreground">{address.label}</p>
+                {address.isDefault && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/50 px-3 py-1 text-[9px] uppercase tracking-[0.2em]">
+                    <Check className="h-3 w-3" /> Default
+                  </span>
+                )}
+              </div>
+              <p className="mt-4 text-sm leading-relaxed">
+                {address.name || name}
+                <br />
+                {address.line1}
+                {address.line2 && <><br />{address.line2}</>}
+                <br />
+                {address.city}, {address.state} {address.postalCode}
+                <br />
+                {address.country}
+                {address.phone && <><br />{address.phone}</>}
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.22em]">
+                <button
+                  type="button"
+                  onClick={() => startEditingAddress(address)}
+                  disabled={isMutating}
+                  className="inline-flex items-center gap-1.5 underline underline-offset-4 disabled:opacity-50"
+                >
+                  <Pencil className="h-3 w-3" /> Edit
+                </button>
+                {!address.isDefault && (
+                  <button
+                    type="button"
+                    onClick={() => { setFeedback(null); defaultMutation.mutate(address.id); }}
+                    disabled={isMutating}
+                    className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                  >
+                    Set default
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(address)}
+                  disabled={isMutating}
+                  className="inline-flex items-center gap-1.5 text-destructive disabled:opacity-50"
+                >
+                  <Trash2 className="h-3 w-3" /> Delete
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {isFormOpen && (
+        <form onSubmit={handleSave} noValidate className="rounded-md border border-border bg-card p-5 md:p-6">
+          <h3 className="text-display text-xl">{editingAddressId === null ? "Add address" : "Edit address"}</h3>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {ADDRESS_FIELDS.map((field) => {
+              const errorMessage = fieldErrors[field.name];
+              const inputId = `saved-address-${field.name}`;
+              return (
+                <label key={field.name} htmlFor={inputId} className="block">
+                  <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                    {field.label}{field.required ? " *" : ""}
+                  </span>
+                  <input
+                    id={inputId}
+                    type={field.type || "text"}
+                    autoComplete={field.autoComplete}
+                    required={field.required}
+                    value={form[field.name] ?? ""}
+                    onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
+                    aria-invalid={Boolean(errorMessage)}
+                    aria-describedby={errorMessage ? `${inputId}-error` : undefined}
+                    className={`mt-2 block w-full rounded-md border bg-transparent px-4 py-3 text-sm transition-colors focus:border-primary focus:outline-none ${errorMessage ? "border-destructive" : "border-border"}`}
+                  />
+                  {errorMessage && <span id={`${inputId}-error`} className="mt-1 block text-xs text-destructive">{errorMessage}</span>}
+                </label>
+              );
+            })}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={isMutating}
+              className="rounded-full bg-primary px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-primary-foreground disabled:cursor-wait disabled:opacity-50"
+            >
+              {saveMutation.isPending ? "Saving..." : editingAddressId === null ? "Save address" : "Save changes"}
+            </button>
+            <button
+              type="button"
+              onClick={cancelForm}
+              disabled={isMutating}
+              className="rounded-full border border-border px-5 py-3 text-[10px] uppercase tracking-[0.22em] disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
+}
+
+const ADDRESS_FIELDS: Array<{
+  name: keyof SavedAddressInput;
+  label: string;
+  required: boolean;
+  type?: "text" | "tel";
+  autoComplete?: string;
+}> = [
+  { name: "label", label: "Address label", required: true },
+  { name: "name", label: "Full name", required: true, autoComplete: "name" },
+  { name: "line1", label: "Address line 1", required: true, autoComplete: "address-line1" },
+  { name: "line2", label: "Address line 2", required: false, autoComplete: "address-line2" },
+  { name: "city", label: "City", required: true, autoComplete: "address-level2" },
+  { name: "state", label: "State", required: true, autoComplete: "address-level1" },
+  { name: "postalCode", label: "Postal code", required: true, autoComplete: "postal-code" },
+  { name: "country", label: "Country", required: true, autoComplete: "country-name" },
+  { name: "phone", label: "Mobile phone (optional)", required: false, type: "tel", autoComplete: "tel-national" },
+];
+
+const emptyAddress = (name: string): SavedAddressInput => ({
+  label: "",
+  name,
+  line1: "",
+  line2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+  phone: "",
+});
+
+function validateSavedAddress(address: SavedAddressInput) {
+  const errors: Partial<Record<keyof SavedAddressInput, string>> = {};
+  const requiredFields: Array<keyof SavedAddressInput> = [
+    "label",
+    "name",
+    "line1",
+    "city",
+    "state",
+    "postalCode",
+    "country",
+  ];
+  for (const field of requiredFields) {
+    if (!address[field]?.trim()) errors[field] = "This field is required.";
+  }
+  if (address.postalCode.trim() && !/^\d{6}$/.test(address.postalCode.trim())) {
+    errors.postalCode = "Enter a valid 6-digit PIN code.";
+  }
+  const phone = address.phone?.trim() || "";
+  if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+    errors.phone = "Enter a valid 10-digit mobile number.";
+  }
+  return errors;
 }
 
 function Loyalty() {

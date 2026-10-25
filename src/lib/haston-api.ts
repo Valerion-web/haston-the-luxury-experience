@@ -34,6 +34,33 @@ export type BackendCategory = {
   description?: string | null;
   productCount?: number;
 };
+export type SavedAddress = {
+  id: number;
+  userId: number;
+  label: string;
+  name?: string | null;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+  isDefault: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+export type SavedAddressInput = {
+  label: string;
+  name: string;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone?: string | null;
+};
 export type BackendBrand = {
   id: number;
   slug: string;
@@ -306,6 +333,21 @@ export const hastonApi = {
     apiRequest<BackendCategory & { products: BackendProduct[] }>(
       `/categories/${encodeURIComponent(slug)}`,
     ),
+  addresses: () => apiRequest<SavedAddress[]>("/addresses"),
+  createAddress: (address: SavedAddressInput) =>
+    apiRequest<SavedAddress>("/addresses", {
+      method: "POST",
+      body: JSON.stringify(address),
+    }),
+  updateAddress: (id: number, address: Partial<SavedAddressInput>) =>
+    apiRequest<SavedAddress>(`/addresses/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(address),
+    }),
+  deleteAddress: (id: number) =>
+    apiRequest<{ message: string }>(`/addresses/${id}`, { method: "DELETE" }),
+  setDefaultAddress: (id: number) =>
+    apiRequest<SavedAddress>(`/addresses/${id}/default`, { method: "PUT" }),
   getWishlist: () => apiRequest<BackendWishlistResponse>("/wishlist").then(mapWishlist),
   addWishlistItem: (productId: number) =>
     apiRequest<BackendWishlistResponse>("/wishlist/items", {
